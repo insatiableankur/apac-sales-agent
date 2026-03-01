@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import Anthropic from "@anthropic-ai/sdk";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const MARKETS = ["Singapore","Malaysia","Philippines","India","Indonesia","Thailand","Hong Kong","Vietnam","Australia","South Korea","Japan","Taiwan","Multi-Country APAC"];
@@ -564,13 +563,17 @@ COMPETITORS MENTIONED: ${form.competitorsMentioned || "None known"}
 
 Generate the complete 7-module intelligence brief as specified.`;
 
-      const client = new Anthropic({ apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY, dangerouslyAllowBrowser: true });
-const data = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 8000,
-  system: buildSystemPrompt(),
-  messages: [{ role: "user", content: prompt }],
-});
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 8000,
+          system: buildSystemPrompt(),
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data = await res.json();
       const text = data.content?.map(b => b.text || "").join("") || "";
       const clean = text.replace(/```json[\s\S]*?```/g, t => t.slice(7, -3)).replace(/```/g, "").trim();
       const parsed = JSON.parse(clean);
@@ -612,14 +615,18 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
     const sysPrompt = `You are Ankur Sehgal — 15-year APAC enterprise SaaS veteran, 7x President's Club, $25M ARR. You're coaching this rep on their live deal. Be direct, specific, commercially sharp. Reference the deal context. Generate scripts, talk tracks, emails on demand. Deal context: ${context}`;
 
     try {
-      cconst client = new Anthropic({ apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY, dangerouslyAllowBrowser: true });
-const data = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 8000,
-  system: sysPrompt,
-  messages: updated.map(m => ({ role: m.role, content: m.content })),
-});
-const reply = data.content?.map(b => b.text || "").join("") || "";
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 8000,
+          system: sysPrompt,
+          messages: updated.map(m => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = await res.json();
+      const reply = data.content?.map(b => b.text || "").join("") || "";
       setChatMessages([...updated, { role: "assistant", content: reply }]);
     } catch {
       setChatMessages([...updated, { role: "assistant", content: "Something went wrong. Try again." }]);
