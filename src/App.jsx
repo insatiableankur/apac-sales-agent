@@ -301,7 +301,7 @@ const exportToPDF = async (result, form) => {
 
   const bulletItem = (text, color = '#374151') => {
     checkY(5);
-    setTxt('#F59E0B'); doc.setFontSize(10); doc.text('▸', M, y);
+    setTxt('#F59E0B'); doc.setFontSize(10); doc.text('>>', M, y);
     setTxt(color); doc.setFontSize(9); doc.setFont('helvetica','normal');
     const lines = doc.splitTextToSize(String(text), CW - 6);
     lines.forEach((line, i) => {
