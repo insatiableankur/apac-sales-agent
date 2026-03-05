@@ -230,7 +230,7 @@ const exportToPDF = async (result, form) => {
   setTxt('#FFFFFF'); doc.setFontSize(18); doc.setFont('helvetica','bold');
   doc.text('APAC Sales Intelligence', M + 16, 28);
   setTxt('#F59E0B'); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text("ANKUR SEHGAL  ·  7X PRESIDENT’S CLUB", M + 16, 34);
+  doc.text('ANKUR SEHGAL  ·  7X PRESIDENT'S CLUB', M + 16, 34);
 
   // Company name
   y = 70;
@@ -591,7 +591,7 @@ const exportToPDF = async (result, form) => {
     doc.text(`${p} / ${total}`, W - M, 295, { align: 'right' });
   }
 
-  doc.save(`${form.company.replace(/ /g,'_')}_Intelligence_Brief.pdf`);
+  doc.save(`${form.company.replace(/\s+/g,'_')}_Intelligence_Brief.pdf`);
 };
 
 // ─── WEB SEARCH ───────────────────────────────────────────────────────────────
@@ -1274,17 +1274,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               </div>
 
               {/* Stat strip */}
-              {/* PDF Export Bar */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "var(--amber-glow)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px 18px" }}>
-                <div style={{ fontSize: 13, color: "var(--amber)", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>📄 INTELLIGENCE BRIEF READY</div>
-                <button
-                  onClick={() => exportToPDF(result, form)}
-                  style={{ background: "linear-gradient(135deg, #F59E0B, #EA580C)", border: "none", borderRadius: 8, padding: "10px 20px", color: "#08111E", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 16px rgba(245,158,11,0.4)" }}
-                >
-                  ⬇ Export PDF
-                </button>
-              </div>
-
               <div className="stat-grid fade-up-1">
                 {[
                   { k: "ICP SCORE", v: `${result.accountBrief?.icpScore}/100` },
