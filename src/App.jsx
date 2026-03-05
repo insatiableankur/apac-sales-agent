@@ -226,7 +226,7 @@ const exportToPDF = async (result, form) => {
   // Logo area
   setFill('#1A56DB'); doc.roundedRect(M, 20, 12, 12, 2, 2, 'F');
   setTxt('#FFFFFF'); doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text('🎯', M + 2, 29);
+  doc.text('*', M + 3, 30);
   setTxt('#FFFFFF'); doc.setFontSize(18); doc.setFont('helvetica','bold');
   doc.text('APAC Sales Intelligence', M + 16, 28);
   setTxt('#F59E0B'); doc.setFontSize(8); doc.setFont('helvetica','normal');
