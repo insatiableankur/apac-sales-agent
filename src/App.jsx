@@ -230,7 +230,7 @@ const exportToPDF = async (result, form) => {
   setTxt('#FFFFFF'); doc.setFontSize(18); doc.setFont('helvetica','bold');
   doc.text('APAC Sales Intelligence', M + 16, 28);
   setTxt('#F59E0B'); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('ANKUR SEHGAL  ·  7X PRESIDENT'S CLUB', M + 16, 34);
+  doc.text("ANKUR SEHGAL · 7X PRESIDENTS CLUB", M + 16, 34);
 
   // Company name
   y = 70;
