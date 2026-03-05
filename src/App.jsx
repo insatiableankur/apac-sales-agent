@@ -975,7 +975,7 @@ export default function APACSalesAgent() {
       let liveIntel = "";
       try {
         setAnalyzeStep(0);
-        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry);
+        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry); await new Promise(r => setTimeout(r, 2000));
       } catch(e) {}
 
       const prompt = `Analyse this account and deal situation:
