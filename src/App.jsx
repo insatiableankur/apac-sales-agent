@@ -195,6 +195,430 @@ Return this exact JSON structure:
 
 Be deeply specific to the company, market, industry, product, and deal stage provided. Use real APAC regulatory references, market dynamics, and buying culture nuance. Reference Ankur's actual deal stories where relevant. This must feel like it was written by someone who has personally sold enterprise SaaS in APAC for 15 years — not by a generic AI.`;
 
+// ─── PDF EXPORT ───────────────────────────────────────────────────────────────
+const exportToPDF = async (result, form) => {
+  // Dynamically load jsPDF
+  if (!window.jspdf) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, M = 14, CW = W - M * 2;
+  let y = 0;
+
+  const addPage = () => { doc.addPage(); y = 16; };
+  const checkY = (needed = 12) => { if (y + needed > 278) addPage(); };
+
+  // Colour helpers
+  const hex2rgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  const setFill = h => doc.setFillColor(...hex2rgb(h));
+  const setTxt = h => doc.setTextColor(...hex2rgb(h));
+
+  // ── COVER PAGE ──────────────────────────────────────────────────────
+  setFill('#08111E'); doc.rect(0, 0, W, 297, 'F');
+  // Amber bar
+  setFill('#F59E0B'); doc.rect(0, 0, W, 3, 'F');
+  // Logo area
+  setFill('#1A56DB'); doc.roundedRect(M, 20, 12, 12, 2, 2, 'F');
+  setTxt('#FFFFFF'); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text('🎯', M + 2, 29);
+  setTxt('#FFFFFF'); doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('APAC Sales Intelligence', M + 16, 28);
+  setTxt('#F59E0B'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('ANKUR SEHGAL  ·  7X PRESIDENT'S CLUB', M + 16, 34);
+
+  // Company name
+  y = 70;
+  setTxt('#94A3B8'); doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('INTELLIGENCE BRIEF', M, y); y += 10;
+  setTxt('#FFFFFF'); doc.setFontSize(32); doc.setFont('helvetica','bold');
+  doc.text(form.company, M, y); y += 12;
+
+  // Meta chips
+  const chips = [form.market, form.industry, result.accountBrief?.tier || ''].filter(Boolean);
+  let cx = M;
+  chips.forEach(chip => {
+    setFill('#1E3A5F');
+    const tw = doc.getTextWidth(chip) + 6;
+    doc.roundedRect(cx, y - 4, tw, 7, 1.5, 1.5, 'F');
+    setTxt('#94A3B8'); doc.setFontSize(8);
+    doc.text(chip, cx + 3, y + 1);
+    cx += tw + 4;
+  });
+  y += 14;
+
+  // Score cards
+  const stats = [
+    ['ICP SCORE', `${result.accountBrief?.icpScore}/100`],
+    ['DEAL POTENTIAL', result.accountBrief?.dealPotential || '—'],
+    ['DEAL HEALTH', result.meddpicc?.overallHealth?.toUpperCase() || '—'],
+    ['SALES STAGE', result.commandOfMessage?.salesStage || '—'],
+  ];
+  const sw = (CW - 9) / 4;
+  stats.forEach(([k,v], i) => {
+    setFill('#0D1B2E');
+    doc.roundedRect(M + i*(sw+3), y, sw, 18, 2, 2, 'F');
+    setTxt('#F59E0B'); doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text(v, M + i*(sw+3) + sw/2, y + 8, { align:'center' });
+    setTxt('#475569'); doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.text(k, M + i*(sw+3) + sw/2, y + 14, { align:'center' });
+  });
+  y += 26;
+
+  // Divider
+  setFill('#F59E0B'); doc.rect(M, y, CW, 0.5, 'F'); y += 8;
+  setTxt('#475569'); doc.setFontSize(8);
+  doc.text(`Generated ${new Date().toLocaleDateString('en-SG', {day:'numeric',month:'long',year:'numeric'})}  ·  Powered by Claude AI  ·  Confidential`, M, y);
+  y += 16;
+
+  // ── SECTION HELPER ──────────────────────────────────────────────────
+  const sectionHeader = (title, color = '#1A56DB') => {
+    checkY(14);
+    setFill(color); doc.rect(M, y, CW, 0.5, 'F'); y += 4;
+    setTxt(color); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text(title.toUpperCase(), M, y); y += 6;
+  };
+
+  const fieldLabel = (label) => {
+    setTxt('#6B7280'); doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.text(label, M, y); y += 4;
+  };
+
+  const bodyText = (text, indent = 0, color = '#374151') => {
+    if (!text) return;
+    setTxt(color); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    const lines = doc.splitTextToSize(String(text), CW - indent);
+    lines.forEach(line => {
+      checkY(5);
+      doc.text(line, M + indent, y); y += 4.5;
+    });
+  };
+
+  const bulletItem = (text, color = '#374151') => {
+    checkY(5);
+    setTxt('#F59E0B'); doc.setFontSize(10); doc.text('▸', M, y);
+    setTxt(color); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    const lines = doc.splitTextToSize(String(text), CW - 6);
+    lines.forEach((line, i) => {
+      checkY(5);
+      doc.text(line, M + 6, y); y += 4.5;
+    });
+  };
+
+  const infoBox = (text, bgHex = '#EFF6FF', textHex = '#1E40AF') => {
+    if (!text) return;
+    const lines = doc.splitTextToSize(String(text), CW - 8);
+    const bh = lines.length * 4.5 + 6;
+    checkY(bh + 2);
+    setFill(bgHex); doc.roundedRect(M, y, CW, bh, 2, 2, 'F');
+    setTxt(textHex); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    lines.forEach((line, i) => { doc.text(line, M + 4, y + 5 + i * 4.5); });
+    y += bh + 4;
+  };
+
+  // ── MODULE 1: ACCOUNT BRIEF ──────────────────────────────────────────
+  addPage();
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('01 — Account Brief', M, y); y += 10;
+
+  const ab = result.accountBrief;
+  if (ab) {
+    sectionHeader('Company Profile');
+    bodyText(ab.companyProfile); y += 3;
+
+    sectionHeader('Why Now', '#F59E0B');
+    infoBox(ab.whyNow, '#FFFBEB', '#92400E');
+
+    sectionHeader('Trigger Events');
+    ab.keyTriggers?.forEach(t => bulletItem(t)); y += 2;
+
+    sectionHeader('Pain Points');
+    ab.painPoints?.forEach(p => {
+      checkY(12);
+      const uc = p.urgency === 'high' ? '#EF4444' : p.urgency === 'medium' ? '#F59E0B' : '#6B7280';
+      setTxt(uc); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text(`[${p.urgency?.toUpperCase()}]`, M, y);
+      setTxt('#111827'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(p.pain, M + 14, y); y += 5;
+      bodyText(p.businessImpact, 6, '#6B7280'); y += 1;
+    });
+
+    sectionHeader('Market Context');
+    fieldLabel('BUYING CULTURE');
+    bodyText(ab.buyingCulture, 0, '#374151'); y += 2;
+    fieldLabel('APAC MARKET CONTEXT');
+    bodyText(ab.apacMarketContext, 0, '#374151');
+  }
+
+  // ── MODULE 2: MEDDPICC ───────────────────────────────────────────────
+  addPage();
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('02 — MEDDPICC Diagnostic', M, y); y += 10;
+
+  const me = result.meddpicc;
+  if (me) {
+    // Health badge
+    const hc = me.overallHealth === 'green' ? '#10B981' : me.overallHealth === 'amber' ? '#F59E0B' : '#EF4444';
+    setFill(hc); doc.roundedRect(M, y, 40, 10, 2, 2, 'F');
+    setTxt('#FFFFFF'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(me.overallHealth?.toUpperCase() + ' — ' + (me.forecastCategory || ''), M + 4, y + 7);
+    y += 16;
+
+    // MEDDPICC grid — 2 per row
+    const els = Object.entries(me.elements || {});
+    sectionHeader('Element Scores');
+    els.forEach(([key, el], i) => {
+      if (i % 2 === 0) { checkY(22); }
+      const col = i % 2;
+      const ex = M + col * (CW/2 + 2);
+      const ew = CW/2 - 2;
+      const sc = el.status === 'green' ? '#10B981' : el.status === 'amber' ? '#F59E0B' : '#EF4444';
+      setFill('#F8FAFF'); doc.roundedRect(ex, y, ew, 20, 1.5, 1.5, 'F');
+      setFill(sc); doc.circle(ex + ew - 5, y + 5, 2.5, 'F');
+      setTxt('#08111E'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(el.label || key, ex + 3, y + 6);
+      setTxt('#6B7280'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      const ev = doc.splitTextToSize(el.evidence || '', ew - 6);
+      ev.slice(0,2).forEach((l, li) => doc.text(l, ex + 3, y + 11 + li * 4));
+      if (col === 1) y += 23;
+    });
+    if (els.length % 2 !== 0) y += 23;
+    y += 3;
+
+    sectionHeader('Deal Risks', '#EF4444');
+    me.dealRisks?.forEach(r => bulletItem(r, '#991B1B')); y += 2;
+    sectionHeader('Win Conditions', '#10B981');
+    me.winConditions?.forEach(w => bulletItem(w, '#065F46'));
+  }
+
+  // ── MODULE 3: STAKEHOLDERS ───────────────────────────────────────────
+  addPage();
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('03 — Stakeholder Map', M, y); y += 10;
+
+  const st = result.stakeholders;
+  if (st) {
+    // Champion score
+    const cs = st.championDevelopmentScore || 0;
+    const cc = cs > 70 ? '#10B981' : cs > 40 ? '#F59E0B' : '#EF4444';
+    infoBox(`Champion Development Score: ${cs}/100  ·  ${st.multithreadingStatus || ''}`, '#EFF6FF', '#1E40AF');
+
+    st.buyingCommittee?.forEach((s, i) => {
+      checkY(40);
+      setFill(i % 2 === 0 ? '#F8FAFF' : '#FFFFFF');
+      doc.roundedRect(M, y, CW, 36, 2, 2, 'F');
+      setFill('#1A56DB'); doc.roundedRect(M, y, 3, 36, 1, 1, 'F');
+
+      setTxt('#08111E'); doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text(s.role, M + 6, y + 7);
+
+      const ac = s.accessStatus === 'engaged' ? '#10B981' : s.accessStatus === 'not-engaged' ? '#EF4444' : '#F59E0B';
+      setFill(ac);
+      const al = s.accessStatus?.toUpperCase().replace('-', ' ') || '';
+      const aw = doc.getTextWidth(al) + 6;
+      doc.roundedRect(W - M - aw - 2, y + 2, aw, 6, 1, 1, 'F');
+      setTxt('#FFFFFF'); doc.setFontSize(7); doc.text(al, W - M - aw + 1, y + 6.5);
+
+      setTxt('#6B7280'); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text('MOTIVATIONS:', M + 6, y + 14);
+      setTxt('#374151'); doc.setFont('helvetica','normal');
+      const ml = doc.splitTextToSize(s.motivations || '', CW/2 - 10);
+      ml.slice(0,2).forEach((l, li) => doc.text(l, M + 6, y + 18 + li * 4));
+
+      setTxt('#6B7280'); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text('FEARS:', M + CW/2 + 2, y + 14);
+      setTxt('#374151'); doc.setFont('helvetica','normal');
+      const fl = doc.splitTextToSize(s.fears || '', CW/2 - 10);
+      fl.slice(0,2).forEach((l, li) => doc.text(l, M + CW/2 + 2, y + 18 + li * 4));
+
+      setTxt('#1A56DB'); doc.setFontSize(8); doc.setFont('helvetica','italic');
+      const tl = doc.splitTextToSize(`"${s.talkTrack}"`, CW - 10);
+      doc.text(tl[0] || '', M + 6, y + 31);
+
+      y += 40;
+    });
+  }
+
+  // ── MODULE 4: OUTREACH ───────────────────────────────────────────────
+  addPage();
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('04 — Outreach Sequences', M, y); y += 10;
+
+  const ou = result.outreach;
+  if (ou?.coldEmail) {
+    sectionHeader('Cold Email — Day 1');
+    fieldLabel('SUBJECT LINE');
+    setFill('#EFF6FF'); doc.roundedRect(M, y, CW, 9, 1.5, 1.5, 'F');
+    setTxt('#1E40AF'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(ou.coldEmail.subject || '', M + 4, y + 6); y += 13;
+    fieldLabel('BODY');
+    bodyText(ou.coldEmail.body, 0, '#374151'); y += 4;
+
+    if (ou.coldEmail.followUp1) {
+      sectionHeader(`Follow-Up — Day ${ou.coldEmail.followUp1.dayToSend}`);
+      fieldLabel('SUBJECT'); bodyText(ou.coldEmail.followUp1.subject, 0, '#1E40AF');
+      bodyText(ou.coldEmail.followUp1.body); y += 2;
+    }
+    if (ou.coldEmail.followUp2) {
+      sectionHeader(`Break-Up — Day ${ou.coldEmail.followUp2.dayToSend}`);
+      fieldLabel('SUBJECT'); bodyText(ou.coldEmail.followUp2.subject, 0, '#1E40AF');
+      bodyText(ou.coldEmail.followUp2.body); y += 2;
+    }
+
+    sectionHeader('LinkedIn Message');
+    infoBox(ou.linkedInMessage, '#F0F9FF', '#075985');
+
+    sectionHeader('Sending Tips');
+    ou.sendingTips?.forEach(t => bulletItem(t));
+  }
+
+  // ── MODULE 5: DISCOVERY ──────────────────────────────────────────────
+  addPage();
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('05 — Discovery Questions', M, y); y += 10;
+
+  const dq = result.discoveryQuestions;
+  if (dq) {
+    sectionHeader('Opening Framer');
+    infoBox(`"${dq.openingFramer}"`, '#FFFBEB', '#92400E');
+
+    dq.categories?.forEach(cat => {
+      sectionHeader(cat.category);
+      cat.questions?.forEach(q => {
+        checkY(16);
+        setFill('#F8FAFF'); doc.roundedRect(M, y, CW, 14, 1.5, 1.5, 'F');
+        setTxt('#1F2937'); doc.setFontSize(9); doc.setFont('helvetica','bolditalic');
+        const ql = doc.splitTextToSize(`"${q.question}"`, CW - 8);
+        ql.slice(0,2).forEach((l,li) => doc.text(l, M + 4, y + 5 + li*4));
+        setTxt('#6B7280'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+        doc.text(`Intent: ${(q.intent || '').slice(0, 80)}`, M + 4, y + 11);
+        y += 17;
+      });
+      y += 2;
+    });
+  }
+
+  // ── MODULE 6: COMMAND OF MESSAGE ─────────────────────────────────────
+  addPage();
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('06 — Command of the Message', M, y); y += 10;
+
+  const com = result.commandOfMessage;
+  if (com) {
+    // Before/After
+    const bah = 28;
+    checkY(bah + 4);
+    setFill('#FEF2F2'); doc.roundedRect(M, y, CW/2 - 2, bah, 2, 2, 'F');
+    setTxt('#DC2626'); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text('BEFORE — TODAY', M + 3, y + 6);
+    setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    const bl = doc.splitTextToSize(com.beforeScenario || '', CW/2 - 10);
+    bl.slice(0,4).forEach((l,li) => doc.text(l, M + 3, y + 11 + li*4));
+
+    setFill('#F0FDF4'); doc.roundedRect(M + CW/2 + 2, y, CW/2 - 2, bah, 2, 2, 'F');
+    setTxt('#065F46'); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text('AFTER — 12 MONTHS IN', M + CW/2 + 5, y + 6);
+    setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    const al = doc.splitTextToSize(com.afterScenario || '', CW/2 - 10);
+    al.slice(0,4).forEach((l,li) => doc.text(l, M + CW/2 + 5, y + 11 + li*4));
+    y += bah + 6;
+
+    sectionHeader('Value Drivers');
+    com.valueDrivers?.forEach(v => {
+      checkY(14);
+      setFill('#FFFBEB'); doc.roundedRect(M, y, CW, 12, 1.5, 1.5, 'F');
+      setTxt('#92400E'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(v.driver, M + 4, y + 5);
+      setTxt('#10B981'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(v.estimatedImpact || '', W - M - 4, y + 5, { align: 'right' });
+      setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      const vl = doc.splitTextToSize(v.specifics || '', CW - 8);
+      doc.text(vl[0] || '', M + 4, y + 9.5);
+      y += 15;
+    });
+
+    sectionHeader('Objection Handlers');
+    com.objectionHandlers?.forEach(o => {
+      checkY(18);
+      setFill('#FEF2F2'); doc.roundedRect(M, y, CW, 16, 1.5, 1.5, 'F');
+      setTxt('#991B1B'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      const ql = doc.splitTextToSize(`"${o.objection}"`, CW - 8);
+      doc.text(ql[0] || '', M + 4, y + 5);
+      setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      const rl = doc.splitTextToSize(o.response || '', CW - 8);
+      rl.slice(0,2).forEach((l,li) => doc.text(l, M + 4, y + 10 + li*4));
+      y += 19;
+    });
+
+    sectionHeader('Closing Hypothesis', '#10B981');
+    infoBox(com.closingHypothesis, '#F0FDF4', '#065F46');
+  }
+
+  // ── MODULE 7: NEXT BEST ACTIONS ──────────────────────────────────────
+  checkY(60);
+  setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('07 — Next Best Actions', M, y); y += 10;
+
+  result.nextBestActions?.forEach((a, i) => {
+    checkY(22);
+    const nc = i === 0 ? '#F59E0B' : i === 1 ? '#1A56DB' : '#475569';
+    setFill(nc); doc.circle(M + 5, y + 5, 5, 'F');
+    setTxt('#FFFFFF'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(String(a.priority), M + 5, y + 7, { align: 'center' });
+    setTxt('#08111E'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(a.action || '', M + 14, y + 6);
+    setTxt('#6B7280'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    const wl = doc.splitTextToSize(a.why || '', CW - 20);
+    wl.slice(0,2).forEach((l,li) => doc.text(l, M + 14, y + 11 + li*4));
+    setFill('#E5E7EB'); doc.roundedRect(W - M - 30, y + 1, 30, 7, 1.5, 1.5, 'F');
+    setTxt('#374151'); doc.setFontSize(7);
+    doc.text(a.timeframe || '', W - M - 15, y + 6, { align: 'center' });
+    y += 24;
+  });
+
+  // ── FOOTER ON ALL PAGES ──────────────────────────────────────────────
+  const total = doc.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    setFill('#F59E0B'); doc.rect(0, 291, W, 1, 'F');
+    setTxt('#9CA3AF'); doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.text(`APAC Sales Intelligence  ·  ${form.company}  ·  Confidential`, M, 295);
+    doc.text(`${p} / ${total}`, W - M, 295, { align: 'right' });
+  }
+
+  doc.save(`${form.company.replace(/\s+/g,'_')}_Intelligence_Brief.pdf`);
+};
+
+// ─── WEB SEARCH ───────────────────────────────────────────────────────────────
+const searchCompanyIntel = async (company, market, industry) => {
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 8000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        messages: [{
+          role: "user",
+          content: `Search for the latest news, financial results, leadership changes, strategic initiatives, regulatory issues, and business developments for ${company} in ${market} (${industry} sector). Search for: "${company} news 2025", "${company} annual report", "${company} CEO strategy", "${company} digital transformation". Return a structured summary of: 1) Recent major news/events 2) Financial performance signals 3) Strategic priorities 4) Leadership/org changes 5) Regulatory/compliance developments. Be specific and cite recent dates where possible.`
+        }],
+      }),
+    });
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || "").filter(Boolean).join("\n") || "";
+    return text;
+  } catch (e) {
+    return "";
+  }
+};
+
+
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
@@ -547,6 +971,13 @@ export default function APACSalesAgent() {
     setAnalyzeStep(0);
     const ticker = setInterval(() => setAnalyzeStep(s => Math.min(s + 1, ANALYZE_STEPS.length - 1)), 900);
     try {
+      // Live web search for company intel
+      let liveIntel = "";
+      try {
+        setAnalyzeStep(0);
+        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry);
+      } catch(e) {}
+
       const prompt = `Analyse this account and deal situation:
 
 COMPANY: ${form.company}
@@ -560,15 +991,18 @@ DEAL SIZE TARGET: ${form.dealSize || "Not specified"}
 KNOWN CONTACTS: ${form.knownContacts || "None provided"}
 RECENT NEWS / CONTEXT: ${form.recentNews || "None provided"}
 COMPETITORS MENTIONED: ${form.competitorsMentioned || "None known"}
+${liveIntel ? `
+LIVE MARKET INTELLIGENCE (from real-time web search — use this to enrich the brief):
+${liveIntel}
+` : ""}
+Generate the complete 7-module intelligence brief as specified. Where live intelligence is provided above, incorporate specific recent facts, dates, and events into the brief — especially in keyTriggers, whyNow, and painPoints.`;
 
-Generate the complete 7-module intelligence brief as specified.`;
-
-      const res = await fetch("/api/anthropic", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 8000,
+          max_tokens: 1000,
           system: buildSystemPrompt(),
           messages: [{ role: "user", content: prompt }],
         }),
@@ -615,12 +1049,12 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
     const sysPrompt = `You are Ankur Sehgal — 15-year APAC enterprise SaaS veteran, 7x President's Club, $25M ARR. You're coaching this rep on their live deal. Be direct, specific, commercially sharp. Reference the deal context. Generate scripts, talk tracks, emails on demand. Deal context: ${context}`;
 
     try {
-      const res = await fetch("/api/anthropic", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 8000,
+          max_tokens: 1000,
           system: sysPrompt,
           messages: updated.map(m => ({ role: m.role, content: m.content })),
         }),
@@ -828,9 +1262,14 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       {result.meddpicc?.forecastCategory && <span className={`meta-chip tag-${statusClass(result.meddpicc.overallHealth)}`}>{result.meddpicc.forecastCategory}</span>}
                     </div>
                   </div>
-                  <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]); }}>
-                    + New Account
-                  </button>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button className="btn-ghost" onClick={() => exportToPDF(result, form)} style={{ display: "flex", alignItems: "center", gap: 6, borderColor: "var(--amber)", color: "var(--amber)" }}>
+                      ⬇ Export PDF
+                    </button>
+                    <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]); }}>
+                      + New Account
+                    </button>
+                  </div>
                 </div>
               </div>
 
