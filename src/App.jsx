@@ -975,7 +975,7 @@ export default function APACSalesAgent() {
       let liveIntel = "";
       try {
         setAnalyzeStep(0);
-        liveIntel = ""; // web search disabled temporarily
+        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry);
       } catch(e) {}
 
       const prompt = `Analyse this account and deal situation:
