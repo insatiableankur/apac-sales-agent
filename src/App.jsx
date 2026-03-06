@@ -115,11 +115,6 @@ Return this exact JSON structure:
       }
     },
     "linkedInMessage": "Short, personalised LinkedIn connection message (under 300 characters — the limit for connection requests)",
-    "linkedInVariants": [
-      {"type": "Post Reference", "message": "Reference something specific they posted or commented on recently — under 300 chars"},
-      {"type": "Company Milestone", "message": "Reference a recent company achievement, funding, expansion, or announcement — under 300 chars"},
-      {"type": "Cold Insight", "message": "Pure value-add cold message with a relevant industry insight — under 300 chars"}
-    ],
     "executiveReferral": "Template for asking your champion to introduce you to the economic buyer",
     "sendingTips": ["Tip 1 specific to this market/person", "Tip 2", "Tip 3"]
   },
@@ -195,50 +190,7 @@ Return this exact JSON structure:
     {"priority": 1, "action": "Most critical next action", "why": "Why this is #1", "timeframe": "This week"},
     {"priority": 2, "action": "...", "why": "...", "timeframe": "Next 2 weeks"},
     {"priority": 3, "action": "...", "why": "...", "timeframe": "This month"}
-  ],
-  "battleCards": [
-    {
-      "competitor": "Competitor name (e.g. SAP, Oracle, Anaplan, Workday, Adaptive Insights, Vena Solutions)",
-      "ourStrengths": ["Specific strength vs this competitor 1", "Strength 2", "Strength 3"],
-      "theirWeaknesses": ["Their key weakness 1 specific to APAC", "Weakness 2", "Weakness 3"],
-      "theirStrengths": ["What they do well — be honest", "Strength 2"],
-      "winMoves": ["Specific move to beat them in this deal 1", "Move 2", "Move 3"],
-      "trapQuestions": ["Question that exposes their weakness 1", "Question 2"],
-      "landmines": ["Landmine to plant against them 1", "Landmine 2"],
-      "whenWeWin": "Specific conditions under which we beat this competitor",
-      "whenWeLose": "Honest assessment of when they beat us"
-    }
-  ],
-  "multiLanguageOutreach": {
-    "bahasa": {
-      "language": "Bahasa Indonesia / Malaysia",
-      "emailSubject": "Subject line in Bahasa",
-      "emailBody": "Full cold email in Bahasa Indonesia (formal business tone, appropriate for C-suite in Indonesia/Malaysia)",
-      "linkedIn": "LinkedIn message in Bahasa (under 300 chars)",
-      "culturalNote": "Key cultural tip for engaging in this language/market"
-    },
-    "mandarin": {
-      "language": "Mandarin Chinese",
-      "emailSubject": "Subject line in Mandarin",
-      "emailBody": "Full cold email in Simplified Mandarin (formal, appropriate for Singapore/Malaysia/HK Chinese business culture)",
-      "linkedIn": "LinkedIn message in Mandarin (under 300 chars)",
-      "culturalNote": "Key cultural tip for engaging in Chinese business context"
-    },
-    "thai": {
-      "language": "Thai",
-      "emailSubject": "Subject in Thai",
-      "emailBody": "Full cold email in Thai (polite formal register, appropriate for Thai C-suite)",
-      "linkedIn": "LinkedIn message in Thai",
-      "culturalNote": "Key cultural tip for Thai business culture"
-    },
-    "tagalog": {
-      "language": "Filipino / Tagalog",
-      "emailSubject": "Subject in Filipino/English mix",
-      "emailBody": "Email in Filipino business English (warm, relationship-first tone appropriate for Philippines)",
-      "linkedIn": "LinkedIn message Filipino style",
-      "culturalNote": "Key cultural tip for Filipino business culture"
-    }
-  }
+  ]
 }
 
 Be deeply specific to the company, market, industry, product, and deal stage provided. Use real APAC regulatory references, market dynamics, and buying culture nuance. Reference Ankur's actual deal stories where relevant. This must feel like it was written by someone who has personally sold enterprise SaaS in APAC for 15 years — not by a generic AI.`;
@@ -642,6 +594,96 @@ const exportToPDF = async (result, form) => {
   doc.save(`${form.company.replace(/ /g,'_')}_Intelligence_Brief.pdf`);
 };
 
+// ─── ON-DEMAND GENERATORS ────────────────────────────────────────────────────
+const generateBattleCards = async (competitors, form, result, setFn, setLoading) => {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/anthropic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4000,
+        system: `You are Ankur Sehgal — APAC enterprise SaaS sales expert. Generate battle cards for the given competitors. Return ONLY valid JSON array:
+[{
+  "competitor": "name",
+  "ourStrengths": ["strength 1","strength 2","strength 3"],
+  "theirWeaknesses": ["weakness 1","weakness 2","weakness 3"],
+  "theirStrengths": ["their strength 1","their strength 2"],
+  "winMoves": ["move 1","move 2","move 3"],
+  "trapQuestions": ["question 1","question 2"],
+  "landmines": ["landmine 1","landmine 2"],
+  "whenWeWin": "conditions for winning",
+  "whenWeLose": "honest assessment"
+}]`,
+        messages: [{ role: "user", content: `Competitors: ${competitors}
+Company: ${form.company}
+Industry: ${form.industry}
+Product: ${form.product}
+Our pain points addressed: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')}` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || "").join("") || "";
+    const clean = raw.split("```").join("").replace(/^json
+/,"").trim();
+    setFn(JSON.parse(clean));
+  } catch(e) { alert("Failed to generate battle cards. Try again."); }
+  setLoading(false);
+};
+
+const generateLanguages = async (form, result, setFn, setLoading) => {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/anthropic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4000,
+        system: `You are an APAC sales localisation expert. Generate outreach emails in 4 APAC languages. Return ONLY valid JSON:
+{"bahasa":{"language":"Bahasa Indonesia/Malaysia","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
+"mandarin":{"language":"Mandarin","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
+"thai":{"language":"Thai","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
+"tagalog":{"language":"Filipino","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"}}`,
+        messages: [{ role: "user", content: `Company: ${form.company}, Market: ${form.market}, Industry: ${form.industry}, Product: ${form.product}
+Core value prop: ${form.productDesc}
+Email subject from English: ${result?.outreach?.coldEmail?.subject}
+Key pain: ${result?.accountBrief?.painPoints?.[0]?.pain}` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || "").join("") || "";
+    const clean = raw.split("```").join("").replace(/^json
+/,"").trim();
+    setFn(JSON.parse(clean));
+  } catch(e) { alert("Failed to generate languages. Try again."); }
+  setLoading(false);
+};
+
+const generateLiVariants = async (form, result, setFn, setLoading) => {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/anthropic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `Generate 3 LinkedIn connection message variants under 300 chars each. Return ONLY valid JSON array:
+[{"type":"Post Reference","message":"..."},{"type":"Company Milestone","message":"..."},{"type":"Cold Insight","message":"..."}]`,
+        messages: [{ role: "user", content: `Target: ${form.company}, ${form.market}, ${form.industry}. Our product: ${form.product}. Their pain: ${result?.accountBrief?.painPoints?.[0]?.pain}` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || "").join("") || "";
+    const clean = raw.split("```").join("").replace(/^json
+/,"").trim();
+    setFn(JSON.parse(clean));
+  } catch(e) { alert("Failed to generate variants. Try again."); }
+  setLoading(false);
+};
+
 // ─── ROI CALCULATOR ──────────────────────────────────────────────────────────
 const calcROI = (inputs, result) => {
   const emp = parseFloat(inputs.employees) || 0;
@@ -708,14 +750,16 @@ ${text}` }]
   });
   const data = await res.json();
   const raw = data.content?.map(b => b.text || "").join("") || "";
-  const clean = raw.split("```").join("").replace(/^json\n/,"").trim();
+  const clean = raw.replace(/^```json
+?|
+?```$/g, "").trim();
   return JSON.parse(clean);
 };
 
 // ─── WEB SEARCH ───────────────────────────────────────────────────────────────
 const searchCompanyIntel = async (company, market, industry) => {
   try {
-    const response = await fetch("/api/anthropic", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1072,6 +1116,12 @@ export default function APACSalesAgent() {
   const [roiInputs, setRoiInputs] = useState({ employees: "", avgSalary: "", hoursPerWeek: "", currentErrors: "", dealSize: "" });
   const [roiResult, setRoiResult] = useState(null);
   const [linkedInVariant, setLinkedInVariant] = useState(0);
+  const [battleCards, setBattleCards] = useState(null);
+  const [battleLoading, setBattleLoading] = useState(false);
+  const [langData, setLangData] = useState(null);
+  const [langLoading, setLangLoading] = useState(false);
+  const [liVariants, setLiVariants] = useState(null);
+  const [liVariantsLoading, setLiVariantsLoading] = useState(false);
   const [expandedMedd, setExpandedMedd] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -1128,12 +1178,12 @@ ${liveIntel}
 ` : ""}
 Generate the complete 7-module intelligence brief as specified. Where live intelligence is provided above, incorporate specific recent facts, dates, and events into the brief — especially in keyTriggers, whyNow, and painPoints.`;
 
-      const res = await fetch("/api/anthropic", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 10000,
+          max_tokens: 1000,
           system: buildSystemPrompt(),
           messages: [{ role: "user", content: prompt }],
         }),
@@ -1198,12 +1248,12 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
     const sysPrompt = `You are Ankur Sehgal — 15-year APAC enterprise SaaS veteran, 7x President's Club, $25M ARR. You're coaching this rep on their live deal. Be direct, specific, commercially sharp. Reference the deal context. Generate scripts, talk tracks, emails on demand. Deal context: ${context}`;
 
     try {
-      const res = await fetch("/api/anthropic", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 10000,
+          max_tokens: 1000,
           system: sysPrompt,
           messages: updated.map(m => ({ role: m.role, content: m.content })),
         }),
@@ -1467,7 +1517,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <button className="btn-ghost" onClick={() => exportToPDF(result, form)} style={{ display: "flex", alignItems: "center", gap: 6, borderColor: "var(--amber)", color: "var(--amber)" }}>
                       ⬇ Export PDF
                     </button>
-                    <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]); }}>
+                    <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]);
+      setBattleCards(null); setLangData(null); setLiVariants(null); }}>
                       + New Account
                     </button>
                   </div>
@@ -1736,20 +1787,30 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div className="grid-2">
                       <div>
                         <div className="section-head">LINKEDIN CONNECTION MESSAGE</div>
-                        <div style={{ display:"flex", gap:8, marginBottom:10 }}>
-                          {(result.outreach.linkedInVariants||[{type:"Default"}]).map((v,i) => (
-                            <button key={i} onClick={() => setLinkedInVariant(i)} style={{ flex:1, padding:"7px 6px", borderRadius:8, border:"1px solid", cursor:"pointer", fontSize:11, fontWeight:700,
-                              borderColor: linkedInVariant===i ? "var(--amber)" : "var(--border)",
-                              background: linkedInVariant===i ? "rgba(245,158,11,0.1)" : "transparent",
-                              color: linkedInVariant===i ? "var(--amber)" : "var(--text-muted)" }}>
-                              {v.type}
+                        {!liVariants ? (
+                          <div style={{ marginBottom:10 }}>
+                            <button onClick={() => generateLiVariants(form, result, setLiVariants, setLiVariantsLoading)}
+                              disabled={liVariantsLoading}
+                              style={{ background:"rgba(26,86,219,0.1)", border:"1px solid rgba(26,86,219,0.3)", borderRadius:8, padding:"7px 16px", color:"var(--blue-light)", fontSize:12, fontWeight:700, cursor:"pointer", opacity:liVariantsLoading?0.6:1 }}>
+                              {liVariantsLoading ? "Generating..." : "+ Generate 3 Variants"}
                             </button>
-                          ))}
-                        </div>
+                          </div>
+                        ) : (
+                          <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+                            {liVariants.map((v,i) => (
+                              <button key={i} onClick={() => setLinkedInVariant(i)} style={{ flex:1, padding:"7px 6px", borderRadius:8, border:"1px solid", cursor:"pointer", fontSize:11, fontWeight:700,
+                                borderColor: linkedInVariant===i ? "var(--amber)" : "var(--border)",
+                                background: linkedInVariant===i ? "rgba(245,158,11,0.1)" : "transparent",
+                                color: linkedInVariant===i ? "var(--amber)" : "var(--text-muted)" }}>
+                                {v.type}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         <div style={{ background: "var(--card)", borderRadius: 10, padding: 14, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 8, fontStyle:"italic" }}>
-                          {result.outreach.linkedInVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage}
+                          {liVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage}
                         </div>
-                        <CopyButton text={result.outreach.linkedInVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage} />
+                        <CopyButton text={liVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage} />
                       </div>
                       <div>
                         <div className="section-head">CHAMPION → EXEC REFERRAL</div>
@@ -1866,14 +1927,23 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               {/* ── TAB: BATTLE CARDS ── */}
               {activeTab === "battle" && (
                 <div className="fade-up-1">
-                  {(!result.battleCards || result.battleCards.length === 0 || !form.competitorsMentioned) ? (
+                  {!battleCards ? (
                     <div style={{ textAlign:"center", padding:"60px 20px" }}>
                       <div style={{ fontSize:48, marginBottom:16 }}>⚔️</div>
-                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>No Competitors Identified</div>
-                      <div style={{ color:"var(--text-muted)", fontSize:14 }}>Add competitor names in the deal context form and re-run the analysis to generate battle cards.</div>
+                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>Battle Cards</div>
+                      <div style={{ color:"var(--text-muted)", fontSize:14, marginBottom:24 }}>
+                        {form.competitorsMentioned ? `Generate battle cards for: ${form.competitorsMentioned}` : "Add competitor names in the deal context form first."}
+                      </div>
+                      {form.competitorsMentioned && (
+                        <button onClick={() => generateBattleCards(form.competitorsMentioned, form, result, setBattleCards, setBattleLoading)}
+                          disabled={battleLoading}
+                          style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:battleLoading?0.6:1 }}>
+                          {battleLoading ? "GENERATING..." : "⚔️ GENERATE BATTLE CARDS"}
+                        </button>
+                      )}
                     </div>
                   ) : (
-                    result.battleCards?.map((card, i) => (
+                    battleCards?.map((card, i) => (
                       <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
                         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
                           <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"var(--text)" }}>{card.competitor}</div>
@@ -1921,6 +1991,11 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       </div>
                     ))
                   )}
+                  {battleCards && (
+                    <button onClick={() => setBattleCards(null)} style={{ marginTop:16, background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 20px", color:"var(--text-muted)", fontSize:12, cursor:"pointer" }}>
+                      Regenerate
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -1942,8 +2017,17 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       ))}
                     </div>
                   </div>
-                  {result.multiLanguageOutreach?.[selectedLanguage] && (() => {
-                    const lang = result.multiLanguageOutreach[selectedLanguage];
+                  {!langData && (
+                    <div style={{ textAlign:"center", padding:"40px 20px" }}>
+                      <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading)}
+                        disabled={langLoading}
+                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:langLoading?0.6:1 }}>
+                        {langLoading ? "GENERATING..." : "🌏 GENERATE LANGUAGES"}
+                      </button>
+                    </div>
+                  )}
+                  {langData?.[selectedLanguage] && (() => {
+                    const lang = langData[selectedLanguage];
                     return (
                       <div>
                         <div style={{ background:"rgba(245,158,11,0.06)", border:"1px solid rgba(245,158,11,0.15)", borderRadius:8, padding:14, marginBottom:16 }}>
