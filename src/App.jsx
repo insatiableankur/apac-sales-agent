@@ -654,7 +654,6 @@ Key pain: ${result?.accountBrief?.painPoints?.[0]?.pain}` }]
     const data = await res.json();
     const raw = data.content?.map(b => b.text || "").join("") || "";
     const clean = raw.split("```").join("").split("\n").filter(l => l.trim() && l.trim() !== "json").join("\n").trim();
-/,"").trim();
     setFn(JSON.parse(clean));
   } catch(e) { alert("Failed to generate languages. Try again."); }
   setLoading(false);
@@ -677,7 +676,6 @@ const generateLiVariants = async (form, result, setFn, setLoading) => {
     const data = await res.json();
     const raw = data.content?.map(b => b.text || "").join("") || "";
     const clean = raw.split("```").join("").split("\n").filter(l => l.trim() && l.trim() !== "json").join("\n").trim();
-/,"").trim();
     setFn(JSON.parse(clean));
   } catch(e) { alert("Failed to generate variants. Try again."); }
   setLoading(false);
