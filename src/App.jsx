@@ -750,9 +750,7 @@ ${text}` }]
   });
   const data = await res.json();
   const raw = data.content?.map(b => b.text || "").join("") || "";
-  const clean = raw.replace(/^```json
-?|
-?```$/g, "").trim();
+  const clean = raw.split("```").join("").split("\n").filter(l => l.trim() && !l.trim().match(/^json$/)).join("\n").trim();
   return JSON.parse(clean);
 };
 
