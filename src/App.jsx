@@ -626,7 +626,6 @@ Our pain points addressed: ${result?.accountBrief?.painPoints?.map(p=>p.pain).jo
     const data = await res.json();
     const raw = data.content?.map(b => b.text || "").join("") || "";
     const clean = raw.split("```").join("").split("\n").filter(l => l.trim() && l.trim() !== "json").join("\n").trim();
-/,"").trim();
     setFn(JSON.parse(clean));
   } catch(e) { alert("Failed to generate battle cards. Try again."); }
   setLoading(false);
