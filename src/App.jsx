@@ -115,6 +115,11 @@ Return this exact JSON structure:
       }
     },
     "linkedInMessage": "Short, personalised LinkedIn connection message (under 300 characters — the limit for connection requests)",
+    "linkedInVariants": [
+      {"type": "Post Reference", "message": "Reference something specific they posted or commented on recently — under 300 chars"},
+      {"type": "Company Milestone", "message": "Reference a recent company achievement, funding, expansion, or announcement — under 300 chars"},
+      {"type": "Cold Insight", "message": "Pure value-add cold message with a relevant industry insight — under 300 chars"}
+    ],
     "executiveReferral": "Template for asking your champion to introduce you to the economic buyer",
     "sendingTips": ["Tip 1 specific to this market/person", "Tip 2", "Tip 3"]
   },
@@ -190,7 +195,50 @@ Return this exact JSON structure:
     {"priority": 1, "action": "Most critical next action", "why": "Why this is #1", "timeframe": "This week"},
     {"priority": 2, "action": "...", "why": "...", "timeframe": "Next 2 weeks"},
     {"priority": 3, "action": "...", "why": "...", "timeframe": "This month"}
-  ]
+  ],
+  "battleCards": [
+    {
+      "competitor": "Competitor name (e.g. SAP, Oracle, Anaplan, Workday, Adaptive Insights, Vena Solutions)",
+      "ourStrengths": ["Specific strength vs this competitor 1", "Strength 2", "Strength 3"],
+      "theirWeaknesses": ["Their key weakness 1 specific to APAC", "Weakness 2", "Weakness 3"],
+      "theirStrengths": ["What they do well — be honest", "Strength 2"],
+      "winMoves": ["Specific move to beat them in this deal 1", "Move 2", "Move 3"],
+      "trapQuestions": ["Question that exposes their weakness 1", "Question 2"],
+      "landmines": ["Landmine to plant against them 1", "Landmine 2"],
+      "whenWeWin": "Specific conditions under which we beat this competitor",
+      "whenWeLose": "Honest assessment of when they beat us"
+    }
+  ],
+  "multiLanguageOutreach": {
+    "bahasa": {
+      "language": "Bahasa Indonesia / Malaysia",
+      "emailSubject": "Subject line in Bahasa",
+      "emailBody": "Full cold email in Bahasa Indonesia (formal business tone, appropriate for C-suite in Indonesia/Malaysia)",
+      "linkedIn": "LinkedIn message in Bahasa (under 300 chars)",
+      "culturalNote": "Key cultural tip for engaging in this language/market"
+    },
+    "mandarin": {
+      "language": "Mandarin Chinese",
+      "emailSubject": "Subject line in Mandarin",
+      "emailBody": "Full cold email in Simplified Mandarin (formal, appropriate for Singapore/Malaysia/HK Chinese business culture)",
+      "linkedIn": "LinkedIn message in Mandarin (under 300 chars)",
+      "culturalNote": "Key cultural tip for engaging in Chinese business context"
+    },
+    "thai": {
+      "language": "Thai",
+      "emailSubject": "Subject in Thai",
+      "emailBody": "Full cold email in Thai (polite formal register, appropriate for Thai C-suite)",
+      "linkedIn": "LinkedIn message in Thai",
+      "culturalNote": "Key cultural tip for Thai business culture"
+    },
+    "tagalog": {
+      "language": "Filipino / Tagalog",
+      "emailSubject": "Subject in Filipino/English mix",
+      "emailBody": "Email in Filipino business English (warm, relationship-first tone appropriate for Philippines)",
+      "linkedIn": "LinkedIn message Filipino style",
+      "culturalNote": "Key cultural tip for Filipino business culture"
+    }
+  }
 }
 
 Be deeply specific to the company, market, industry, product, and deal stage provided. Use real APAC regulatory references, market dynamics, and buying culture nuance. Reference Ankur's actual deal stories where relevant. This must feel like it was written by someone who has personally sold enterprise SaaS in APAC for 15 years — not by a generic AI.`;
@@ -226,7 +274,7 @@ const exportToPDF = async (result, form) => {
   // Logo area
   setFill('#1A56DB'); doc.roundedRect(M, 20, 12, 12, 2, 2, 'F');
   setTxt('#FFFFFF'); doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text('*', M + 3, 30);
+  doc.text('A', M + 3, 30);  // logo placeholder
   setTxt('#FFFFFF'); doc.setFontSize(18); doc.setFont('helvetica','bold');
   doc.text('APAC Sales Intelligence', M + 16, 28);
   setTxt('#F59E0B'); doc.setFontSize(8); doc.setFont('helvetica','normal');
@@ -301,7 +349,7 @@ const exportToPDF = async (result, form) => {
 
   const bulletItem = (text, color = '#374151') => {
     checkY(5);
-    setTxt('#F59E0B'); doc.setFontSize(10); doc.text('>>', M, y);
+    setTxt('#F59E0B'); doc.setFontSize(10); doc.text('->', M, y);
     setTxt(color); doc.setFontSize(9); doc.setFont('helvetica','normal');
     const lines = doc.splitTextToSize(String(text), CW - 6);
     lines.forEach((line, i) => {
@@ -591,18 +639,90 @@ const exportToPDF = async (result, form) => {
     doc.text(`${p} / ${total}`, W - M, 295, { align: 'right' });
   }
 
-  doc.save(`${form.company.replace(/\s+/g,'_')}_Intelligence_Brief.pdf`);
+  doc.save(`${form.company.replace(/ /g,'_')}_Intelligence_Brief.pdf`);
+};
+
+// ─── ROI CALCULATOR ──────────────────────────────────────────────────────────
+const calcROI = (inputs, result) => {
+  const emp = parseFloat(inputs.employees) || 0;
+  const salary = parseFloat(inputs.avgSalary) || 80000;
+  const hrs = parseFloat(inputs.hoursPerWeek) || 10;
+  const dealSize = parseFloat(inputs.dealSize) || 200000;
+  const hourlyRate = salary / 2080;
+  const annualHours = emp * hrs * 52;
+  const laborSavings = annualHours * hourlyRate * 0.7;
+  const errorCost = (parseFloat(inputs.currentErrors) || 5) * 50000;
+  const totalBenefit = laborSavings + errorCost;
+  const roi = ((totalBenefit - dealSize) / dealSize * 100).toFixed(0);
+  const payback = (dealSize / (totalBenefit / 12)).toFixed(1);
+  return {
+    laborSavings: Math.round(laborSavings),
+    errorCost: Math.round(errorCost),
+    totalBenefit: Math.round(totalBenefit),
+    roi: parseInt(roi),
+    payback: parseFloat(payback),
+    costOfInaction: Math.round(totalBenefit / 12),
+  };
+};
+
+// ─── TRANSCRIPT ANALYSER ─────────────────────────────────────────────────────
+const analyseTranscript = async (text, form, result) => {
+  const res = await fetch("/api/anthropic", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 4000,
+      system: `You are Ankur Sehgal — APAC enterprise sales expert. Analyse this call transcript and return ONLY valid JSON:
+{
+  "summary": "2-3 sentence call summary",
+  "meddpiccSignals": {
+    "metrics": "what was revealed or is still unknown",
+    "economicBuyer": "what was revealed or is still unknown",
+    "decisionCriteria": "what was revealed or is still unknown",
+    "decisionProcess": "what was revealed or is still unknown",
+    "champion": "what was revealed or is still unknown",
+    "competition": "what was revealed or is still unknown"
+  },
+  "positiveSignals": ["Buying signal 1", "Signal 2", "Signal 3"],
+  "redFlags": ["Concern 1", "Concern 2"],
+  "missedOpportunities": ["Question you should have asked 1", "Missed opp 2"],
+  "nextActions": [
+    {"action": "Specific next action", "owner": "You/Prospect", "timeframe": "24hrs/This week"},
+    {"action": "Action 2", "owner": "You", "timeframe": "This week"},
+    {"action": "Action 3", "owner": "You", "timeframe": "Next 2 weeks"}
+  ],
+  "followUpEmail": {
+    "subject": "Follow up email subject line",
+    "body": "Complete follow-up email based on the call — recap decisions, confirm next steps, add value"
+  },
+  "dealHealthChange": "improved/unchanged/deteriorated",
+  "coachingNote": "One specific thing you could have done better on this call"
+}`,
+      messages: [{ role: "user", content: `Company: ${form?.company || "Unknown"}
+Deal Stage: ${form?.dealStage || "Unknown"}
+
+TRANSCRIPT:
+${text}` }]
+    })
+  });
+  const data = await res.json();
+  const raw = data.content?.map(b => b.text || "").join("") || "";
+  const clean = raw.replace(/^```json
+?|
+?```$/g, "").trim();
+  return JSON.parse(clean);
 };
 
 // ─── WEB SEARCH ───────────────────────────────────────────────────────────────
 const searchCompanyIntel = async (company, market, industry) => {
   try {
-    const response = await fetch("/api/anthropic", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 4000,
+        max_tokens: 8000,
         tools: [{ type: "web_search_20250305", name: "web_search" }],
         messages: [{
           role: "user",
@@ -942,6 +1062,18 @@ export default function APACSalesAgent() {
   });
   const [result, setResult] = useState(null);
   const [activeTab, setActiveTab] = useState("brief");
+  const [dealHistory, setDealHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("apac_deal_history") || "[]"); } catch { return []; }
+  });
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("bahasa");
+  const [emailTone, setEmailTone] = useState("formal");
+  const [transcript, setTranscript] = useState("");
+  const [transcriptResult, setTranscriptResult] = useState(null);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const [roiInputs, setRoiInputs] = useState({ employees: "", avgSalary: "", hoursPerWeek: "", currentErrors: "", dealSize: "" });
+  const [roiResult, setRoiResult] = useState(null);
+  const [linkedInVariant, setLinkedInVariant] = useState(0);
   const [expandedMedd, setExpandedMedd] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -975,7 +1107,7 @@ export default function APACSalesAgent() {
       let liveIntel = "";
       try {
         setAnalyzeStep(0);
-        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry); await new Promise(r => setTimeout(r, 2000));
+        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry);
       } catch(e) {}
 
       const prompt = `Analyse this account and deal situation:
@@ -991,18 +1123,19 @@ DEAL SIZE TARGET: ${form.dealSize || "Not specified"}
 KNOWN CONTACTS: ${form.knownContacts || "None provided"}
 RECENT NEWS / CONTEXT: ${form.recentNews || "None provided"}
 COMPETITORS MENTIONED: ${form.competitorsMentioned || "None known"}
+EMAIL TONE PREFERENCE: ${emailTone.toUpperCase()} — ${emailTone === "formal" ? "Professional, structured, compliance-aware. Appropriate for banking, government, large enterprises." : emailTone === "warm" ? "Conversational, human, relationship-first. Appropriate for tech companies, startups, innovation teams." : "Blunt, direct, ROI-focused. Appropriate for C-suite, economic buyers, time-poor executives."}
 ${liveIntel ? `
 LIVE MARKET INTELLIGENCE (from real-time web search — use this to enrich the brief):
 ${liveIntel}
 ` : ""}
 Generate the complete 7-module intelligence brief as specified. Where live intelligence is provided above, incorporate specific recent facts, dates, and events into the brief — especially in keyTriggers, whyNow, and painPoints.`;
 
-      const res = await fetch("/api/anthropic", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 8000,
+          max_tokens: 1000,
           system: buildSystemPrompt(),
           messages: [{ role: "user", content: prompt }],
         }),
@@ -1013,6 +1146,24 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       const parsed = JSON.parse(clean);
       clearInterval(ticker);
       setResult(parsed);
+      // Save to deal history
+      const historyEntry = {
+        id: Date.now(),
+        company: form.company,
+        market: form.market,
+        industry: form.industry,
+        dealStage: form.dealStage,
+        dealSize: form.dealSize,
+        icpScore: parsed.accountBrief?.icpScore,
+        dealHealth: parsed.meddpicc?.overallHealth,
+        dealPotential: parsed.accountBrief?.dealPotential,
+        date: new Date().toLocaleDateString("en-SG", {day:"numeric",month:"short",year:"numeric"}),
+        result: parsed,
+        form: {...form}
+      };
+      const updated = [historyEntry, ...dealHistory].slice(0, 20);
+      setDealHistory(updated);
+      try { localStorage.setItem("apac_deal_history", JSON.stringify(updated)); } catch(e) {}
       setStep(4);
       setActiveTab("brief");
       // Prime deal coach
@@ -1049,12 +1200,12 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
     const sysPrompt = `You are Ankur Sehgal — 15-year APAC enterprise SaaS veteran, 7x President's Club, $25M ARR. You're coaching this rep on their live deal. Be direct, specific, commercially sharp. Reference the deal context. Generate scripts, talk tracks, emails on demand. Deal context: ${context}`;
 
     try {
-      const res = await fetch("/api/anthropic", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
+          max_tokens: 1000,
           system: sysPrompt,
           messages: updated.map(m => ({ role: m.role, content: m.content })),
         }),
@@ -1081,6 +1232,13 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               <div>
                 <div className="logo-text">APAC Sales Intelligence</div>
                 <div className="logo-sub">ANKUR SEHGAL · 7X PRESIDENT'S CLUB</div>
+            </div>
+            {dealHistory.length > 0 && (
+              <button onClick={() => setShowHistory(!showHistory)} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.3)", borderRadius:8, padding:"6px 14px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer", letterSpacing:1 }}>
+                📋 HISTORY ({dealHistory.length})
+              </button>
+            )}
+            <div style={{ display:"none" }}>
               </div>
             </div>
             <div className="header-badge">POWERED BY CLAUDE AI</div>
@@ -1107,7 +1265,39 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
           )}
 
           {/* ── STEP 1: COMPANY ── */}
-          {step === 1 && (
+          {/* ── DEAL HISTORY PANEL ── */}
+      {showHistory && (
+        <div style={{ position:"fixed", top:0, right:0, width:420, height:"100vh", background:"var(--card)", borderLeft:"1px solid var(--border)", zIndex:1000, overflowY:"auto", padding:24 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)" }}>Deal History</div>
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={() => { setDealHistory([]); try { localStorage.removeItem("apac_deal_history"); } catch(e) {} }} style={{ background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:6, padding:"4px 10px", color:"#EF4444", fontSize:11, fontWeight:700, cursor:"pointer" }}>CLEAR ALL</button>
+              <button onClick={() => setShowHistory(false)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 10px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>CLOSE</button>
+            </div>
+          </div>
+          {dealHistory.map((h, i) => {
+            const hc = h.dealHealth === "green" ? "#10B981" : h.dealHealth === "amber" ? "#F59E0B" : "#EF4444";
+            return (
+              <div key={h.id} style={{ background:"var(--bg)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:12, cursor:"pointer" }}
+                onClick={() => { setResult(h.result); setForm(h.form); setStep(4); setShowHistory(false); setActiveTab("brief"); }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                  <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color:"var(--text)" }}>{h.company}</div>
+                  <div style={{ width:10, height:10, borderRadius:"50%", background:hc, marginTop:3 }}></div>
+                </div>
+                <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:6 }}>{h.market} · {h.industry}</div>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  <span style={{ fontSize:11, background:"rgba(245,158,11,0.1)", color:"var(--amber)", borderRadius:4, padding:"2px 8px", fontWeight:700 }}>ICP {h.icpScore}/100</span>
+                  <span style={{ fontSize:11, background:"rgba(26,86,219,0.1)", color:"var(--blue-light)", borderRadius:4, padding:"2px 8px" }}>{h.dealPotential}</span>
+                  <span style={{ fontSize:11, color:"var(--text-muted)", borderRadius:4, padding:"2px 8px", border:"1px solid var(--border)" }}>{h.dealStage?.split(" — ")[0]}</span>
+                </div>
+                <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:8 }}>{h.date}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {step === 1 && (
             <div>
               <div style={{ marginBottom: 32 }} className="fade-up-1">
                 <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 30, fontWeight: 800, color: "white", marginBottom: 8 }}>Who are you targeting?</h1>
@@ -1204,6 +1394,19 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     placeholder="Who do you know there already? e.g. 'Sarah Chen — Head of Finance Transformation, met at a CFO summit. Seems interested but not sure she has budget authority.'" />
                 </div>
                 <div className="field" style={{ marginBottom: 0 }}>
+                  <div style={{ marginBottom:20 }}>
+                    <label className="field-label">EMAIL TONE</label>
+                    <div style={{ display:"flex", gap:8, marginTop:6 }}>
+                      {[["formal","Formal","Banking / Govt"],["warm","Warm","Tech / Startup"],["direct","Direct","C-Suite / EB"]].map(([t,label,sub]) => (
+                        <button key={t} onClick={() => setEmailTone(t)} style={{ flex:1, padding:"10px 8px", borderRadius:8, border:"1px solid", cursor:"pointer", textAlign:"center",
+                          borderColor: emailTone===t ? "var(--amber)" : "var(--border)",
+                          background: emailTone===t ? "rgba(245,158,11,0.1)" : "transparent" }}>
+                          <div style={{ fontSize:13, fontWeight:700, color: emailTone===t ? "var(--amber)" : "var(--text)" }}>{label}</div>
+                          <div style={{ fontSize:10, color:"var(--text-muted)", marginTop:2 }}>{sub}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <label className="field-label">COMPETITORS MENTIONED OR IN THE DEAL</label>
                   <input type="text" value={form.competitorsMentioned} onChange={e => set("competitorsMentioned", e.target.value)}
                     placeholder="e.g. SAP BPC, Oracle Hyperion, Workiva, Vena Solutions, or 'not known yet'" />
@@ -1274,6 +1477,17 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               </div>
 
               {/* Stat strip */}
+              {/* PDF Export Bar */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "var(--amber-glow)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px 18px" }}>
+                <div style={{ fontSize: 13, color: "var(--amber)", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>📄 INTELLIGENCE BRIEF READY</div>
+                <button
+                  onClick={() => exportToPDF(result, form)}
+                  style={{ background: "linear-gradient(135deg, #F59E0B, #EA580C)", border: "none", borderRadius: 8, padding: "10px 20px", color: "#08111E", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 16px rgba(245,158,11,0.4)" }}
+                >
+                  ⬇ Export PDF
+                </button>
+              </div>
+
               <div className="stat-grid fade-up-1">
                 {[
                   { k: "ICP SCORE", v: `${result.accountBrief?.icpScore}/100` },
@@ -1298,6 +1512,10 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   { id: "discovery", label: "💬 DISCOVERY" },
                   { id: "com", label: "🏆 COMMAND" },
                   { id: "coach", label: "🎯 COACH" },
+                  { id: "battle", label: "⚔️ BATTLE" },
+                  { id: "roi", label: "💰 ROI" },
+                  { id: "transcript", label: "📞 TRANSCRIPT" },
+                  { id: "languages", label: "🌏 LANGUAGES" },
                 ].map(t => (
                   <button key={t.id} className={`tab ${activeTab === t.id ? "active" : ""}`} onClick={() => setActiveTab(t.id)}>
                     {t.label}
@@ -1520,10 +1738,20 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div className="grid-2">
                       <div>
                         <div className="section-head">LINKEDIN CONNECTION MESSAGE</div>
-                        <div style={{ background: "var(--card)", borderRadius: 10, padding: 14, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 8 }}>
-                          {result.outreach.linkedInMessage}
+                        <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+                          {(result.outreach.linkedInVariants||[{type:"Default"}]).map((v,i) => (
+                            <button key={i} onClick={() => setLinkedInVariant(i)} style={{ flex:1, padding:"7px 6px", borderRadius:8, border:"1px solid", cursor:"pointer", fontSize:11, fontWeight:700,
+                              borderColor: linkedInVariant===i ? "var(--amber)" : "var(--border)",
+                              background: linkedInVariant===i ? "rgba(245,158,11,0.1)" : "transparent",
+                              color: linkedInVariant===i ? "var(--amber)" : "var(--text-muted)" }}>
+                              {v.type}
+                            </button>
+                          ))}
                         </div>
-                        <CopyButton text={result.outreach.linkedInMessage} />
+                        <div style={{ background: "var(--card)", borderRadius: 10, padding: 14, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 8, fontStyle:"italic" }}>
+                          {result.outreach.linkedInVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage}
+                        </div>
+                        <CopyButton text={result.outreach.linkedInVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage} />
                       </div>
                       <div>
                         <div className="section-head">CHAMPION → EXEC REFERRAL</div>
@@ -1634,6 +1862,252 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div className="section-head">CLOSING HYPOTHESIS</div>
                     <div className="highlight-text">{result.commandOfMessage.closingHypothesis}</div>
                   </div>
+                </div>
+              )}
+
+              {/* ── TAB: BATTLE CARDS ── */}
+              {activeTab === "battle" && (
+                <div className="fade-up-1">
+                  {(!result.battleCards || result.battleCards.length === 0 || !form.competitorsMentioned) ? (
+                    <div style={{ textAlign:"center", padding:"60px 20px" }}>
+                      <div style={{ fontSize:48, marginBottom:16 }}>⚔️</div>
+                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>No Competitors Identified</div>
+                      <div style={{ color:"var(--text-muted)", fontSize:14 }}>Add competitor names in the deal context form and re-run the analysis to generate battle cards.</div>
+                    </div>
+                  ) : (
+                    result.battleCards?.map((card, i) => (
+                      <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
+                        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+                          <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"var(--text)" }}>{card.competitor}</div>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", border:"1px solid var(--amber)", borderRadius:6, padding:"4px 10px" }}>BATTLE CARD</div>
+                        </div>
+                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+                          <div style={{ background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:8, padding:16 }}>
+                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#10B981", marginBottom:10 }}>OUR STRENGTHS VS THEM</div>
+                            {card.ourStrengths?.map((s,j) => <div key={j} style={{ fontSize:13, color:"var(--text)", marginBottom:6, paddingLeft:12, borderLeft:"2px solid #10B981" }}>{s}</div>)}
+                          </div>
+                          <div style={{ background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:8, padding:16 }}>
+                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#EF4444", marginBottom:10 }}>THEIR WEAKNESSES</div>
+                            {card.theirWeaknesses?.map((w,j) => <div key={j} style={{ fontSize:13, color:"var(--text)", marginBottom:6, paddingLeft:12, borderLeft:"2px solid #EF4444" }}>{w}</div>)}
+                          </div>
+                        </div>
+                        <div style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:8, padding:16, marginBottom:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", marginBottom:10 }}>WIN MOVES — HOW TO BEAT THEM</div>
+                          {card.winMoves?.map((m,j) => (
+                            <div key={j} style={{ display:"flex", gap:10, marginBottom:8, alignItems:"flex-start" }}>
+                              <span style={{ color:"var(--amber)", fontWeight:700, minWidth:20 }}>{j+1}.</span>
+                              <span style={{ fontSize:13, color:"var(--text)" }}>{m}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+                          <div>
+                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--blue-light)", marginBottom:8 }}>TRAP QUESTIONS</div>
+                            {card.trapQuestions?.map((q,j) => <div key={j} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:6, fontStyle:"italic" }}>&quot;{q}&quot;</div>)}
+                          </div>
+                          <div>
+                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#A78BFA", marginBottom:8 }}>LANDMINES TO PLANT</div>
+                            {card.landmines?.map((l,j) => <div key={j} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:6 }}>{l}</div>)}
+                          </div>
+                        </div>
+                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginTop:16 }}>
+                          <div style={{ background:"rgba(16,185,129,0.05)", borderRadius:8, padding:12 }}>
+                            <div style={{ fontSize:11, fontWeight:700, color:"#10B981", marginBottom:6 }}>WHEN WE WIN</div>
+                            <div style={{ fontSize:13, color:"var(--text-muted)" }}>{card.whenWeWin}</div>
+                          </div>
+                          <div style={{ background:"rgba(239,68,68,0.05)", borderRadius:8, padding:12 }}>
+                            <div style={{ fontSize:11, fontWeight:700, color:"#EF4444", marginBottom:6 }}>WHEN WE LOSE</div>
+                            <div style={{ fontSize:13, color:"var(--text-muted)" }}>{card.whenWeLose}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* ── TAB: MULTI-LANGUAGE OUTREACH ── */}
+              {activeTab === "languages" && (
+                <div className="fade-up-1">
+                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:20 }}>
+                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:16, fontWeight:800, color:"var(--amber)", marginBottom:6 }}>Multi-Language Outreach</div>
+                    <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:16 }}>Same message, localised for every APAC market. Select language to view.</div>
+                    <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                      {[["bahasa","Bahasa"],["mandarin","Mandarin"],["thai","Thai"],["tagalog","Filipino"]].map(([key,label]) => (
+                        <button key={key} onClick={() => setSelectedLanguage(key)}
+                          style={{ padding:"8px 16px", borderRadius:8, border:"1px solid", fontSize:13, fontWeight:600, cursor:"pointer",
+                            borderColor: selectedLanguage === key ? "var(--amber)" : "var(--border)",
+                            background: selectedLanguage === key ? "rgba(245,158,11,0.1)" : "transparent",
+                            color: selectedLanguage === key ? "var(--amber)" : "var(--text-muted)" }}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {result.multiLanguageOutreach?.[selectedLanguage] && (() => {
+                    const lang = result.multiLanguageOutreach[selectedLanguage];
+                    return (
+                      <div>
+                        <div style={{ background:"rgba(245,158,11,0.06)", border:"1px solid rgba(245,158,11,0.15)", borderRadius:8, padding:14, marginBottom:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:"var(--amber)", marginBottom:6 }}>CULTURAL NOTE</div>
+                          <div style={{ fontSize:13, color:"var(--text)" }}>{lang.culturalNote}</div>
+                        </div>
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)", marginBottom:8 }}>EMAIL SUBJECT</div>
+                          <div style={{ background:"rgba(26,86,219,0.1)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:8, padding:12, fontSize:14, fontWeight:600, color:"var(--blue-light)", marginBottom:16 }}>{lang.emailSubject}</div>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)", marginBottom:8 }}>EMAIL BODY</div>
+                          <div style={{ background:"var(--bg)", borderRadius:8, padding:16, fontSize:13, color:"var(--text)", lineHeight:1.7, whiteSpace:"pre-wrap" }}>{lang.emailBody}</div>
+                        </div>
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)", marginBottom:8 }}>LINKEDIN MESSAGE</div>
+                          <div style={{ background:"var(--bg)", borderRadius:8, padding:16, fontSize:13, color:"var(--text)", fontStyle:"italic" }}>&quot;{lang.linkedIn}&quot;</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* ── TAB: ROI BUILDER ── */}
+              {activeTab === "roi" && (
+                <div className="fade-up-1">
+                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
+                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)", marginBottom:4 }}>ROI & Business Case Builder</div>
+                    <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:20 }}>Build a CFO-ready business case in 60 seconds. Enter their numbers to quantify the cost of inaction.</div>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
+                      {[
+                        ["employees","Finance / Reporting Team Size","e.g. 25"],
+                        ["avgSalary","Average Annual Salary (USD)","e.g. 85000"],
+                        ["hoursPerWeek","Hours/Week on Manual Reporting","e.g. 12"],
+                        ["currentErrors","Reporting Errors Per Year","e.g. 8"],
+                        ["dealSize","Your Solution ACV (USD)","e.g. 200000"],
+                      ].map(([key,label,ph]) => (
+                        <div key={key}>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:1, color:"var(--text-muted)", marginBottom:6 }}>{label.toUpperCase()}</div>
+                          <input type="number" placeholder={ph} value={roiInputs[key]}
+                            onChange={e => setRoiInputs(p => ({...p, [key]: e.target.value}))}
+                            style={{ width:"100%", background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:14 }} />
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => setRoiResult(calcROI(roiInputs, result))}
+                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1 }}>
+                      CALCULATE ROI
+                    </button>
+                  </div>
+                  {roiResult && (
+                    <div>
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, marginBottom:20 }}>
+                        {[
+                          ["ROI", `${roiResult.roi}%`, "#10B981"],
+                          ["Payback Period", `${roiResult.payback} months`, "#F59E0B"],
+                          ["Monthly Cost of Inaction", `$${roiResult.costOfInaction.toLocaleString()}`, "#EF4444"],
+                        ].map(([label,val,color]) => (
+                          <div key={label} style={{ background:"var(--card)", border:`1px solid ${color}33`, borderRadius:12, padding:20, textAlign:"center" }}>
+                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:900, color }}>{val}</div>
+                            <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4, letterSpacing:1 }}>{label.toUpperCase()}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:"var(--amber)", marginBottom:16, letterSpacing:1 }}>COST BREAKDOWN</div>
+                        {[
+                          ["Labor Savings (70% efficiency gain)", roiResult.laborSavings, "#10B981"],
+                          ["Error & Rework Cost Elimination", roiResult.errorCost, "#10B981"],
+                          ["Total Annual Benefit", roiResult.totalBenefit, "#F59E0B"],
+                        ].map(([label,val,color]) => (
+                          <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:"1px solid var(--border)" }}>
+                            <span style={{ fontSize:13, color:"var(--text)" }}>{label}</span>
+                            <span style={{ fontSize:15, fontWeight:700, color }}>${val.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:20 }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:"var(--amber)", marginBottom:10, letterSpacing:1 }}>CFO TALK TRACK</div>
+                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, fontStyle:"italic" }}>
+                          "Based on your team size and current processes, the cost of inaction is approximately ${roiResult.costOfInaction.toLocaleString()} per month — or ${roiResult.totalBenefit.toLocaleString()} annually. Our solution delivers a {roiResult.roi}% ROI with a {roiResult.payback}-month payback period. Every month you delay costs more than the solution itself."
+                        </div>
+                        <button onClick={() => navigator.clipboard.writeText(`Based on your team size and current processes, the cost of inaction is approximately $${roiResult.costOfInaction.toLocaleString()} per month — or $${roiResult.totalBenefit.toLocaleString()} annually. Our solution delivers a ${roiResult.roi}% ROI with a ${roiResult.payback}-month payback period. Every month you delay costs more than the solution itself.`)}
+                          style={{ marginTop:12, background:"transparent", border:"1px solid var(--amber)", borderRadius:6, padding:"6px 16px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer" }}>
+                          COPY TALK TRACK
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── TAB: TRANSCRIPT ANALYSER ── */}
+              {activeTab === "transcript" && (
+                <div className="fade-up-1">
+                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
+                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)", marginBottom:4 }}>Call Transcript Analyser</div>
+                    <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:16 }}>Paste your call transcript below. AI extracts MEDDPICC signals, buying signals, red flags, missed opportunities, and generates your follow-up email.</div>
+                    <textarea value={transcript} onChange={e => setTranscript(e.target.value)}
+                      placeholder="Paste full call transcript here... (Zoom auto-transcript, Gong export, manual notes — any format works)"
+                      style={{ width:"100%", minHeight:200, background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:16, color:"var(--text)", fontSize:13, lineHeight:1.6, resize:"vertical", marginBottom:16, boxSizing:"border-box" }} />
+                    <button onClick={async () => {
+                      if (!transcript.trim()) return;
+                      setTranscriptLoading(true); setTranscriptResult(null);
+                      try { setTranscriptResult(await analyseTranscript(transcript, form, result)); }
+                      catch(e) { alert("Analysis failed. Try again."); }
+                      setTranscriptLoading(false);
+                    }} disabled={transcriptLoading || !transcript.trim()}
+                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity: transcriptLoading || !transcript.trim() ? 0.6 : 1 }}>
+                      {transcriptLoading ? "ANALYSING..." : "ANALYSE CALL"}
+                    </button>
+                  </div>
+                  {transcriptResult && (
+                    <div>
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
+                        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", marginBottom:10 }}>CALL SUMMARY</div>
+                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7 }}>{transcriptResult.summary}</div>
+                        <div style={{ display:"flex", gap:10, marginTop:12 }}>
+                          {[["improved","#10B981"],["unchanged","#F59E0B"],["deteriorated","#EF4444"]].map(([s,c]) => (
+                            <div key={s} style={{ padding:"4px 12px", borderRadius:6, background: transcriptResult.dealHealthChange===s ? c+"33" : "transparent", border:`1px solid ${transcriptResult.dealHealthChange===s ? c : "var(--border)"}`, fontSize:11, fontWeight:700, color: transcriptResult.dealHealthChange===s ? c : "var(--text-muted)", textTransform:"uppercase" }}>{s}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:16 }}>
+                        <div style={{ background:"rgba(16,185,129,0.06)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:12, padding:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:"#10B981", marginBottom:10, letterSpacing:1 }}>BUYING SIGNALS</div>
+                          {transcriptResult.positiveSignals?.map((s,i) => <div key={i} style={{ fontSize:12, color:"var(--text)", marginBottom:6, paddingLeft:10, borderLeft:"2px solid #10B981" }}>{s}</div>)}
+                        </div>
+                        <div style={{ background:"rgba(239,68,68,0.06)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:12, padding:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:"#EF4444", marginBottom:10, letterSpacing:1 }}>RED FLAGS</div>
+                          {transcriptResult.redFlags?.map((r,i) => <div key={i} style={{ fontSize:12, color:"var(--text)", marginBottom:6, paddingLeft:10, borderLeft:"2px solid #EF4444" }}>{r}</div>)}
+                        </div>
+                        <div style={{ background:"rgba(167,139,250,0.06)", border:"1px solid rgba(167,139,250,0.2)", borderRadius:12, padding:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:"#A78BFA", marginBottom:10, letterSpacing:1 }}>MISSED OPPORTUNITIES</div>
+                          {transcriptResult.missedOpportunities?.map((m,i) => <div key={i} style={{ fontSize:12, color:"var(--text)", marginBottom:6, paddingLeft:10, borderLeft:"2px solid #A78BFA" }}>{m}</div>)}
+                        </div>
+                      </div>
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
+                        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", marginBottom:12 }}>NEXT ACTIONS</div>
+                        {transcriptResult.nextActions?.map((a,i) => (
+                          <div key={i} style={{ display:"flex", gap:12, padding:"10px 0", borderBottom:"1px solid var(--border)", alignItems:"flex-start" }}>
+                            <div style={{ minWidth:24, height:24, borderRadius:"50%", background: i===0?"var(--amber)":i===1?"var(--blue)":"var(--border)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color: i<2?"var(--navy)":"var(--text)" }}>{i+1}</div>
+                            <div style={{ flex:1 }}>
+                              <div style={{ fontSize:13, color:"var(--text)", fontWeight:600 }}>{a.action}</div>
+                              <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:2 }}>{a.owner} · {a.timeframe}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background:"rgba(245,158,11,0.06)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:20, marginBottom:16 }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:"var(--amber)", marginBottom:8, letterSpacing:1 }}>COACHING NOTE</div>
+                        <div style={{ fontSize:13, color:"var(--text)", fontStyle:"italic" }}>{transcriptResult.coachingNote}</div>
+                      </div>
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)" }}>FOLLOW-UP EMAIL</div>
+                          <button onClick={() => navigator.clipboard.writeText(transcriptResult.followUpEmail?.body || "")} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Copy</button>
+                        </div>
+                        <div style={{ background:"rgba(26,86,219,0.1)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:8, padding:10, fontSize:13, fontWeight:600, color:"var(--blue-light)", marginBottom:12 }}>{transcriptResult.followUpEmail?.subject}</div>
+                        <div style={{ background:"var(--bg)", borderRadius:8, padding:16, fontSize:13, color:"var(--text)", lineHeight:1.7, whiteSpace:"pre-wrap" }}>{transcriptResult.followUpEmail?.body}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
