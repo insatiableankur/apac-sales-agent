@@ -708,7 +708,7 @@ ${text}` }]
   });
   const data = await res.json();
   const raw = data.content?.map(b => b.text || "").join("") || "";
-  const clean = raw.replace(/^```json
+  const clean = raw.split("```").join("").replace(/^json\n/,"").trim();
 ?|
 ?```$/g, "").trim();
   return JSON.parse(clean);
