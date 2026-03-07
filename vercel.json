@@ -3,5 +3,6 @@
     "api/anthropic.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "regions": ["sin1"]
 }
