@@ -997,7 +997,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-haiku-4-5-20251001",
           max_tokens: 6000,
           system: buildSystemPrompt(),
           messages: [{ role: "user", content: prompt }],
@@ -1067,7 +1067,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-haiku-4-5-20251001",
           max_tokens: 6000,
           system: sysPrompt,
           messages: updated.map(m => ({ role: m.role, content: m.content })),
