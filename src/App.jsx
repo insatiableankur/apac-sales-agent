@@ -1046,6 +1046,11 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         debugStreamCall(prompt, sys1, "PART1"),
         debugStreamCall(prompt, sys2, "PART2"),
       ]);
+      // Fix any keys that broke out of discoveryQuestions
+      const dq = part2.discoveryQuestions || {};
+      if (part2.redFlags) dq.redFlags = part2.redFlags;
+      if (part2.idealCallOutcome) dq.idealCallOutcome = part2.idealCallOutcome;
+      part2.discoveryQuestions = dq;
       const parsed = { ...part1, ...part2 };
       clearInterval(ticker);
       setResult(parsed);
