@@ -1023,7 +1023,11 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
             }
           }
         }
-        let clean = text;
+        // Strip markdown code fences
+        let clean = text.trim();
+        if (clean.startsWith("```")) {
+          clean = clean.replace(/^```[a-z]*\s*/i, "").replace(/\s*```\s*$/,"");
+        }
         // Sanitize common JSON breaking chars
         clean = clean.replace(/[\u0000-\u001F]/g, " ");
         const s1 = clean.indexOf("{");
