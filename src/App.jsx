@@ -1026,7 +1026,22 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         let clean = text.split("```json").join("").split("```").join("").trim();
         const s = clean.indexOf("{"), e = clean.lastIndexOf("}");
         if (s !== -1 && e !== -1) clean = clean.slice(s, e + 1);
-        return JSON.parse(clean);
+        try {
+          return JSON.parse(clean);
+        } catch(e) {
+          // Fix common JSON issues: unescaped quotes, truncation
+          let fixed = clean
+            .replace(/([^\\])\n/g, '$1\\n')
+            .replace(/([^\\])\t/g, '$1\\t')
+            .replace(/([^\\])\r/g, '$1\\r');
+          const s = fixed.indexOf("{"), e2 = fixed.lastIndexOf("}");
+          if (s !== -1 && e2 !== -1) fixed = fixed.slice(s, e2 + 1);
+          const opens = (fixed.match(/{/g)||[]).length - (fixed.match(/}/g)||[]).length;
+          const openArr = (fixed.match(/\[/g)||[]).length - (fixed.match(/\]/g)||[]).length;
+          for(let i=0;i<openArr;i++) fixed += "]";
+          for(let i=0;i<opens;i++) fixed += "}";
+          return JSON.parse(fixed);
+        }
       };
 
       const sys1 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies. Return ONLY valid JSON with these 3 keys: accountBrief, meddpicc, stakeholders. Use exact same structure as specified.`;
