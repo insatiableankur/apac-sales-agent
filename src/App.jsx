@@ -1025,18 +1025,18 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         }
         let clean = text.split("```json").join("").split("```").join("").replace(/^\s*\n/,"").trim();
         console.log("CLEAN:", JSON.stringify(clean.slice(0,100)));
-        const s = clean.indexOf("{"), e = clean.lastIndexOf("}");
-        if (s !== -1 && e !== -1) clean = clean.slice(s, e + 1);
+        const s = clean.indexOf("{"), eIdx = clean.lastIndexOf("}");
+        if (s !== -1 && eIdx !== -1) clean = clean.slice(s, eIdx + 1);
         try {
           return JSON.parse(clean);
-        } catch(e) {
+        } catch(jsonParseErr) {
           // Fix common JSON issues: unescaped quotes, truncation
           let fixed = clean
             .replace(/([^\\])\n/g, '$1\\n')
             .replace(/([^\\])\t/g, '$1\\t')
             .replace(/([^\\])\r/g, '$1\\r');
-          const s = fixed.indexOf("{"), e2 = fixed.lastIndexOf("}");
-          if (s !== -1 && e2 !== -1) fixed = fixed.slice(s, e2 + 1);
+          const fs = fixed.indexOf("{"), fe = fixed.lastIndexOf("}");
+          if (fs !== -1 && fe !== -1) fixed = fixed.slice(fs, fe + 1);
           const opens = (fixed.match(/{/g)||[]).length - (fixed.match(/}/g)||[]).length;
           const openArr = (fixed.match(/\[/g)||[]).length - (fixed.match(/\]/g)||[]).length;
           for(let i=0;i<openArr;i++) fixed += "]";
