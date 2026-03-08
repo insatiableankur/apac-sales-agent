@@ -1042,14 +1042,9 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
 
       setAnalyzeStep(4);
       // Debug: log raw stream output
-      const debugStreamCall = async (userPrompt, systemPrompt, label) => {
-        const result = await streamCall(userPrompt, systemPrompt);
-        console.log(label, "keys:", Object.keys(result));
-        return result;
-      };
       const [part1, part2] = await Promise.all([
-        debugStreamCall(prompt, sys1, "PART1"),
-        debugStreamCall(prompt, sys2, "PART2"),
+        streamCall(prompt, sys1),
+        streamCall(prompt, sys2),
       ]);
       // Fix any keys that broke out of discoveryQuestions
       const dq = part2.discoveryQuestions || {};
