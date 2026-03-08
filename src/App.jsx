@@ -993,68 +993,51 @@ ${liveIntel}
 ` : ""}
 Generate the complete 7-module intelligence brief as specified. Where live intelligence is provided above, incorporate specific recent facts, dates, and events into the brief — especially in keyTriggers, whyNow, and painPoints.`;
 
-      // Streaming analysis to avoid Vercel timeout
-      const res = await fetch("/api/anthropic", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 8000,
-          stream: true,
-          system: buildSystemPrompt(),
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") continue;
-            try {
-              const evt = JSON.parse(data);
-              if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
-                fullText += evt.delta.text;
-              }
-            } catch(e) {}
+      // CALL 1: Brief + MEDDPICC + Stakeholders
+      const streamCall = async (userPrompt, systemPrompt) => {
+        const r = await fetch("/api/anthropic", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 6000,
+            stream: true,
+            system: systemPrompt,
+            messages: [{ role: "user", content: userPrompt }],
+          }),
+        });
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        const reader = r.body.getReader();
+        const decoder = new TextDecoder();
+        let text = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          for (const line of chunk.split("\n")) {
+            if (line.startsWith("data: ")) {
+              try {
+                const evt = JSON.parse(line.slice(6).trim());
+                if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") text += evt.delta.text;
+              } catch(e) {}
+            }
           }
         }
-      }
+        let clean = text.split("```json").join("").split("```").join("").trim();
+        const s = clean.indexOf("{"), e = clean.lastIndexOf("}");
+        if (s !== -1 && e !== -1) clean = clean.slice(s, e + 1);
+        return JSON.parse(clean);
+      };
 
-      let clean = fullText.split("```json").join("").split("```").join("").trim();
-      // Find JSON boundaries
-      const jsonStart = clean.indexOf("{");
-      const jsonEnd = clean.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        clean = clean.slice(jsonStart, jsonEnd + 1);
-      }
-      let parsed;
-      try {
-        parsed = JSON.parse(clean);
-      } catch(jsonErr) {
-        // Try to fix truncated JSON by closing open structures
-        let fixed = clean;
-        const opens = (fixed.match(/{/g)||[]).length - (fixed.match(/}/g)||[]).length;
-        const openArr = (fixed.match(/\[/g)||[]).length - (fixed.match(/\]/g)||[]).length;
-        for(let i=0;i<openArr;i++) fixed += "]";
-        for(let i=0;i<opens;i++) fixed += "}";
-        try {
-          parsed = JSON.parse(fixed);
-          console.log("PARSED WITH FIX");
-        } catch(e2) {
-          throw new Error("JSON parse failed: " + jsonErr.message);
-        }
-      }
+      const sys1 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies. Return ONLY valid JSON with these 3 keys: accountBrief, meddpicc, stakeholders. Use exact same structure as specified.`;
+      const sys2 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies. Return ONLY valid JSON with these 4 keys: outreach, discoveryQuestions, commandOfMessage, nextBestActions. Use exact same structure as specified.`;
+
+      setAnalyzeStep(4);
+      const [part1, part2] = await Promise.all([
+        streamCall(prompt, sys1),
+        streamCall(prompt, sys2),
+      ]);
+      const parsed = { ...part1, ...part2 };
       clearInterval(ticker);
       setResult(parsed);
       // Save to deal history
