@@ -1032,6 +1032,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       }
 
       const clean = fullText.split("```json").join("").split("```").join("").trim();
+      console.log("STREAM LENGTH:", fullText.length, "CLEAN PREVIEW:", clean.slice(0,200));
       const parsed = JSON.parse(clean);
       clearInterval(ticker);
       setResult(parsed);
