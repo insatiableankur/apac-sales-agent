@@ -384,7 +384,7 @@ const exportToPDF = async (result, form) => {
   setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
   doc.text('07 — Next Best Actions', M, y); y += 10;
 
-  result.nextBestActions?.forEach((a, i) => {
+  (Array.isArray(result.nextBestActions) ? result.nextBestActions : Object.values(result.nextBestActions||{})).forEach((a, i) => {
     checkY(22);
     const nc = i === 0 ? '#F59E0B' : i === 1 ? '#1A56DB' : '#475569';
     setFill(nc); doc.circle(M + 5, y + 5, 5, 'F');
@@ -1024,6 +1024,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
           }
         }
         let clean = text.split("```json").join("").split("```").join("").replace(/^\s*\n/,"").trim();
+        console.log("CLEAN:", JSON.stringify(clean.slice(0,100)));
         const s = clean.indexOf("{"), e = clean.lastIndexOf("}");
         if (s !== -1 && e !== -1) clean = clean.slice(s, e + 1);
         try {
