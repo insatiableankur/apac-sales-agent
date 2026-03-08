@@ -1024,6 +1024,8 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
           }
         }
         let clean = text;
+        // Sanitize common JSON breaking chars
+        clean = clean.replace(/[\u0000-\u001F]/g, " ");
         const s1 = clean.indexOf("{");
         // Find the end of the FIRST complete JSON object
         let depth = 0, e1 = -1;
