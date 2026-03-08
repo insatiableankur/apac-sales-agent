@@ -970,7 +970,7 @@ export default function APACSalesAgent() {
       let liveIntel = "";
       try {
         setAnalyzeStep(0);
-        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry);
+        const rawIntel = await searchCompanyIntel(form.company, form.market, form.industry); liveIntel = rawIntel.replace(/`/g, "'").replace(/\\/g, " ");
       } catch(e) {}
 
       const prompt = `Analyse this account and deal situation:
