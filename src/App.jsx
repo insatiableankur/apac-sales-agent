@@ -999,7 +999,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 6000,
+          max_tokens: 8000,
           stream: true,
           system: buildSystemPrompt(),
           messages: [{ role: "user", content: prompt }],
@@ -1041,11 +1041,19 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       let parsed;
       try {
         parsed = JSON.parse(clean);
-        console.log("PARSED OK:", Object.keys(parsed));
       } catch(jsonErr) {
-        console.error("JSON PARSE ERROR:", jsonErr.message);
-        console.error("CLEAN TAIL:", clean.slice(-500));
-        throw jsonErr;
+        // Try to fix truncated JSON by closing open structures
+        let fixed = clean;
+        const opens = (fixed.match(/{/g)||[]).length - (fixed.match(/}/g)||[]).length;
+        const openArr = (fixed.match(/\[/g)||[]).length - (fixed.match(/\]/g)||[]).length;
+        for(let i=0;i<openArr;i++) fixed += "]";
+        for(let i=0;i<opens;i++) fixed += "}";
+        try {
+          parsed = JSON.parse(fixed);
+          console.log("PARSED WITH FIX");
+        } catch(e2) {
+          throw new Error("JSON parse failed: " + jsonErr.message);
+        }
       }
       clearInterval(ticker);
       setResult(parsed);
@@ -1108,7 +1116,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 6000,
+          max_tokens: 8000,
           system: sysPrompt,
           messages: updated.map(m => ({ role: m.role, content: m.content })),
         }),
