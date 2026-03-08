@@ -1068,7 +1068,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
     } catch (e) {
       clearInterval(ticker);
       setStep(2);
-      alert("Analysis failed. Please check your connection and try again.");
+      alert("Analysis failed: " + e.message);
     }
   };
 
