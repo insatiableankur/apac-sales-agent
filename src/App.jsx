@@ -1023,26 +1023,11 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
             }
           }
         }
-        let clean = text.split("```json").join("").split("```").join("").replace(/^\s*\n/,"").trim();
-        console.log("CLEAN:", JSON.stringify(clean.slice(0,100)));
-        const s = clean.indexOf("{"), eIdx = clean.lastIndexOf("}");
-        if (s !== -1 && eIdx !== -1) clean = clean.slice(s, eIdx + 1);
-        try {
-          return JSON.parse(clean);
-        } catch(jsonParseErr) {
-          // Fix common JSON issues: unescaped quotes, truncation
-          let fixed = clean
-            .replace(/([^\\])\n/g, '$1\\n')
-            .replace(/([^\\])\t/g, '$1\\t')
-            .replace(/([^\\])\r/g, '$1\\r');
-          const fs = fixed.indexOf("{"), fe = fixed.lastIndexOf("}");
-          if (fs !== -1 && fe !== -1) fixed = fixed.slice(fs, fe + 1);
-          const opens = (fixed.match(/{/g)||[]).length - (fixed.match(/}/g)||[]).length;
-          const openArr = (fixed.match(/\[/g)||[]).length - (fixed.match(/\]/g)||[]).length;
-          for(let i=0;i<openArr;i++) fixed += "]";
-          for(let i=0;i<opens;i++) fixed += "}";
-          return JSON.parse(fixed);
-        }
+        let clean = text;
+        const s1 = clean.indexOf("{");
+        const e1 = clean.lastIndexOf("}");
+        if (s1 !== -1 && e1 !== -1) clean = clean.slice(s1, e1 + 1);
+        return JSON.parse(clean);
       };
 
       const sys1 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years APAC enterprise SaaS, 7x President's Club. Return ONLY valid JSON with exactly these 3 keys:
