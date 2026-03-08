@@ -1005,7 +1005,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       });
       const data = await res.json();
       const text = data.content?.map(b => b.text || "").join("") || "";
-      const clean = text.replace(/```json[\s\S]*?```/g, t => t.slice(7, -3)).replace(/```/g, "").trim();
+      const clean = text.split("```json").join("").split("```").join("").trim();
       const parsed = JSON.parse(clean);
       clearInterval(ticker);
       setResult(parsed);
