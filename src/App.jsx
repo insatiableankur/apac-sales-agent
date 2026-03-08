@@ -993,19 +993,45 @@ ${liveIntel}
 ` : ""}
 Generate the complete 7-module intelligence brief as specified. Where live intelligence is provided above, incorporate specific recent facts, dates, and events into the brief — especially in keyTriggers, whyNow, and painPoints.`;
 
+      // Streaming analysis to avoid Vercel timeout
       const res = await fetch("/api/anthropic", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 6000,
+          stream: true,
           system: buildSystemPrompt(),
           messages: [{ role: "user", content: prompt }],
         }),
       });
-      const data = await res.json();
-      const text = data.content?.map(b => b.text || "").join("") || "";
-      const clean = text.split("```json").join("").split("```").join("").trim();
+
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6).trim();
+            if (data === "[DONE]") continue;
+            try {
+              const evt = JSON.parse(data);
+              if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
+                fullText += evt.delta.text;
+              }
+            } catch(e) {}
+          }
+        }
+      }
+
+      const clean = fullText.split("```json").join("").split("```").join("").trim();
       const parsed = JSON.parse(clean);
       clearInterval(ticker);
       setResult(parsed);
