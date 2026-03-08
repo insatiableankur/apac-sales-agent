@@ -1041,17 +1041,17 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
 {"outreach":{"coldEmail":{"subject":"...","preheader":"...","body":"150-200 word email","followUp1":{"dayToSend":5,"subject":"...","body":"..."},"followUp2":{"dayToSend":12,"subject":"...","body":"..."}},"linkedInMessage":"under 300 chars","executiveReferral":"...","sendingTips":["..."]},"discoveryQuestions":{"openingFramer":"...","categories":[{"category":"Current State","questions":[{"question":"...","intent":"...","followUp":"..."}]}],"redFlags":["..."],"idealCallOutcome":"..."},"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."},"nextBestActions":[{"priority":1,"action":"...","why":"...","timeframe":"This week"},{"priority":2,"action":"...","why":"...","timeframe":"Next 2 weeks"},{"priority":3,"action":"...","why":"...","timeframe":"This month"}]} Be concise - max 25 words per text field, max 3 array items.`;
 
       setAnalyzeStep(4);
-      // Debug: log raw stream output
-      const [part1, part2] = await Promise.all([
+      const sys3 = `You are the APAC Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."}} Max 25 words per field.`;
+      const [part1, part2, part3] = await Promise.all([
         streamCall(prompt, sys1),
         streamCall(prompt, sys2),
+        streamCall(prompt, sys3),
       ]);
-      // Fix any keys that broke out of discoveryQuestions
       const dq = part2.discoveryQuestions || {};
       if (part2.redFlags) dq.redFlags = part2.redFlags;
       if (part2.idealCallOutcome) dq.idealCallOutcome = part2.idealCallOutcome;
       part2.discoveryQuestions = dq;
-      const parsed = { ...part1, ...part2 };
+      const parsed = { ...part1, ...part2, ...part3 };
       clearInterval(ticker);
       setResult(parsed);
       // Save to deal history
