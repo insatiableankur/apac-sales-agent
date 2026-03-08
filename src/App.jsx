@@ -970,7 +970,7 @@ export default function APACSalesAgent() {
       let liveIntel = "";
       try {
         setAnalyzeStep(0);
-        // web search moved to on-demand
+        liveIntel = await searchCompanyIntel(form.company, form.market, form.industry);
       } catch(e) {}
 
       const prompt = `Analyse this account and deal situation:
