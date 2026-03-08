@@ -1034,7 +1034,13 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
           else if (clean[ci] === "}") { depth--; if (depth === 0) { e1 = ci; break; } }
         }
         if (s1 !== -1 && e1 !== -1) clean = clean.slice(s1, e1 + 1);
-        return JSON.parse(clean);
+        try {
+          return JSON.parse(clean);
+        } catch(e) {
+          // Retry with aggressive sanitization
+          const safe = clean.replace(/[\u0000-\u001F]/g, " ");
+          return JSON.parse(safe);
+        }
       };
 
       const sys1 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years APAC enterprise SaaS, 7x President's Club. Return ONLY valid JSON with exactly these 4 keys:
