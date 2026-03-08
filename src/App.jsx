@@ -1038,7 +1038,15 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       if (jsonStart !== -1 && jsonEnd !== -1) {
         clean = clean.slice(jsonStart, jsonEnd + 1);
       }
-      const parsed = JSON.parse(clean);
+      let parsed;
+      try {
+        parsed = JSON.parse(clean);
+        console.log("PARSED OK:", Object.keys(parsed));
+      } catch(jsonErr) {
+        console.error("JSON PARSE ERROR:", jsonErr.message);
+        console.error("CLEAN TAIL:", clean.slice(-500));
+        throw jsonErr;
+      }
       clearInterval(ticker);
       setResult(parsed);
       // Save to deal history
