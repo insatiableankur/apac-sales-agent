@@ -1044,16 +1044,18 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
 
       setAnalyzeStep(4);
       const sys3 = `You are the APAC Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."}} Max 25 words per field.`;
-      const [part1, part2, part3] = await Promise.all([
+      const sys4 = `You are the APAC Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"nextBestActions":[{"priority":1,"action":"Most critical action","why":"Why this is #1","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]} Be specific to the deal.`;
+      const [part1, part2, part3, part4] = await Promise.all([
         streamCall(prompt, sys1),
         streamCall(prompt, sys2),
         streamCall(prompt, sys3),
+        streamCall(prompt, sys4),
       ]);
       const dq = part2.discoveryQuestions || {};
       if (part2.redFlags) dq.redFlags = part2.redFlags;
       if (part2.idealCallOutcome) dq.idealCallOutcome = part2.idealCallOutcome;
       part2.discoveryQuestions = dq;
-      const parsed = { ...part1, ...part2, ...part3 };
+      const parsed = { ...part1, ...part2, ...part3, ...part4 };
       clearInterval(ticker);
       setResult(parsed);
       // Save to deal history
