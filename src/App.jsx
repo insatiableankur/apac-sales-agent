@@ -1478,7 +1478,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     </div>
                     <div className="divider" />
                     <div className="section-head">NEXT BEST ACTIONS</div>
-                    {result.nextBestActions?.map((a, i) => (
+                    {( Array.isArray(result.nextBestActions) ? result.nextBestActions : Object.values(result.nextBestActions || {}) ).map((a, i) => (
                       <div className="action-item" key={i}>
                         <div className="action-num" style={{ background: i === 0 ? "var(--amber)" : i === 1 ? "var(--blue)" : "var(--slate)", color: i === 0 ? "var(--navy)" : "white" }}>{a.priority}</div>
                         <div className="action-content">
