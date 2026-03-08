@@ -1048,9 +1048,15 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       const sys2 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies. Return ONLY valid JSON with these 4 keys: outreach, discoveryQuestions, commandOfMessage, nextBestActions. Use exact same structure as specified.`;
 
       setAnalyzeStep(4);
+      // Debug: log raw stream output
+      const debugStreamCall = async (userPrompt, systemPrompt, label) => {
+        const result = await streamCall(userPrompt, systemPrompt);
+        console.log(label, "keys:", Object.keys(result));
+        return result;
+      };
       const [part1, part2] = await Promise.all([
-        streamCall(prompt, sys1),
-        streamCall(prompt, sys2),
+        debugStreamCall(prompt, sys1, "PART1"),
+        debugStreamCall(prompt, sys2, "PART2"),
       ]);
       const parsed = { ...part1, ...part2 };
       clearInterval(ticker);
