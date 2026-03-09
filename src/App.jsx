@@ -390,15 +390,18 @@ const exportToPDF = async (result, form) => {
     setFill(nc); doc.circle(M + 5, y + 5, 5, 'F');
     setTxt('#FFFFFF'); doc.setFontSize(10); doc.setFont('helvetica','bold');
     doc.text(String(a.priority), M + 5, y + 7, { align: 'center' });
+    const aLines = doc.splitTextToSize(a.action || '', CW - 20);
+    const wLines = doc.splitTextToSize(a.why || '', CW - 20);
+    const bH = Math.max(24, (aLines.length + wLines.length) * 5 + 10);
+    checkY(bH);
     setTxt('#08111E'); doc.setFontSize(10); doc.setFont('helvetica','bold');
-    doc.text(a.action || '', M + 14, y + 6);
+    aLines.forEach((l,li) => doc.text(l, M + 14, y + 6 + li*5));
     setTxt('#6B7280'); doc.setFontSize(8); doc.setFont('helvetica','normal');
-    const wl = doc.splitTextToSize(a.why || '', CW - 20);
-    wl.slice(0,2).forEach((l,li) => doc.text(l, M + 14, y + 11 + li*4));
+    wLines.slice(0,3).forEach((l,li) => doc.text(l, M + 14, y + 6 + aLines.length*5 + li*4));
     setFill('#E5E7EB'); doc.roundedRect(W - M - 30, y + 1, 30, 7, 1.5, 1.5, 'F');
     setTxt('#374151'); doc.setFontSize(7);
     doc.text(a.timeframe || '', W - M - 15, y + 6, { align: 'center' });
-    y += 24;
+    y += bH;
   });
 
   // ── FOOTER ON ALL PAGES ──────────────────────────────────────────────
