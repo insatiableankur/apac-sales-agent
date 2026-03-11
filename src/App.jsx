@@ -1156,8 +1156,8 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       const [part1, part2, part3, part4] = await Promise.all([
         streamCall(prompt, sys1),
         streamCall(prompt, sys2),
-        streamCall(prompt, sys3, "claude-haiku-4-5-20251001"),
-        streamCall(prompt, sys4, "claude-haiku-4-5-20251001"),
+        streamCall(prompt, sys3),
+        streamCall(prompt, sys4),
       ]);
       const dq = part2.discoveryQuestions || {};
       if (part2.redFlags) dq.redFlags = part2.redFlags;
