@@ -1271,7 +1271,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   <div className="field">
                     <label className="field-label">PRIMARY MARKET <span>*</span></label>
                     <select value={form.market} onChange={e => set("market", e.target.value)}>
-                      <option value="">Select APAC market...</option>
+                      <option value="">Select market...</option>
                       {MARKETS.map(m => <option key={m}>{m}</option>)}
                     </select>
                   </div>
