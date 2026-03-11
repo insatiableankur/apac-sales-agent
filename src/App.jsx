@@ -1280,8 +1280,11 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   <label className="field-label">INDUSTRY <span>*</span></label>
                   <select value={form.industry} onChange={e => set("industry", e.target.value)}>
                     <option value="">Select industry...</option>
-                    {INDUSTRIES.map(i => <option key={i}>{i}</option>)}
+                    {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                   </select>
+                  {form.industry === "Other" && (
+                    <input type="text" placeholder="Describe your industry (e.g. PropTech, EdTech, AgriTech...)" value={customIndustry} onChange={e => setCustomIndustry(e.target.value)} style={{ width:"100%", background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:"8px 12px", color:"var(--text)", fontSize:13, marginTop:8, boxSizing:"border-box" }} />
+                  )}
                 </div>
                 <div className="field" style={{ marginBottom: 0 }}>
                   <label className="field-label">RECENT NEWS OR CONTEXT <span style={{ color: "var(--text-faint)", fontWeight: 400 }}>(optional — improves accuracy)</span></label>
@@ -1367,6 +1370,24 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <button className="btn-ghost" onClick={() => setStep(1)}>← Back</button>
+                {/* MEDDPICC Pre-Qualifying Questions */}
+                <div style={{ background:"rgba(26,86,219,0.06)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:12, padding:20, marginBottom:20 }}>
+                  <div style={{ fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:800, color:"var(--blue-light)", marginBottom:4, letterSpacing:1 }}>MEDDPICC CALIBRATION</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:16 }}>Answer to get more accurate MEDDPICC scoring. Skip any you don't know yet.</div>
+                  {[
+                    ["budgetConfirmed", "Budget confirmed or allocated?", "e.g. Yes - $500K approved / No / Under discussion"],
+                    ["ebIdentified", "Economic Buyer identified?", "e.g. Yes - CFO John Smith / No / Suspected"],
+                    ["timelineDefined", "Compelling event or deadline?", "e.g. Go-live by Q3 / Board approval by June / No deadline"],
+                    ["competitorsKnown", "Competitors actively involved?", "e.g. SAP shortlisted / Oracle evaluated / None known"],
+                    ["painQuantified", "Pain quantified in $ terms?", "e.g. $2M/year in manual costs / Not yet quantified"],
+                  ].map(([key, label, ph]) => (
+                    <div key={key} style={{ marginBottom:10 }}>
+                      <div style={{ fontSize:10, fontWeight:700, color:"var(--text-muted)", letterSpacing:1, marginBottom:4 }}>{label.toUpperCase()}</div>
+                      <input type="text" placeholder={ph} value={meddQual[key]} onChange={e => setMeddQual(p => ({...p, [key]: e.target.value}))}
+                        style={{ width:"100%", background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:"8px 12px", color:"var(--text)", fontSize:12, boxSizing:"border-box" }} />
+                    </div>
+                  ))}
+                </div>
                 <button className="btn-amber" onClick={runAnalysis} disabled={!canProceed2}>
                   🚀 Run Intelligence Analysis
                 </button>
