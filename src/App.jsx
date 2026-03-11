@@ -1,18 +1,29 @@
 import { useState, useRef, useEffect } from "react";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
-const MARKETS = ["Singapore","Malaysia","Philippines","India","Indonesia","Thailand","Hong Kong","Vietnam","Australia","South Korea","Japan","Taiwan","Multi-Country APAC"];
+const MARKETS = [
+  // Asia Pacific
+  "Singapore","Malaysia","Philippines","India","Indonesia","Thailand","Hong Kong","Vietnam","Australia","South Korea","Japan","Taiwan","New Zealand","Bangladesh","Sri Lanka","Myanmar","Cambodia","Pakistan",
+  // Middle East & Africa
+  "UAE","Saudi Arabia","Qatar","Kuwait","Bahrain","Oman","Egypt","South Africa","Nigeria","Kenya","Morocco",
+  // Europe
+  "United Kingdom","Germany","France","Netherlands","Sweden","Norway","Denmark","Finland","Spain","Italy","Switzerland","Belgium","Ireland","Poland","Portugal","Austria",
+  // Americas
+  "United States","Canada","Brazil","Mexico","Colombia","Argentina","Chile","Peru",
+  // Global
+  "Global / Multi-Country"
+];
 const INDUSTRIES = ["Financial Services / Banking","Insurance / Insurtech","Fintech / Payments","HCM / HR Technology","ERP / Finance Systems","Retail / CPG / Ecommerce","Logistics / Supply Chain","Healthcare / Pharma","Telco / Media / Tech","Real Estate / PropTech","Energy / Resources","Manufacturing","Professional Services","Government / Public Sector"];
 const DEAL_STAGES = ["Prospecting — No Contact Yet","Discovery — First Meetings Done","Evaluation — Active POC / Demo","Proposal — Business Case Submitted","Negotiation — Commercial Terms","Closed Won","Closed Lost — Needs Autopsy"];
 const DEAL_SIZES = ["< $50K ACV","$50K – $100K ACV","$100K – $250K ACV","$250K – $500K ACV","$500K – $1M ACV","$1M+ ACV"];
 const PRODUCTS = ["Financial Reporting & ESG Platform","HCM / Workforce Management","CRM / Revenue Intelligence","Customer Engagement / Messaging","Data & Analytics Platform","ERP / Finance Automation","Cybersecurity / GRC","Supply Chain Management","Marketing Automation","Learning & Development","Other SaaS Platform"];
 
 // ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
-const buildSystemPrompt = () => `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years APAC enterprise SaaS, 7x President's Club, $25M ARR. Return ONLY valid JSON — no markdown, no preamble:
+const buildSystemPrompt = () => `You are the Global Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years enterprise SaaS across APAC, MEA, Europe & Americas, 7x President's Club, $25M ARR. Return ONLY valid JSON — no markdown, no preamble:
 
-{"accountBrief":{"icpScore":87,"icpRating":"Strong Fit","tier":"Tier 1 — Strategic","dealPotential":"$200K–$400K ACV","companyProfile":"2-3 sentence snapshot.","whyNow":"Why engage now.","keyTriggers":["Trigger 1","Trigger 2","Trigger 3"],"painPoints":[{"pain":"Pain 1","businessImpact":"Impact","urgency":"high"},{"pain":"Pain 2","businessImpact":"Impact","urgency":"medium"},{"pain":"Pain 3","businessImpact":"Impact","urgency":"low"}],"buyingCulture":"How they buy.","apacMarketContext":"Market context."},"meddpicc":{"overallHealth":"amber","forecastCategory":"Pipeline","elements":{"metrics":{"status":"red","label":"Metrics","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"economicBuyer":{"status":"amber","label":"Economic Buyer","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"decisionCriteria":{"status":"green","label":"Decision Criteria","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"decisionProcess":{"status":"red","label":"Decision Process","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"paperProcess":{"status":"red","label":"Paper Process","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"identifiedPain":{"status":"green","label":"Identified Pain","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"champion":{"status":"amber","label":"Champion","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"competition":{"status":"amber","label":"Competition","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]}},"dealRisks":["Risk 1","Risk 2","Risk 3"],"winConditions":["Condition 1","Condition 2","Condition 3"]},"stakeholders":{"buyingCommittee":[{"role":"Group CFO","archetype":"Economic Buyer","priority":1,"accessStatus":"not-engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."},{"role":"Head of Finance Transformation","archetype":"Champion","priority":2,"accessStatus":"engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."},{"role":"IT Director","archetype":"Technical Evaluator","priority":3,"accessStatus":"not-engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."},{"role":"Head of Procurement","archetype":"Gatekeeper","priority":4,"accessStatus":"unknown","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."}],"championDevelopmentScore":45,"championGaps":["Gap 1","Gap 2","Gap 3"],"multithreadingStatus":"Status."},"outreach":{"coldEmail":{"subject":"Subject","preheader":"Preview","body":"Full email 150-200 words. Hook, Peer Frame, Insight, Soft Ask, Social Proof.","followUp1":{"dayToSend":5,"subject":"FU subject","body":"3-sentence follow-up."},"followUp2":{"dayToSend":12,"subject":"Final subject","body":"Break-up style."}},"linkedInMessage":"Under 300 chars.","executiveReferral":"Champion to EB intro template.","sendingTips":["Tip 1","Tip 2","Tip 3"]},"discoveryQuestions":{"openingFramer":"Agenda setter.","categories":[{"category":"Current State & Pain","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Business Impact","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Decision Process","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Urgency","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Champion Development","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]}],"redFlags":["Flag 1","Flag 2","Flag 3"],"idealCallOutcome":"Perfect discovery outcome."},"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"Why at this stage.","beforeScenario":"Life without solution.","afterScenario":"Success after 12 months.","requiredCapabilities":[{"capability":"...","proofPoint":"..."},{"capability":"...","proofPoint":"..."},{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["D1","D2","D3"],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"},{"driver":"Risk Mitigation","specifics":"...","estimatedImpact":"..."},{"driver":"Revenue Growth","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."},{"objection":"...","response":"..."},{"objection":"...","response":"..."}],"closingHypothesis":"Single compelling reason to buy."},"nextBestActions":[{"priority":1,"action":"Action 1","why":"Why","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]}
+{"accountBrief":{"icpScore":87,"icpRating":"Strong Fit","tier":"Tier 1 — Strategic","dealPotential":"$200K–$400K ACV","companyProfile":"2-3 sentence snapshot.","whyNow":"Why engage now.","keyTriggers":["Trigger 1","Trigger 2","Trigger 3"],"painPoints":[{"pain":"Pain 1","businessImpact":"Impact","urgency":"high"},{"pain":"Pain 2","businessImpact":"Impact","urgency":"medium"},{"pain":"Pain 3","businessImpact":"Impact","urgency":"low"}],"buyingCulture":"How they buy.","marketContext":"Relevant local market, regulatory and competitive context for this country/region."},"meddpicc":{"overallHealth":"amber","forecastCategory":"Pipeline","elements":{"metrics":{"status":"red","label":"Metrics","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"economicBuyer":{"status":"amber","label":"Economic Buyer","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"decisionCriteria":{"status":"green","label":"Decision Criteria","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"decisionProcess":{"status":"red","label":"Decision Process","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"paperProcess":{"status":"red","label":"Paper Process","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"identifiedPain":{"status":"green","label":"Identified Pain","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"champion":{"status":"amber","label":"Champion","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]},"competition":{"status":"amber","label":"Competition","description":"...","evidence":"...","nextAction":"...","questions":["Q1","Q2"]}},"dealRisks":["Risk 1","Risk 2","Risk 3"],"winConditions":["Condition 1","Condition 2","Condition 3"]},"stakeholders":{"buyingCommittee":[{"role":"Group CFO","archetype":"Economic Buyer","priority":1,"accessStatus":"not-engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."},{"role":"Head of Finance Transformation","archetype":"Champion","priority":2,"accessStatus":"engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."},{"role":"IT Director","archetype":"Technical Evaluator","priority":3,"accessStatus":"not-engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."},{"role":"Head of Procurement","archetype":"Gatekeeper","priority":4,"accessStatus":"unknown","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."}],"championDevelopmentScore":45,"championGaps":["Gap 1","Gap 2","Gap 3"],"multithreadingStatus":"Status."},"outreach":{"coldEmail":{"subject":"Subject","preheader":"Preview","body":"Full email 150-200 words. Hook, Peer Frame, Insight, Soft Ask, Social Proof.","followUp1":{"dayToSend":5,"subject":"FU subject","body":"3-sentence follow-up."},"followUp2":{"dayToSend":12,"subject":"Final subject","body":"Break-up style."}},"linkedInMessage":"Under 300 chars.","executiveReferral":"Champion to EB intro template.","sendingTips":["Tip 1","Tip 2","Tip 3"]},"discoveryQuestions":{"openingFramer":"Agenda setter.","categories":[{"category":"Current State & Pain","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Business Impact","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Decision Process","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Urgency","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]},{"category":"Champion Development","questions":[{"question":"...","intent":"...","followUp":"..."},{"question":"...","intent":"...","followUp":"..."}]}],"redFlags":["Flag 1","Flag 2","Flag 3"],"idealCallOutcome":"Perfect discovery outcome."},"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"Why at this stage.","beforeScenario":"Life without solution.","afterScenario":"Success after 12 months.","requiredCapabilities":[{"capability":"...","proofPoint":"..."},{"capability":"...","proofPoint":"..."},{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["D1","D2","D3"],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"},{"driver":"Risk Mitigation","specifics":"...","estimatedImpact":"..."},{"driver":"Revenue Growth","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."},{"objection":"...","response":"..."},{"objection":"...","response":"..."}],"closingHypothesis":"Single compelling reason to buy."},"nextBestActions":[{"priority":1,"action":"Action 1","why":"Why","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]}
 
-Be specific to the company, market, industry, product and deal stage. Use real APAC context.`;
+Be deeply specific to the company, market, country, industry, product and deal stage. Reference relevant local regulations, market dynamics, buying culture and competitive landscape for the specific country/region provided.`;
 
 
 // ─── PDF EXPORT ───────────────────────────────────────────────────────────────
@@ -48,7 +59,7 @@ const exportToPDF = async (result, form) => {
   setTxt('#FFFFFF'); doc.setFontSize(14); doc.setFont('helvetica','bold');
   doc.text('A', M + 3, 30);  // logo placeholder
   setTxt('#FFFFFF'); doc.setFontSize(18); doc.setFont('helvetica','bold');
-  doc.text('APAC Sales Intelligence', M + 16, 28);
+  doc.text('Sales Intelligence', M + 16, 28);
   setTxt('#F59E0B'); doc.setFontSize(8); doc.setFont('helvetica','normal');
   doc.text("ANKUR SEHGAL · 7X PRESIDENTS CLUB", M + 16, 34);
 
@@ -410,7 +421,7 @@ const exportToPDF = async (result, form) => {
     doc.setPage(p);
     setFill('#F59E0B'); doc.rect(0, 291, W, 1, 'F');
     setTxt('#9CA3AF'); doc.setFontSize(7); doc.setFont('helvetica','normal');
-    doc.text(`APAC Sales Intelligence  ·  ${form.company}  ·  Confidential`, M, 295);
+    doc.text(`Sales Intelligence  ·  ${form.company}  ·  Confidential`, M, 295);
     doc.text(`${p} / ${total}`, W - M, 295, { align: 'right' });
   }
 
@@ -427,7 +438,7 @@ const generateBattleCards = async (competitors, form, result, setFn, setLoading)
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 4000,
-        system: `You are Ankur Sehgal — APAC enterprise SaaS sales expert. Generate battle cards for the given competitors. Return ONLY valid JSON array:
+        system: `You are Ankur Sehgal — global enterprise SaaS sales expert. Generate battle cards for the given competitors. Return ONLY valid JSON array:
 [{
   "competitor": "name",
   "ourStrengths": ["strength 1","strength 2","strength 3"],
@@ -463,7 +474,7 @@ const generateLanguages = async (form, result, setFn, setLoading) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 4000,
-        system: `You are an APAC sales localisation expert. Generate outreach emails in 4 APAC languages. Return ONLY valid JSON:
+        system: `You are a global sales localisation expert. Generate outreach emails in 4 APAC languages. Return ONLY valid JSON:
 {"bahasa":{"language":"Bahasa Indonesia/Malaysia","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
 "mandarin":{"language":"Mandarin","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
 "thai":{"language":"Thai","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
@@ -535,7 +546,7 @@ const analyseTranscript = async (text, form, result) => {
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4000,
-      system: `You are Ankur Sehgal — APAC enterprise sales expert. Analyse this call transcript and return ONLY valid JSON:
+      system: `You are Ankur Sehgal — global enterprise sales expert. Analyse this call transcript and return ONLY valid JSON:
 {
   "summary": "2-3 sentence call summary",
   "meddpiccSignals": {
@@ -912,7 +923,7 @@ function formatChatText(text) {
 }
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
-export default function APACSalesAgent() {
+export default function SalesIntelligenceAgent() {
   const [step, setStep] = useState(1); // 1=company, 2=context, 3=analyzing, 4=results
   const [analyzeStep, setAnalyzeStep] = useState(0);
   const [form, setForm] = useState({
@@ -941,6 +952,14 @@ export default function APACSalesAgent() {
   const [liVariants, setLiVariants] = useState(null);
   const [liVariantsLoading, setLiVariantsLoading] = useState(false);
   const [expandedMedd, setExpandedMedd] = useState(null);
+  const [meddQual, setMeddQual] = useState({
+    budgetConfirmed: "",
+    ebIdentified: "",
+    timelineDefined: "",
+    competitorsKnown: "",
+    painQuantified: "",
+  });
+  const [customIndustry, setCustomIndustry] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -990,6 +1009,14 @@ KNOWN CONTACTS: ${form.knownContacts || "None provided"}
 RECENT NEWS / CONTEXT: ${form.recentNews || "None provided"}
 COMPETITORS MENTIONED: ${form.competitorsMentioned || "None known"}
 EMAIL TONE PREFERENCE: ${emailTone.toUpperCase()} — ${emailTone === "formal" ? "Professional, structured, compliance-aware. Appropriate for banking, government, large enterprises." : emailTone === "warm" ? "Conversational, human, relationship-first. Appropriate for tech companies, startups, innovation teams." : "Blunt, direct, ROI-focused. Appropriate for C-suite, economic buyers, time-poor executives."}
+INDUSTRY CONTEXT: ${form.industry === "Other" ? customIndustry : form.industry}
+
+MEDDPICC PRE-QUALIFICATION (use these to calibrate MEDDPICC scores):
+- Budget confirmed: ${meddQual.budgetConfirmed || "Unknown"}
+- Economic Buyer identified: ${meddQual.ebIdentified || "Unknown"}
+- Timeline/compelling event: ${meddQual.timelineDefined || "Unknown"}
+- Competitors known: ${meddQual.competitorsKnown || "Unknown"}
+- Pain quantified in dollars: ${meddQual.painQuantified || "Unknown"}
 ${liveIntel ? `
 LIVE MARKET INTELLIGENCE (from real-time web search — use this to enrich the brief):
 ${liveIntel}
@@ -1050,14 +1077,14 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         }
       };
 
-      const sys1 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years APAC enterprise SaaS, 7x President's Club. Return ONLY valid JSON with exactly these 4 keys:
-{"accountBrief":{"icpScore":87,"icpRating":"Strong Fit","tier":"Tier 1","dealPotential":"$200K ACV","companyProfile":"...","whyNow":"...","keyTriggers":["..."],"painPoints":[{"pain":"...","businessImpact":"...","urgency":"high"}],"buyingCulture":"...","apacMarketContext":"..."},"meddpicc":{"overallHealth":"amber","forecastCategory":"Pipeline","elements":{"metrics":{"status":"red","label":"Metrics","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"economicBuyer":{"status":"amber","label":"Economic Buyer","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"decisionCriteria":{"status":"green","label":"Decision Criteria","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"decisionProcess":{"status":"red","label":"Decision Process","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"paperProcess":{"status":"red","label":"Paper Process","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"identifiedPain":{"status":"green","label":"Identified Pain","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"champion":{"status":"amber","label":"Champion","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"competition":{"status":"amber","label":"Competition","description":"...","evidence":"...","nextAction":"...","questions":["..."]}},"dealRisks":["..."],"winConditions":["..."]},"stakeholders":{"buyingCommittee":[{"role":"CFO","archetype":"Economic Buyer","priority":1,"accessStatus":"not-engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."}],"championDevelopmentScore":45,"championGaps":["..."],"multithreadingStatus":"..."}} Be concise - max 25 words per text field, max 3 array items.`;
-      const sys2 = `You are the APAC Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years APAC enterprise SaaS, 7x President's Club. Return ONLY valid JSON with exactly these 3 keys:
+      const sys1 = `You are the Global Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years enterprise SaaS globally, 7x President's Club. Return ONLY valid JSON with exactly these 4 keys:
+{"accountBrief":{"icpScore":87,"icpRating":"Strong Fit","tier":"Tier 1","dealPotential":"$200K ACV","companyProfile":"...","whyNow":"...","keyTriggers":["..."],"painPoints":[{"pain":"...","businessImpact":"...","urgency":"high"}],"buyingCulture":"...","marketContext":"..."},"meddpicc":{"overallHealth":"amber","forecastCategory":"Pipeline","elements":{"metrics":{"status":"red","label":"Metrics","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"economicBuyer":{"status":"amber","label":"Economic Buyer","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"decisionCriteria":{"status":"green","label":"Decision Criteria","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"decisionProcess":{"status":"red","label":"Decision Process","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"paperProcess":{"status":"red","label":"Paper Process","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"identifiedPain":{"status":"green","label":"Identified Pain","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"champion":{"status":"amber","label":"Champion","description":"...","evidence":"...","nextAction":"...","questions":["..."]},"competition":{"status":"amber","label":"Competition","description":"...","evidence":"...","nextAction":"...","questions":["..."]}},"dealRisks":["..."],"winConditions":["..."]},"stakeholders":{"buyingCommittee":[{"role":"CFO","archetype":"Economic Buyer","priority":1,"accessStatus":"not-engaged","motivations":"...","fears":"...","engagementStrategy":"...","talkTrack":"...","warningSign":"..."}],"championDevelopmentScore":45,"championGaps":["..."],"multithreadingStatus":"..."}} Be concise - max 25 words per text field, max 3 array items.`;
+      const sys2 = `You are the Global Enterprise SaaS Sales Intelligence Engine trained on Ankur Sehgal's methodologies: 15 years enterprise SaaS globally, 7x President's Club. Return ONLY valid JSON with exactly these 3 keys:
 {"outreach":{"coldEmail":{"subject":"...","preheader":"...","body":"150-200 word email","followUp1":{"dayToSend":5,"subject":"...","body":"..."},"followUp2":{"dayToSend":12,"subject":"...","body":"..."}},"linkedInMessage":"under 300 chars","executiveReferral":"...","sendingTips":["..."]},"discoveryQuestions":{"openingFramer":"...","categories":[{"category":"Current State","questions":[{"question":"...","intent":"...","followUp":"..."}]}],"redFlags":["..."],"idealCallOutcome":"..."},"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."},"nextBestActions":[{"priority":1,"action":"...","why":"...","timeframe":"This week"},{"priority":2,"action":"...","why":"...","timeframe":"Next 2 weeks"},{"priority":3,"action":"...","why":"...","timeframe":"This month"}]} Be concise - max 25 words per text field, max 3 array items.`;
 
       setAnalyzeStep(4);
-      const sys3 = `You are the APAC Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."}} Max 25 words per field.`;
-      const sys4 = `You are the APAC Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"nextBestActions":[{"priority":1,"action":"Most critical action","why":"Why this is #1","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]} Be specific to the deal.`;
+      const sys3 = `You are the Global Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."}} Max 25 words per field.`;
+      const sys4 = `You are the Global Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"nextBestActions":[{"priority":1,"action":"Most critical action","why":"Why this is #1","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]} Be specific to the deal.`;
       const [part1, part2, part3, part4] = await Promise.all([
         streamCall(prompt, sys1),
         streamCall(prompt, sys2),
@@ -1155,7 +1182,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
             <div className="logo">
               <div className="logo-icon">🎯</div>
               <div>
-                <div className="logo-text">APAC Sales Intelligence</div>
+                <div className="logo-text">Sales Intelligence</div>
                 <div className="logo-sub">ANKUR SEHGAL · 7X PRESIDENT'S CLUB</div>
             </div>
             {dealHistory.length > 0 && (
