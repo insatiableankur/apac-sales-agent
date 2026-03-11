@@ -1007,6 +1007,8 @@ export default function SalesIntelligenceAgent() {
   const [orgLoading, setOrgLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [roiResult, setRoiResult] = useState(null);
+  const [roiResearch, setRoiResearch] = useState(null);
+  const [roiResearchLoading, setRoiResearchLoading] = useState(false);
   const [linkedInVariant, setLinkedInVariant] = useState(0);
   const [battleCards, setBattleCards] = useState(null);
   const [battleLoading, setBattleLoading] = useState(false);
@@ -2201,6 +2203,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                         {[
                           ["Labor Savings (70% efficiency gain)", roiResult.laborSavings, "#10B981"],
                           ["Error & Rework Cost Elimination", roiResult.errorCost, "#10B981"],
+                          ...(roiResult.revenueUpside > 0 ? [["Revenue Upside Enabled", roiResult.revenueUpside, "#10B981"]] : []),
                           ["Total Annual Benefit", roiResult.totalBenefit, "#F59E0B"],
                         ].map(([label,val,color]) => (
                           <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:"1px solid var(--border)" }}>
@@ -2218,6 +2221,56 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                           style={{ marginTop:12, background:"transparent", border:"1px solid var(--amber)", borderRadius:6, padding:"6px 16px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer" }}>
                           COPY TALK TRACK
                         </button>
+                      </div>
+
+                      {/* Analyst Research */}
+                      <div style={{ marginTop:16 }}>
+                        {!roiResearch ? (
+                          <button onClick={async () => {
+                            setRoiResearchLoading(true);
+                            try {
+                              const res = await fetch("/api/anthropic", {
+                                method:"POST", headers:{"Content-Type":"application/json"},
+                                body: JSON.stringify({
+                                  model:"claude-sonnet-4-20250514", max_tokens:3000,
+                                  tools:[{type:"web_search_20250305",name:"web_search"}],
+                                  system:`You are a B2B analyst researcher. Search for ROI studies, TEI reports, Forrester/Gartner research and customer case studies relevant to this product and industry. Return ONLY valid JSON:
+{"studies":[{"source":"Forrester TEI","title":"Study title","keyFinding":"Main ROI finding","url":"link if available","year":"2024"}],"industryBenchmarks":["Benchmark 1","Benchmark 2","Benchmark 3"],"valueStories":["Story 1","Story 2"]}`,
+                                  messages:[{role:"user",content:`Find ROI research, analyst reports (Forrester TEI, Gartner, IDC), and customer value stories for: Product: ${form.product} in the ${form.industry} industry. Search for "${form.product} ROI", "${form.industry} digital transformation ROI", "Forrester TEI ${form.product}", "${form.product} case study ${form.industry}".`}]
+                                })
+                              });
+                              const data = await res.json();
+                              const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('') || '{}';
+                              const s=text.indexOf('{'),e=text.lastIndexOf('}');
+                              if(s!==-1&&e!==-1) setRoiResearch(JSON.parse(text.slice(s,e+1)));
+                            } catch(e) { console.error(e); }
+                            setRoiResearchLoading(false);
+                          }} disabled={roiResearchLoading}
+                            style={{ width:"100%", background:"rgba(26,86,219,0.08)", border:"1px solid rgba(26,86,219,0.3)", borderRadius:10, padding:"12px 24px", color:"var(--blue-light)", fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:800, cursor:"pointer", letterSpacing:1, opacity:roiResearchLoading?0.6:1 }}>
+                            {roiResearchLoading ? "SEARCHING ANALYST REPORTS..." : "🔍 FIND FORRESTER/GARTNER RESEARCH & CASE STUDIES"}
+                          </button>
+                        ) : (
+                          <div>
+                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:"var(--blue-light)", marginBottom:12, letterSpacing:1 }}>ANALYST RESEARCH & CASE STUDIES</div>
+                            {roiResearch.studies?.map((s,i) => (
+                              <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:10 }}>
+                                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                                  <span style={{ fontSize:11, fontWeight:700, color:"var(--blue-light)", letterSpacing:1 }}>{s.source} {s.year && `· ${s.year}`}</span>
+                                  {s.url && <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:"var(--amber)" }}>View →</a>}
+                                </div>
+                                <div style={{ fontSize:13, fontWeight:700, color:"var(--text)", marginBottom:4 }}>{s.title}</div>
+                                <div style={{ fontSize:13, color:"var(--text-muted)" }}>{s.keyFinding}</div>
+                              </div>
+                            ))}
+                            {roiResearch.industryBenchmarks?.length > 0 && (
+                              <div style={{ background:"rgba(16,185,129,0.06)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:10, padding:16, marginBottom:10 }}>
+                                <div style={{ fontSize:11, fontWeight:700, color:"#10B981", marginBottom:8, letterSpacing:1 }}>INDUSTRY BENCHMARKS</div>
+                                {roiResearch.industryBenchmarks.map((b,i) => <div key={i} style={{ fontSize:13, color:"var(--text)", marginBottom:4 }}>→ {b}</div>)}
+                              </div>
+                            )}
+                            <button onClick={() => setRoiResearch(null)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Clear Research</button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
