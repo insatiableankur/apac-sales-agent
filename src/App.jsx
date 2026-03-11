@@ -477,6 +477,13 @@ const generateLanguages = async (form, result, setFn, setLoading) => {
         system: `You are a global sales localisation expert. Generate outreach emails in 4 APAC languages. Return ONLY valid JSON:
 {"bahasa":{"language":"Bahasa Indonesia/Malaysia","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
 "mandarin":{"language":"Mandarin","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
+"japanese":{"language":"Japanese","emailSubject":"subject","emailBody":"full formal email in Japanese","linkedIn":"under 300 chars","culturalNote":"tip"},
+"korean":{"language":"Korean","emailSubject":"subject","emailBody":"full email in Korean","linkedIn":"under 300 chars","culturalNote":"tip"},
+"arabic":{"language":"Arabic","emailSubject":"subject","emailBody":"full email in Arabic (right-to-left)","linkedIn":"under 300 chars","culturalNote":"tip"},
+"hindi":{"language":"Hindi","emailSubject":"subject","emailBody":"full email in Hindi","linkedIn":"under 300 chars","culturalNote":"tip"},
+"french":{"language":"French","emailSubject":"subject","emailBody":"full email in French","linkedIn":"under 300 chars","culturalNote":"tip"},
+"german":{"language":"German","emailSubject":"subject","emailBody":"full email in German","linkedIn":"under 300 chars","culturalNote":"tip"},
+"spanish":{"language":"Spanish","emailSubject":"subject","emailBody":"full email in Spanish","linkedIn":"under 300 chars","culturalNote":"tip"},
 "thai":{"language":"Thai","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
 "tagalog":{"language":"Filipino","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"}}`,
         messages: [{ role: "user", content: `Company: ${form.company}, Market: ${form.market}, Industry: ${form.industry}, Product: ${form.product}
@@ -515,22 +522,73 @@ const generateLiVariants = async (form, result, setFn, setLoading) => {
   setLoading(false);
 };
 
+// ─── EMAIL FINDER ────────────────────────────────────────────────────────────
+const findEmails = async (company, stakeholders, setFn, setLoading) => {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/anthropic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        system: `You are an expert at finding professional email addresses. Search for email addresses and email patterns for executives at the given company. Return ONLY valid JSON array:
+[{"role":"CFO","name":"John Smith (if found)","email":"john.smith@company.com (if found)","emailPattern":"firstname.lastname@company.com","confidence":"high/medium/low","source":"LinkedIn/company website/press release"}]`,
+        messages: [{ role: "user", content: `Find email addresses for these roles at ${company}: ${stakeholders.map(s => s.role).join(', ')}. Search for "${company} executive email", "${company} leadership team", "${company} contact". Also identify the email pattern used at ${company} (e.g. firstname.lastname@company.com).` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '[]';
+    const s = text.indexOf('['), e = text.lastIndexOf(']');
+    if (s !== -1 && e !== -1) setFn(JSON.parse(text.slice(s, e+1)));
+    else setFn([]);
+  } catch(e) { console.error('Email finder error:', e); setFn([]); }
+  setLoading(false);
+};
+
+// ─── ORG CHART GENERATOR ──────────────────────────────────────────────────────
+const generateOrgChart = async (company, market, industry, result, setFn, setLoading) => {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/anthropic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        system: `You are an expert at mapping enterprise org structures. Return ONLY valid JSON:
+{"ceo":{"name":"Name if known","title":"CEO/MD","children":[{"name":"Name","title":"CFO","department":"Finance","relevance":"high/medium/low","children":[]},{"name":"Name","title":"CTO","department":"Technology","relevance":"medium","children":[]}]},"emailPattern":"firstname.lastname@company.com","totalEmployees":"approx number","reportingStructure":"Description of how decisions are made"}`,
+        messages: [{ role: "user", content: `Map the org chart for ${company} in ${market} (${industry}). Focus on the C-suite and key decision makers relevant to a ${result?.outreach?.coldEmail?.subject || 'enterprise SaaS'} sale. Search for "${company} leadership team", "${company} executives", "${company} annual report".` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '{}';
+    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+    if (s !== -1 && e !== -1) setFn(JSON.parse(text.slice(s, e+1)));
+  } catch(e) { console.error('Org chart error:', e); }
+  setLoading(false);
+};
+
 // ─── ROI CALCULATOR ──────────────────────────────────────────────────────────
 const calcROI = (inputs, result) => {
   const emp = parseFloat(inputs.employees) || 0;
   const salary = parseFloat(inputs.avgSalary) || 80000;
   const hrs = parseFloat(inputs.hoursPerWeek) || 10;
   const dealSize = parseFloat(inputs.dealSize) || 200000;
+  const errorCost = parseFloat(inputs.currentErrors) || 0;
+  const revenueUpside = parseFloat(inputs.revenueUpside) || 0;
   const hourlyRate = salary / 2080;
   const annualHours = emp * hrs * 52;
   const laborSavings = annualHours * hourlyRate * 0.7;
-  const errorCost = (parseFloat(inputs.currentErrors) || 5) * 50000;
-  const totalBenefit = laborSavings + errorCost;
-  const roi = ((totalBenefit - dealSize) / dealSize * 100).toFixed(0);
-  const payback = (dealSize / (totalBenefit / 12)).toFixed(1);
+  const totalBenefit = laborSavings + errorCost + revenueUpside;
+  const roi = dealSize > 0 ? ((totalBenefit - dealSize) / dealSize * 100).toFixed(0) : 0;
+  const payback = totalBenefit > 0 ? (dealSize / (totalBenefit / 12)).toFixed(1) : 0;
   return {
     laborSavings: Math.round(laborSavings),
     errorCost: Math.round(errorCost),
+    revenueUpside: Math.round(revenueUpside),
     totalBenefit: Math.round(totalBenefit),
     roi: parseInt(roi),
     payback: parseFloat(payback),
@@ -943,6 +1001,11 @@ export default function SalesIntelligenceAgent() {
   const [transcriptResult, setTranscriptResult] = useState(null);
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [roiInputs, setRoiInputs] = useState({ employees: "", avgSalary: "", hoursPerWeek: "", currentErrors: "", dealSize: "" });
+  const [emailData, setEmailData] = useState(null);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [orgChart, setOrgChart] = useState(null);
+  const [orgLoading, setOrgLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [roiResult, setRoiResult] = useState(null);
   const [linkedInVariant, setLinkedInVariant] = useState(0);
   const [battleCards, setBattleCards] = useState(null);
@@ -1188,11 +1251,16 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 <div className="logo-text">Sales Intelligence</div>
                 <div className="logo-sub">ANKUR SEHGAL · 7X PRESIDENT'S CLUB</div>
             </div>
-            {dealHistory.length > 0 && (
-              <button onClick={() => setShowHistory(!showHistory)} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.3)", borderRadius:8, padding:"6px 14px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer", letterSpacing:1 }}>
-                📋 HISTORY ({dealHistory.length})
+            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+              <button onClick={() => setDarkMode(!darkMode)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"6px 12px", color:"var(--text-muted)", fontSize:14, cursor:"pointer" }}>
+                {darkMode ? "☀️" : "🌙"}
               </button>
-            )}
+              {dealHistory.length > 0 && (
+                <button onClick={() => setShowHistory(!showHistory)} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.3)", borderRadius:8, padding:"6px 14px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer", letterSpacing:1 }}>
+                  📋 HISTORY ({dealHistory.length})
+                </button>
+              )}
+            </div>
             <div style={{ display:"none" }}>
               </div>
             </div>
@@ -1446,7 +1514,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       ⬇ Export PDF
                     </button>
                     <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]);
-      setBattleCards(null); setLangData(null); setLiVariants(null); }}>
+      setBattleCards(null); setLangData(null); setLiVariants(null); setEmailData(null); setOrgChart(null); }}>
                       + New Account
                     </button>
                   </div>
@@ -1490,6 +1558,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   { id: "com", label: "🏆 COMMAND" },
                   { id: "coach", label: "🎯 COACH" },
                   { id: "battle", label: "⚔️ BATTLE" },
+                  { id: "orgchart", label: "🏢 ORG CHART" },
+                  { id: "emails", label: "📧 EMAILS" },
                   { id: "roi", label: "💰 ROI" },
                   { id: "transcript", label: "📞 TRANSCRIPT" },
                   { id: "languages", label: "🌏 LANGUAGES" },
@@ -1852,6 +1922,112 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </div>
               )}
 
+              {/* ── TAB: ORG CHART ── */}
+              {activeTab === "orgchart" && (
+                <div className="fade-up-1">
+                  {!orgChart ? (
+                    <div style={{ textAlign:"center", padding:"60px 20px" }}>
+                      <div style={{ fontSize:48, marginBottom:16 }}>🏢</div>
+                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>Org Chart Intelligence</div>
+                      <div style={{ color:"var(--text-muted)", fontSize:14, marginBottom:24 }}>AI searches the web to map {form.company}'s leadership structure and decision-making hierarchy.</div>
+                      <button onClick={() => generateOrgChart(form.company, form.market, form.industry, result, setOrgChart, setOrgLoading)}
+                        disabled={orgLoading}
+                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:orgLoading?0.6:1 }}>
+                        {orgLoading ? "RESEARCHING..." : "🏢 GENERATE ORG CHART"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)" }}>{form.company} — Leadership Structure</div>
+                        <button onClick={() => setOrgChart(null)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Refresh</button>
+                      </div>
+                      {orgChart.emailPattern && (
+                        <div style={{ background:"rgba(26,86,219,0.08)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:8, padding:12, marginBottom:16 }}>
+                          <span style={{ fontSize:11, fontWeight:700, color:"var(--blue-light)", letterSpacing:1 }}>EMAIL PATTERN: </span>
+                          <span style={{ fontSize:13, color:"var(--text)", fontFamily:"monospace" }}>{orgChart.emailPattern}</span>
+                        </div>
+                      )}
+                      {orgChart.reportingStructure && (
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:16, marginBottom:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-muted)", letterSpacing:1, marginBottom:8 }}>DECISION-MAKING STRUCTURE</div>
+                          <div style={{ fontSize:13, color:"var(--text)" }}>{orgChart.reportingStructure}</div>
+                        </div>
+                      )}
+                      {/* Render org tree */}
+                      {(() => {
+                        const renderNode = (node, level=0) => (
+                          <div key={node.title} style={{ marginLeft: level * 24, marginBottom:8 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background: level===0?"var(--amber)":"var(--card)", border:"1px solid var(--border)", borderRadius:8 }}>
+                              <div style={{ width:8, height:8, borderRadius:"50%", background: node.relevance==="high"?"#10B981":node.relevance==="medium"?"#F59E0B":"#6B7280" }}></div>
+                              <div>
+                                <div style={{ fontSize:13, fontWeight:700, color:level===0?"var(--navy)":"var(--text)" }}>{node.name || "Name TBC"}</div>
+                                <div style={{ fontSize:11, color:level===0?"var(--navy)":"var(--text-muted)" }}>{node.title} {node.department ? `· ${node.department}` : ""}</div>
+                              </div>
+                            </div>
+                            {node.children?.map(child => renderNode(child, level+1))}
+                          </div>
+                        );
+                        return orgChart.ceo ? renderNode(orgChart.ceo) : null;
+                      })()}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── TAB: EMAIL FINDER ── */}
+              {activeTab === "emails" && (
+                <div className="fade-up-1">
+                  {!emailData ? (
+                    <div style={{ textAlign:"center", padding:"60px 20px" }}>
+                      <div style={{ fontSize:48, marginBottom:16 }}>📧</div>
+                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>Email Intelligence</div>
+                      <div style={{ color:"var(--text-muted)", fontSize:14, marginBottom:24 }}>AI searches the web to find email addresses and patterns for {form.company} stakeholders.</div>
+                      <button onClick={() => findEmails(form.company, result?.stakeholders?.buyingCommittee || [], setEmailData, setEmailLoading)}
+                        disabled={emailLoading}
+                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:emailLoading?0.6:1 }}>
+                        {emailLoading ? "SEARCHING..." : "📧 FIND EMAILS"}
+                      </button>
+                      <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:12 }}>Uses web search. Results are best-effort — always verify before sending.</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)" }}>Email Intelligence — {form.company}</div>
+                        <button onClick={() => setEmailData(null)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Refresh</button>
+                      </div>
+                      {emailData.length === 0 ? (
+                        <div style={{ textAlign:"center", padding:"40px", color:"var(--text-muted)" }}>No emails found. Try searching LinkedIn directly or use the email pattern from Org Chart.</div>
+                      ) : (
+                        emailData.map((e, i) => (
+                          <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:12 }}>
+                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                              <div>
+                                <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color:"var(--text)" }}>{e.role}</div>
+                                {e.name && <div style={{ fontSize:13, color:"var(--text-muted)" }}>{e.name}</div>}
+                              </div>
+                              <div style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:6,
+                                background: e.confidence==="high"?"rgba(16,185,129,0.1)":e.confidence==="medium"?"rgba(245,158,11,0.1)":"rgba(107,114,128,0.1)",
+                                color: e.confidence==="high"?"#10B981":e.confidence==="medium"?"#F59E0B":"#6B7280" }}>
+                                {e.confidence?.toUpperCase()} CONFIDENCE
+                              </div>
+                            </div>
+                            {e.email && (
+                              <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:6 }}>
+                                <span style={{ fontSize:14, fontFamily:"monospace", color:"var(--blue-light)", background:"rgba(26,86,219,0.08)", padding:"4px 10px", borderRadius:6 }}>{e.email}</span>
+                                <button onClick={() => navigator.clipboard.writeText(e.email)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"3px 10px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Copy</button>
+                              </div>
+                            )}
+                            {e.emailPattern && <div style={{ fontSize:12, color:"var(--text-muted)" }}>Pattern: <span style={{ fontFamily:"monospace" }}>{e.emailPattern}</span></div>}
+                            {e.source && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4 }}>Source: {e.source}</div>}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* ── TAB: BATTLE CARDS ── */}
               {activeTab === "battle" && (
                 <div className="fade-up-1">
@@ -1934,7 +2110,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div style={{ fontFamily:"'Syne',sans-serif", fontSize:16, fontWeight:800, color:"var(--amber)", marginBottom:6 }}>Multi-Language Outreach</div>
                     <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:16 }}>Same message, localised for every APAC market. Select language to view.</div>
                     <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                      {[["bahasa","Bahasa"],["mandarin","Mandarin"],["thai","Thai"],["tagalog","Filipino"]].map(([key,label]) => (
+                      {[["bahasa","🇮🇩 Bahasa"],["mandarin","🇨🇳 Mandarin"],["thai","🇹🇭 Thai"],["tagalog","🇵🇭 Filipino"],["japanese","🇯🇵 Japanese"],["korean","🇰🇷 Korean"],["arabic","🇸🇦 Arabic"],["hindi","🇮🇳 Hindi"],["french","🇫🇷 French"],["german","🇩🇪 German"],["spanish","🇪🇸 Spanish"]].map(([key,label]) => (
                         <button key={key} onClick={() => setSelectedLanguage(key)}
                           style={{ padding:"8px 16px", borderRadius:8, border:"1px solid", fontSize:13, fontWeight:600, cursor:"pointer",
                             borderColor: selectedLanguage === key ? "var(--amber)" : "var(--border)",
@@ -1986,10 +2162,11 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:20 }}>Build a CFO-ready business case in 60 seconds. Enter their numbers to quantify the cost of inaction.</div>
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
                       {[
-                        ["employees","Finance / Reporting Team Size","e.g. 25"],
+                        ["employees","Team Size Affected","e.g. 25 people"],
                         ["avgSalary","Average Annual Salary (USD)","e.g. 85000"],
-                        ["hoursPerWeek","Hours/Week on Manual Reporting","e.g. 12"],
-                        ["currentErrors","Reporting Errors Per Year","e.g. 8"],
+                        ["hoursPerWeek","Hours/Week on Manual/Inefficient Work","e.g. 12"],
+                        ["currentErrors","Annual Cost of Errors/Rework/Risk (USD)","e.g. 250000"],
+                        ["revenueUpside","Annual Revenue Upside Enabled (USD)","e.g. 500000"],
                         ["dealSize","Your Solution ACV (USD)","e.g. 200000"],
                       ].map(([key,label,ph]) => (
                         <div key={key}>
