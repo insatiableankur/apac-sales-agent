@@ -992,7 +992,10 @@ export default function SalesIntelligenceAgent() {
       let liveIntel = "";
       try {
         setAnalyzeStep(0);
-        const rawIntel = await searchCompanyIntel(form.company, form.market, form.industry); liveIntel = rawIntel.replace(/`/g, "'").replace(/\\/g, " ");
+        const rawIntel = await Promise.race([
+          searchCompanyIntel(form.company, form.market, form.industry),
+          new Promise(r => setTimeout(() => r(""), 20000))
+        ]); liveIntel = rawIntel.replace(/`/g, "'").replace(/\\/g, " ");
       } catch(e) {}
 
       const prompt = `Analyse this account and deal situation:
