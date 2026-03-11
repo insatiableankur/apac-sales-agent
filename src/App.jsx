@@ -1241,7 +1241,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
   return (
     <>
       <style>{CSS}</style>
-      <div className="app">
+      <div className={darkMode ? "app" : "app light-mode"}>
         {/* Header */}
         <header className="header">
           <div className="header-inner">
