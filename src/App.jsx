@@ -2137,15 +2137,14 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       ))}
                     </div>
                   </div>
-                  {!langData && (
-                    <div style={{ textAlign:"center", padding:"40px 20px" }}>
-                      <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading, selectedLanguage)}
-                        disabled={langLoading}
-                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:langLoading?0.6:1 }}>
-                        {langLoading ? "GENERATING..." : "🌏 GENERATE LANGUAGES"}
-                      </button>
-                    </div>
-                  )}
+                  <div style={{ textAlign:"center", marginBottom:16 }}>
+                    <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading, selectedLanguage)}
+                      disabled={langLoading}
+                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"12px 28px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:langLoading?0.6:1 }}>
+                      {langLoading ? "GENERATING..." : `🌏 GENERATE ${selectedLanguage.toUpperCase()}`}
+                    </button>
+                    {langData?.[selectedLanguage] && <span style={{ marginLeft:12, fontSize:12, color:"#10B981" }}>✓ Generated</span>}
+                  </div>
                   {langData?.[selectedLanguage] && (() => {
                     const lang = langData[selectedLanguage];
                     return (
