@@ -1831,7 +1831,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               <div className="results-header">
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                   <div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: 3, marginBottom: 6 }}>INTELLIGENCE BRIEF READY</div>
+                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: 3, marginBottom: 6 }}>INTELLIGENCE BRIEF READY</div>
                     <div className="company-title">{form.company}</div>
                     <div className="company-meta">
                       <span className="meta-chip tag-dim">{form.market}</span>
@@ -1855,7 +1855,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               {/* Stat strip */}
               {/* PDF Export Bar */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "var(--amber-glow)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px 18px" }}>
-                <div style={{ fontSize: 13, color: "var(--amber)", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>📄 INTELLIGENCE BRIEF READY</div>
+                <div style={{ fontSize: 13, color: "var(--amber)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>📄 INTELLIGENCE BRIEF READY</div>
                 <button
                   onClick={() => exportToPDF(result, form)}
                   style={{ background: "linear-gradient(135deg, #F59E0B, #EA580C)", border: "none", borderRadius: 8, padding: "10px 20px", color: "#08111E", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 16px rgba(245,158,11,0.4)" }}
@@ -1964,7 +1964,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                         {[["green","COMMIT","var(--green)"],["amber","PIPELINE","var(--amber)"],["red","AT RISK","var(--red)"]].find(([s]) => s === result.meddpicc.overallHealth)?.map(([s, label, color], i, arr) => (
                           i === 0 ? null : i === 1 ? <div key={i} style={{ fontFamily: "'Syne', sans-serif", fontSize: 24, fontWeight: 800, color: arr[2] }}>{label}</div> : null
                         ))}
-                        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "var(--text-faint)", letterSpacing: 1 }}>{result.meddpicc.forecastCategory}</div>
+                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "var(--text-faint)", letterSpacing: 1 }}>{result.meddpicc.forecastCategory}</div>
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
@@ -2020,7 +2020,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                         <strong>Multithreading Status:</strong> {result.stakeholders.multithreadingStatus}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-                        <div style={{ fontSize: 11, color: "var(--text-faint)", fontFamily: "'DM Mono', monospace" }}>CHAMPION SCORE</div>
+                        <div style={{ fontSize: 11, color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace" }}>CHAMPION SCORE</div>
                         <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 800, color: result.stakeholders.championDevelopmentScore > 70 ? "var(--green)" : result.stakeholders.championDevelopmentScore > 40 ? "var(--amber)" : "var(--red)" }}>
                           {result.stakeholders.championDevelopmentScore}/100
                         </div>
@@ -2079,13 +2079,13 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     {/* Email 1 */}
                     <div style={{ marginBottom: 20 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                        <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>EMAIL 1 — INITIAL OUTREACH</div>
+                        <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>EMAIL 1 — INITIAL OUTREACH</div>
                         <span className="tag tag-amber">DAY 1</span>
                       </div>
                       <div className="email-box">
                         <div className="email-header">
                           <div>
-                            <div style={{ fontSize: 10, color: "var(--text-faint)", fontFamily: "'DM Mono', monospace", letterSpacing: 1, marginBottom: 3 }}>SUBJECT</div>
+                            <div style={{ fontSize: 10, color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, marginBottom: 3 }}>SUBJECT</div>
                             <div className="email-subject">{result.outreach.coldEmail?.subject}</div>
                             {result.outreach.coldEmail?.preheader && <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 2 }}>{result.outreach.coldEmail.preheader}</div>}
                           </div>
@@ -2098,7 +2098,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     {[result.outreach.coldEmail?.followUp1, result.outreach.coldEmail?.followUp2].map((fu, i) => fu && (
                       <div key={i} style={{ marginBottom: 16 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>EMAIL {i + 2} — {i === 0 ? "FOLLOW-UP" : "BREAK-UP"}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>EMAIL {i + 2} — {i === 0 ? "FOLLOW-UP" : "BREAK-UP"}</div>
                           <span className="tag tag-dim">DAY {fu.dayToSend}</span>
                         </div>
                         <div className="email-box">
@@ -2685,7 +2685,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   <div className="chat-window">
                     <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10, background: "var(--navy2)" }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)", boxShadow: "0 0 8px rgba(16,185,129,0.5)" }} />
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: 1 }}>DEAL COACH · ANKUR SEHGAL · ACTIVE SESSION</div>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: 1 }}>DEAL COACH · ANKUR SEHGAL · ACTIVE SESSION</div>
                     </div>
                     <div className="chat-messages">
                       {chatMessages.map((m, i) => (
@@ -2721,7 +2721,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       "Role-play as the CFO — challenge my pitch",
                       "What should I do before my next call?",
                     ].map((q, i) => (
-                      <button key={i} onClick={() => { setChatInput(q); }} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 20, padding: "6px 14px", fontSize: 11, color: "var(--text-dim)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s" }}
+                      <button key={i} onClick={() => { setChatInput(q); }} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 20, padding: "6px 14px", fontSize: 11, color: "var(--text-dim)", cursor: "pointer", fontFamily: "'Inter', sans-serif", transition: "all 0.15s" }}
                         onMouseEnter={e => { e.target.style.borderColor = "var(--amber)"; e.target.style.color = "var(--amber)"; }}
                         onMouseLeave={e => { e.target.style.borderColor = "var(--border)"; e.target.style.color = "var(--text-dim)"; }}>
                         {q}
