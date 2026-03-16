@@ -465,38 +465,43 @@ Our pain points addressed: ${result?.accountBrief?.painPoints?.map(p=>p.pain).jo
   setLoading(false);
 };
 
-const generateLanguages = async (form, result, setFn, setLoading) => {
+const generateLanguages = async (form, result, setFn, setLoading, selectedLang) => {
   setLoading(true);
+  const langMap = {
+    bahasa:"Bahasa Indonesia/Malaysia", mandarin:"Mandarin Chinese",
+    japanese:"Japanese (formal keigo)", korean:"Korean",
+    arabic:"Arabic", hindi:"Hindi", french:"French",
+    german:"German", spanish:"Spanish", thai:"Thai", tagalog:"Filipino"
+  };
+  const langName = langMap[selectedLang] || selectedLang;
   try {
     const res = await fetch("/api/anthropic", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 8000,
-        system: `You are a global sales localisation expert. Generate outreach emails in 4 APAC languages. Return ONLY valid JSON:
-{"bahasa":{"language":"Bahasa Indonesia/Malaysia","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
-"mandarin":{"language":"Mandarin","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
-"japanese":{"language":"Japanese","emailSubject":"subject","emailBody":"full formal email in Japanese","linkedIn":"under 300 chars","culturalNote":"tip"},
-"korean":{"language":"Korean","emailSubject":"subject","emailBody":"full email in Korean","linkedIn":"under 300 chars","culturalNote":"tip"},
-"arabic":{"language":"Arabic","emailSubject":"subject","emailBody":"full email in Arabic (right-to-left)","linkedIn":"under 300 chars","culturalNote":"tip"},
-"hindi":{"language":"Hindi","emailSubject":"subject","emailBody":"full email in Hindi","linkedIn":"under 300 chars","culturalNote":"tip"},
-"french":{"language":"French","emailSubject":"subject","emailBody":"full email in French","linkedIn":"under 300 chars","culturalNote":"tip"},
-"german":{"language":"German","emailSubject":"subject","emailBody":"full email in German","linkedIn":"under 300 chars","culturalNote":"tip"},
-"spanish":{"language":"Spanish","emailSubject":"subject","emailBody":"full email in Spanish","linkedIn":"under 300 chars","culturalNote":"tip"},
-"thai":{"language":"Thai","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
-"tagalog":{"language":"Filipino","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"}}`,
-        messages: [{ role: "user", content: `Company: ${form.company}, Market: ${form.market}, Industry: ${form.industry}, Product: ${form.product}
-Core value prop: ${form.productDesc}
-Email subject from English: ${result?.outreach?.coldEmail?.subject}
-Key pain: ${result?.accountBrief?.painPoints?.[0]?.pain}` }]
+        model: "claude-sonnet-4-20250514", max_tokens: 2000, stream: true,
+        system: `You are a global sales localisation expert. Return ONLY valid JSON: {"${selectedLang || "lang"}":{"language":"${langName}","emailSubject":"subject in target language","emailBody":"150-word email in target language","linkedIn":"under 300 chars in target language","culturalNote":"key cultural tip"}}`,
+        messages: [{ role: "user", content: `Write in ${langName}. Company: ${form.company}, Market: ${form.market}, Industry: ${form.industry}, Product: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.[0]?.pain}. English subject: ${result?.outreach?.coldEmail?.subject}` }]
       })
     });
-    const data = await res.json();
-    const raw = data.content?.map(b => b.text || "").join("") || "";
-    const clean = raw.split("```").join("").split("\n").filter(l => l.trim() && l.trim() !== "json").join("\n").trim();
-    setFn(JSON.parse(clean));
-  } catch(e) { alert("Failed to generate languages. Try again."); }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let raw = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const line of decoder.decode(value, { stream: true }).split("\n")) {
+        if (line.startsWith("data: ")) {
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") raw += evt.delta.text;
+          } catch(e) {}
+        }
+      }
+    }
+    const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
+    const parsed = JSON.parse(raw.slice(s, e+1));
+    setFn(prev => ({ ...(prev||{}), ...parsed }));
+  } catch(e) { console.error(e); alert("Failed to generate. Try again."); }
   setLoading(false);
 };
 
