@@ -1353,7 +1353,7 @@ export default function SalesIntelligenceAgent() {
     { icon: "🏆", text: "Applying Command of the Message framework" },
   ];
 
-  const runAnalysis = async () => {
+  const runAnalysis = useCallback(async () => {
     setStep(3);
     setAnalyzeStep(0);
     const ticker = setInterval(() => setAnalyzeStep(s => Math.min(s + 1, ANALYZE_STEPS.length - 1)), 900);
@@ -1524,6 +1524,8 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       alert("Analysis failed: " + e.message);
     }
   };
+
+  }, [form, emailTone, meddQual, customIndustry]); // useCallback
 
   // ── Chat ───────────────────────────────────────────────────────────────────
   const sendChat = async () => {
