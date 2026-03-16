@@ -2125,7 +2125,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   </div>
                   {!langData && (
                     <div style={{ textAlign:"center", padding:"40px 20px" }}>
-                      <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading)}
+                      <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading, selectedLanguage)}
                         disabled={langLoading}
                         style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:langLoading?0.6:1 }}>
                         {langLoading ? "GENERATING..." : "🌏 GENERATE LANGUAGES"}
