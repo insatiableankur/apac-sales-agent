@@ -1158,11 +1158,20 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       setAnalyzeStep(4);
       const sys3 = `You are the Global Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"commandOfMessage":{"salesStage":"Evaluation","stageRationale":"...","beforeScenario":"...","afterScenario":"...","requiredCapabilities":[{"capability":"...","proofPoint":"..."}],"uniqueDifferentiators":["..."],"valueDrivers":[{"driver":"Cost Reduction","specifics":"...","estimatedImpact":"$X"}],"objectionHandlers":[{"objection":"...","response":"..."}],"closingHypothesis":"..."}}`;
       const sys4 = `You are the Global Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"nextBestActions":[{"priority":1,"action":"Most critical action","why":"Why this is #1","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]} Be specific to the deal.`;
+      // Retry wrapper for reliability
+      const reliableCall = async (p, s, retries=2) => {
+        for (let i=0; i<retries; i++) {
+          try { return await streamCall(p, s); } catch(e) {
+            if (i===retries-1) throw e;
+            await new Promise(r => setTimeout(r, 1000));
+          }
+        }
+      };
       const [part1, part2, part3, part4] = await Promise.all([
-        streamCall(prompt, sys1),
-        streamCall(prompt, sys2),
-        streamCall(prompt, sys3),
-        streamCall(prompt, sys4),
+        reliableCall(prompt, sys1),
+        reliableCall(prompt, sys2),
+        reliableCall(prompt, sys3),
+        reliableCall(prompt, sys4),
       ]);
       const dq = part2.discoveryQuestions || {};
       if (part2.redFlags) dq.redFlags = part2.redFlags;
