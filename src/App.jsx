@@ -1523,8 +1523,6 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
       setStep(2);
       alert("Analysis failed: " + e.message);
     }
-  };
-
   }, [form, emailTone, meddQual, customIndustry]); // useCallback
 
   // ── Chat ───────────────────────────────────────────────────────────────────
