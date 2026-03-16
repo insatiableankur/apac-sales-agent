@@ -532,26 +532,35 @@ const findEmails = async (company, stakeholders, setFn, setLoading) => {
   setLoading(true);
   try {
     const res = await fetch("/api/anthropic", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        tools: [{ type: "web_search_20250305", name: "web_search" }],
-        system: `You are an expert at finding professional email addresses. Search for email addresses and email patterns for executives at the given company. Return ONLY valid JSON array:
-[{"role":"CFO","name":"John Smith (if found)","email":"john.smith@company.com (if found)","emailPattern":"firstname.lastname@company.com","confidence":"high/medium/low","source":"LinkedIn/company website/press release"}]`,
-        messages: [{ role: "user", content: `Find email addresses for these roles at ${company}: ${stakeholders.map(s => s.role).join(', ')}. Search for "${company} executive email", "${company} leadership team", "${company} contact". Also identify the email pattern used at ${company} (e.g. firstname.lastname@company.com).` }]
+        model: "claude-sonnet-4-20250514", max_tokens: 2000, stream: true,
+        system: `You are an expert at B2B email intelligence. Based on your knowledge of companies and common enterprise email patterns, provide your best estimate of email addresses and patterns. Return ONLY valid JSON array:
+[{"role":"CFO","name":"Likely name if known","email":"estimated.email@company.com","emailPattern":"firstname.lastname@company.com","confidence":"high/medium/low","notes":"How you determined this"}]`,
+        messages: [{ role: "user", content: `Company: ${company}. Find or estimate email addresses for: ${stakeholders.map(s => s.role).join(', ')}. Use your knowledge of ${company}'s known executives, common email naming conventions for this company/industry, and any publicly known contact information. Provide your best estimates with confidence levels.` }]
       })
     });
-    const data = await res.json();
-    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '[]';
-    const s = text.indexOf('['), e = text.lastIndexOf(']');
-        if (s !== -1 && e !== -1) {
-          try { setFn(JSON.parse(text.slice(s, e+1))); }
-          catch(e2) { setFn([]); console.error("Email parse error:", e2); }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let raw = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const line of decoder.decode(value, { stream: true }).split("\n")) {
+        if (line.startsWith("data: ")) {
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") raw += evt.delta.text;
+          } catch(e) {}
         }
-    else setFn([]);
-  } catch(e) { console.error('Email finder error:', e); setFn([]); }
+      }
+    }
+    const s = raw.indexOf("["), e = raw.lastIndexOf("]");
+    if (s !== -1 && e !== -1) {
+      try { setFn(JSON.parse(raw.slice(s, e+1))); }
+      catch(e2) { setFn([]); }
+    } else setFn([]);
+  } catch(e) { console.error("Email finder error:", e); setFn([]); }
   setLoading(false);
 };
 
