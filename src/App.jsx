@@ -1154,7 +1154,20 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
         }
         if (s1 !== -1 && e1 !== -1) clean = clean.slice(s1, e1 + 1);
         try {
-          return JSON.parse(clean);
+          try {
+            return JSON.parse(clean);
+          } catch(e) {
+            // Repair truncated JSON
+            let fixed = clean;
+            const opens = (fixed.match(/{/g)||[]).length - (fixed.match(/}/g)||[]).length;
+            const openArr = (fixed.match(/\[/g)||[]).length - (fixed.match(/\]/g)||[]).length;
+            // Remove trailing incomplete property
+            fixed = fixed.replace(/,\s*"[^"]*"\s*:\s*[^,}\]]*$/, '');
+            fixed = fixed.replace(/,\s*"[^"]*"\s*$/, '');
+            for(let j=0;j<openArr;j++) fixed += "]";
+            for(let j=0;j<opens;j++) fixed += "}";
+            return JSON.parse(fixed);
+          }
         } catch(e) {
           // Retry with aggressive sanitization
           const safe = clean.replace(/[\u0000-\u001F]/g, " ");
