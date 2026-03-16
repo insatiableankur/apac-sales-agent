@@ -546,7 +546,10 @@ const findEmails = async (company, stakeholders, setFn, setLoading) => {
     const data = await res.json();
     const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '[]';
     const s = text.indexOf('['), e = text.lastIndexOf(']');
-    if (s !== -1 && e !== -1) setFn(JSON.parse(text.slice(s, e+1)));
+        if (s !== -1 && e !== -1) {
+          try { setFn(JSON.parse(text.slice(s, e+1))); }
+          catch(e2) { setFn([]); console.error("Email parse error:", e2); }
+        }
     else setFn([]);
   } catch(e) { console.error('Email finder error:', e); setFn([]); }
   setLoading(false);
