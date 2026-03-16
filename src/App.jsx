@@ -1098,7 +1098,7 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             model: model,
-            max_tokens: 8000,
+            max_tokens: 16000,
             stream: true,
             system: systemPrompt,
             messages: [{ role: "user", content: userPrompt }],
