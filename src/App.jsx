@@ -473,7 +473,7 @@ const generateLanguages = async (form, result, setFn, setLoading) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 4000,
+        max_tokens: 8000,
         system: `You are a global sales localisation expert. Generate outreach emails in 4 APAC languages. Return ONLY valid JSON:
 {"bahasa":{"language":"Bahasa Indonesia/Malaysia","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
 "mandarin":{"language":"Mandarin","emailSubject":"subject","emailBody":"full email","linkedIn":"under 300 chars","culturalNote":"tip"},
