@@ -501,7 +501,7 @@ const generateLanguages = async (form, result, setFn, setLoading, selectedLang) 
     const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
     const parsed = JSON.parse(raw.slice(s, e+1));
     setFn(prev => ({ ...(prev||{}), ...parsed }));
-  } catch(e) { console.error(e); alert("Failed to generate. Try again."); }
+  } catch(e) { alert("Failed to generate. Try again."); }
   setLoading(false);
 };
 
@@ -560,7 +560,7 @@ const findEmails = async (company, stakeholders, setFn, setLoading) => {
       try { setFn(JSON.parse(raw.slice(s, e+1))); }
       catch(e2) { setFn([]); }
     } else setFn([]);
-  } catch(e) { console.error("Email finder error:", e); setFn([]); }
+  } catch(e) { setFn([]); }
   setLoading(false);
 };
 
@@ -584,7 +584,7 @@ const generateOrgChart = async (company, market, industry, result, setFn, setLoa
     const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '{}';
     const s = text.indexOf('{'), e = text.lastIndexOf('}');
     if (s !== -1 && e !== -1) setFn(JSON.parse(text.slice(s, e+1)));
-  } catch(e) { console.error('Org chart error:', e); }
+  } catch(e) { }
   setLoading(false);
 };
 
@@ -687,8 +687,6 @@ const searchCompanyIntel = async (company, market, industry) => {
 
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -2571,7 +2569,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                               const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('') || '{}';
                               const s=text.indexOf('{'),e=text.lastIndexOf('}');
                               if(s!==-1&&e!==-1) setRoiResearch(JSON.parse(text.slice(s,e+1)));
-                            } catch(e) { console.error(e); }
+                            } catch(e) { }
                             setRoiResearchLoading(false);
                           }} disabled={roiResearchLoading}
                             style={{ width:"100%", background:"rgba(26,86,219,0.08)", border:"1px solid rgba(26,86,219,0.3)", borderRadius:10, padding:"12px 24px", color:"var(--blue-light)", fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:800, cursor:"pointer", letterSpacing:1, opacity:roiResearchLoading?0.6:1 }}>
