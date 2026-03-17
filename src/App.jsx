@@ -2671,8 +2671,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                           <div key={i} className="card" style={{ marginBottom:10 }}>
                             <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color:'var(--amber)', marginBottom:12 }}>vs. {bc.competitor}</div>
                             <div className="compete-vs">
-                              <div className="compete-win"><div className="compete-label" style={{ color:'var(--green)' }}>✓ We Win When</div>{bc.weWinWhen?.map((w,j) => <div key={j} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>{w}</div>)}</div>
-                              <div className="compete-lose"><div className="compete-label" style={{ color:'var(--red)' }}>✗ They Attack With</div>{bc.theyAttackWith?.map((w,j) => <div key={j} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>{w}</div>)}</div>
+                              <div className="compete-win"><div className="compete-label" style={{ color:'var(--green)' }}>✓ We Win When</div>{(Array.isArray(bc.weWinWhen)?bc.weWinWhen:[bc.weWinWhen]).filter(Boolean).map((w,j) => <div key={j} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>{w}</div>)}</div>
+                              <div className="compete-lose"><div className="compete-label" style={{ color:'var(--red)' }}>✗ They Attack</div>{(Array.isArray(bc.theyAttackWith)?bc.theyAttackWith:[bc.theyAttackWith]).filter(Boolean).map((w,j) => <div key={j} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>{w}</div>)}</div>
                             </div>
                           </div>
                         ))}
