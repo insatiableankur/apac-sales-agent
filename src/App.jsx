@@ -2665,7 +2665,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   <div className="inline-section">
                     <div className="section-header">⚔️ Battle Cards</div>
                     {!battleCards ? (
-                      <button className="gen-btn" onClick={() => generateBattleCards(form, result, setBattleCards, setBattleLoading)} disabled={battleLoading||!form.competitorsMentioned}>
+                      <button className="gen-btn" onClick={() => generateBattleCards(form.competitorsMentioned, form, result, setBattleCards, setBattleLoading)} disabled={battleLoading||!form.competitorsMentioned}>
                         {battleLoading ? '⏳ Generating...' : form.competitorsMentioned ? '⚔️ Generate Battle Cards' : 'Add competitors in the form first'}
                       </button>
                     ) : (
