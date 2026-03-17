@@ -1364,6 +1364,145 @@ const CSS = `
   .light-mode .chat-msg.user .chat-bubble { background: #EFF6FF; }
   .light-mode .chat-input-area { background: #F1F5F9; }
   .light-mode .chat-input { background: white; border-color: rgba(0,0,0,0.1); color: #0F172A; }
+
+  /* ─── RESPONSIVE BREAKPOINTS ─────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .main { padding: 24px 16px 80px; }
+    .header { padding: 0 16px; }
+    .header-inner { height: 56px; }
+    .logo-text { font-size: 13px; }
+    .logo-sub { display: none; }
+    .header-badge { display: none; }
+    .tabs { padding: 3px; gap: 1px; }
+    .tab { padding: 8px 10px; font-size: 8px; letter-spacing: 0.5px; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .medd-grid { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .com-before-after { grid-template-columns: 1fr; }
+    .steps { display: none; }
+    .company-title { font-size: 22px; }
+  }
+  @media (max-width: 480px) {
+    .tab { padding: 7px 8px; font-size: 7.5px; }
+    .btn-amber { padding: 12px 20px; font-size: 13px; }
+    .card { padding: 18px; }
+    .chat-window { height: 420px; }
+  }
+  /* ─── RESPONSIVE GRID HELPERS ─────────────────────────────────────── */
+  .r-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .r-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .r-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  @media (max-width: 768px) {
+    .r-grid-2 { grid-template-columns: 1fr; gap: 12px; }
+    .r-grid-3 { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .r-grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  }
+  @media (max-width: 480px) {
+    .r-grid-3 { grid-template-columns: 1fr; }
+  }
+  /* ─── MICRO-ANIMATIONS ────────────────────────────────────────────── */
+  @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes scaleIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+  @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+  @keyframes barGrow { from { width:0; } to { width:100%; } }
+  .anim-slide-up { animation: slideUp 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+  .anim-slide-up-2 { animation: slideUp 0.35s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+  .anim-slide-up-3 { animation: slideUp 0.35s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+  .anim-slide-up-4 { animation: slideUp 0.35s 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+  .anim-scale-in { animation: scaleIn 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+  .anim-count { animation: slideUp 0.4s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+  /* ─── SKELETON LOADERS ────────────────────────────────────────────── */
+  .skeleton { background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size:200% 100%; animation: shimmer 1.5s infinite; border-radius:6px; }
+  .skeleton-text { height:12px; border-radius:4px; }
+  .skeleton-title { height:20px; border-radius:6px; }
+  .skeleton-card { border-radius:var(--radius); padding:24px; background:var(--card); border:1px solid var(--border); margin-bottom:12px; }
+  /* ─── INTERACTIVE STATES ──────────────────────────────────────────── */
+  .card-interactive:hover { border-color:var(--border2); background:var(--card2); transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+  button:active { transform:scale(0.97); }
+  /* ─── SCORE COMPONENTS ────────────────────────────────────────────── */
+  .score-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s ease; position:relative; overflow:hidden; }
+  .score-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--score-color, var(--amber)); border-radius:0 0 14px 14px; }
+  .score-card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+  .score-value { font-family:'Syne',sans-serif; font-size:38px; font-weight:900; line-height:1; }
+  .score-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2.5px; color:var(--text-dim); margin:5px 0 3px; text-transform:uppercase; }
+  .score-sub { font-size:11px; font-weight:600; color:var(--text-muted); }
+  /* ─── SECTION HEADERS ─────────────────────────────────────────────── */
+  .section-header { display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2.5px; color:var(--amber); text-transform:uppercase; margin-bottom:14px; }
+  .section-header::after { content:''; flex:1; height:1px; background:var(--border); }
+  /* ─── GAP CARDS ───────────────────────────────────────────────────── */
+  .gap-card { background:var(--card); border:1px solid var(--border); border-left:3px solid var(--gap-color,var(--red)); border-radius:0 10px 10px 0; padding:14px; transition:all 0.2s; }
+  .gap-card:hover { background:var(--card2); }
+  .gap-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; margin-bottom:5px; }
+  .gap-action { font-size:12px; color:var(--text-muted); line-height:1.5; }
+  /* ─── PAIN ROWS ───────────────────────────────────────────────────── */
+  .pain-row { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--border); transition:all 0.15s; border-radius:8px; }
+  .pain-row:last-child { border-bottom:none; }
+  .pain-row:hover { background:var(--card2); padding-left:8px; }
+  .pain-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .pain-impact { font-size:12px; color:var(--text-muted); }
+  /* ─── ACTION ITEMS ────────────────────────────────────────────────── */
+  .action-item { display:flex; gap:16px; align-items:flex-start; padding:16px 0; border-bottom:1px solid var(--border); transition:all 0.2s; border-radius:8px; }
+  .action-item:last-child { border-bottom:none; }
+  .action-item:hover { background:var(--card2); padding-left:8px; }
+  .action-number { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:14px; font-weight:900; flex-shrink:0; transition:transform 0.2s; }
+  .action-item:hover .action-number { transform:scale(1.1); }
+  .action-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .action-why { font-size:12px; color:var(--text-muted); margin-bottom:5px; }
+  /* ─── EMPTY STATES ────────────────────────────────────────────────── */
+  .empty-state { text-align:center; padding:48px 24px; }
+  .empty-state-icon { font-size:44px; margin-bottom:16px; opacity:0.6; }
+  .empty-state-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--amber); margin-bottom:8px; }
+  .empty-state-desc { font-size:13px; color:var(--text-muted); max-width:380px; margin:0 auto 24px; line-height:1.7; }
+  /* ─── INLINE SECTION ──────────────────────────────────────────────── */
+  .inline-section { border-top:1px solid var(--border); padding-top:24px; margin-top:8px; margin-bottom:24px; }
+  .inline-section:last-child { margin-bottom:0; }
+  /* ─── MEDDPICC COMPACT ────────────────────────────────────────────── */
+  .medd-compact-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  @media (max-width:768px) { .medd-compact-grid { grid-template-columns:repeat(2,1fr); } }
+  /* ─── PERSON CARD ─────────────────────────────────────────────────── */
+  .person-card { display:flex; gap:14px; align-items:flex-start; padding:16px; background:var(--card); border:1px solid var(--border); border-radius:12px; transition:all 0.2s; margin-bottom:8px; }
+  .person-card:hover { border-color:var(--border2); background:var(--card2); }
+  /* ─── COMPETE ─────────────────────────────────────────────────────── */
+  .compete-vs { display:flex; gap:4px; align-items:stretch; margin-bottom:16px; border-radius:12px; overflow:hidden; }
+  .compete-win { flex:1; background:var(--green-dim); border:1px solid rgba(16,185,129,0.2); padding:16px; }
+  .compete-lose { flex:1; background:var(--red-dim); border:1px solid rgba(239,68,68,0.2); padding:16px; }
+  .compete-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; font-weight:700; }
+  /* ─── INPUT GROUPS ────────────────────────────────────────────────── */
+  .input-group { margin-bottom:14px; }
+  .input-label { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:2px; display:block; margin-bottom:7px; text-transform:uppercase; }
+  /* ─── MEETING TYPES ───────────────────────────────────────────────── */
+  .meeting-types { display:flex; gap:6px; flex-wrap:wrap; }
+  .meeting-type-btn { padding:7px 12px; border-radius:8px; border:1px solid var(--border); font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; background:transparent; color:var(--text-muted); }
+  .meeting-type-btn:hover { border-color:var(--border2); color:var(--text); }
+  .meeting-type-btn.active { border-color:rgba(245,158,11,0.4); background:var(--amber-glow); color:var(--amber); }
+  /* ─── LANG PILLS ──────────────────────────────────────────────────── */
+  .lang-pills { display:flex; gap:5px; flex-wrap:wrap; }
+  .lang-pill { padding:5px 11px; border-radius:20px; border:1px solid var(--border); font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; background:transparent; color:var(--text-muted); white-space:nowrap; }
+  .lang-pill:hover { border-color:var(--border2); color:var(--text); }
+  .lang-pill.active { border-color:rgba(245,158,11,0.4); background:var(--amber-glow); color:var(--amber); }
+  .lang-pill.done { border-color:rgba(16,185,129,0.3); color:var(--green); }
+  /* ─── ROI METRICS ─────────────────────────────────────────────────── */
+  .roi-metric { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:center; transition:all 0.2s; }
+  .roi-metric:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+  .roi-value { font-family:'Syne',sans-serif; font-size:26px; font-weight:900; line-height:1; margin-bottom:5px; }
+  .roi-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+  /* ─── GEN BUTTONS ─────────────────────────────────────────────────── */
+  .gen-btn { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:11px 20px; color:var(--text-muted); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:8px; }
+  .gen-btn:hover { border-color:var(--border2); color:var(--text); background:var(--card2); transform:translateY(-1px); }
+  .gen-btn:disabled { opacity:0.45; cursor:not-allowed; transform:none; }
+  /* ─── PROGRESS TRACK ──────────────────────────────────────────────── */
+  .progress-track { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:8px; }
+  .progress-fill-anim { height:100%; border-radius:2px; animation:barGrow 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
+  /* ─── TOUCH TARGETS ───────────────────────────────────────────────── */
+  @media (max-width:768px) { button, .tab, .lang-pill, .meeting-type-btn { min-height:44px; } }
+  /* ─── SCROLLBARS ──────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+  /* ─── FOCUS ───────────────────────────────────────────────────────── */
+  *:focus-visible { outline:2px solid var(--amber); outline-offset:2px; border-radius:4px; }
+
   .light-mode .tab.active { background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
   .light-mode .email-box { background: white; }
   .light-mode .email-header { background: #F8FAFC; }
@@ -2002,21 +2141,12 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               {/* Tabs */}
               <div className="tabs fade-up-2">
                 {[
-                  { id: "brief", label: "📋 BRIEF" },
-                  { id: "meddpicc", label: "⚡ MEDDPICC" },
-                  { id: "stakeholders", label: "👥 STAKEHOLDERS" },
-                  { id: "outreach", label: "✉️ OUTREACH" },
-                  { id: "discovery", label: "💬 DISCOVERY" },
-                  { id: "com", label: "🏆 COMMAND" },
-                  { id: "roi", label: "💰 ROI" },
-                  { id: "meetingprep", label: "⚡ MEETING PREP" },
-                  { id: "execbrief", label: "📋 EXEC BRIEF" },
-                  { id: "coach", label: "🎯 DEAL COACH" },
-                  { id: "battle", label: "⚔️ BATTLE" },
-                  { id: "orgchart", label: "🏢 ORG CHART" },
-                  { id: "emails", label: "📧 EMAILS" },
-                  { id: "transcript", label: "📞 TRANSCRIPT" },
-                  { id: "languages", label: "🌏 LANGUAGES" },
+                  { id: "intel", label: "🎯 Deal Intel" },
+                  { id: "people", label: "👥 People" },
+                  { id: "outreach", label: "📣 Outreach" },
+                  { id: "playbook", label: "🔍 Playbook" },
+                  { id: "bizcase", label: "💼 Biz Case" },
+                  { id: "coach", label: "🤖 Coach" },
                 ].map(t => (
                   <button key={t.id} className={`tab ${activeTab === t.id ? "active" : ""}`} onClick={() => setActiveTab(t.id)}>
                     {t.label}
@@ -2025,1127 +2155,757 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               </div>
 
               {/* ── TAB: BRIEF ── */}
-              {activeTab === "brief" && result.accountBrief && (
-                <div className="fade-up">
-                  <div className="card">
-                    <div className="card-title">ACCOUNT PROFILE</div>
-                    <div className="section-body" style={{ marginBottom: 20 }}>{result.accountBrief.companyProfile}</div>
-                    <div className="section-head">WHY NOW</div>
-                    <div className="info-panel amber" style={{ marginBottom: 20 }}>{result.accountBrief.whyNow}</div>
-                    <div className="section-head">TRIGGER EVENTS</div>
-                    <ul className="bullet-list" style={{ marginBottom: 20 }}>
-                      {result.accountBrief.keyTriggers?.map((t, i) => <li key={i}>{t}</li>)}
-                    </ul>
-                    <div className="section-head">PAIN POINTS</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {result.accountBrief.painPoints?.map((p, i) => (
-                        <div key={i} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 14 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "white" }}>{p.pain}</div>
-                            <span className={`tag ${urgencyColor(p.urgency)}`}>{p.urgency?.toUpperCase()}</span>
+              {/* ═══ TAB: DEAL INTELLIGENCE ═══════════════════════════════ */}
+              {activeTab === "intel" && (
+                <div className="anim-slide-up">
+                  {result.accountBrief ? (() => {
+                    const ab = result.accountBrief;
+                    const ds = calcDealScore(result, meddQual);
+                    return (
+                      <>
+                        {/* Score Row */}
+                        <div className="r-grid-4" style={{ marginBottom:20 }}>
+                          {/* Deal Score */}
+                          {ds && (
+                            <div className="score-card anim-count" style={{ '--score-color': ds.color, '--score-pct': `${ds.score}%` }}>
+                              <div className="score-value anim-count" style={{ color: ds.color }}>{ds.score}</div>
+                              <div className="score-label">Deal Score</div>
+                              <div className="score-sub" style={{ color: ds.color }}>{ds.rating}</div>
+                              <div className="progress-track" style={{ marginTop:8 }}>
+                                <div className="progress-fill-anim" style={{ width:`${ds.score}%`, background:ds.color, '--bar-width': `${ds.score}%` }}></div>
+                              </div>
+                            </div>
+                          )}
+                          {/* ICP */}
+                          <div className="score-card anim-count" style={{ '--score-color':'var(--amber)', '--score-pct':`${ab.icpScore}%`, animationDelay:'0.05s' }}>
+                            <div className="score-value" style={{ color:'var(--amber)' }}>{ab.icpScore}</div>
+                            <div className="score-label">ICP Score</div>
+                            <div className="score-sub">{ab.icpRating}</div>
+                            <div className="progress-track">
+                              <div className="progress-fill-anim" style={{ width:`${ab.icpScore}%`, background:'var(--amber)', '--bar-width':`${ab.icpScore}%`, animationDelay:'0.3s' }}></div>
+                            </div>
                           </div>
-                          <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{p.businessImpact}</div>
+                          {/* Tier */}
+                          <div className="score-card anim-count" style={{ '--score-color':'var(--blue-light)', animationDelay:'0.1s' }}>
+                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color:'var(--blue-light)', lineHeight:1.2 }}>{ab.tier}</div>
+                            <div className="score-label">Account Tier</div>
+                            <div className="score-sub">{ab.dealPotential}</div>
+                          </div>
+                          {/* Health */}
+                          <div className="score-card anim-count" style={{ '--score-color': result.meddpicc?.overallHealth==='green'?'var(--green)':result.meddpicc?.overallHealth==='amber'?'var(--amber)':'var(--red)', animationDelay:'0.15s' }}>
+                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color: result.meddpicc?.overallHealth==='green'?'var(--green)':result.meddpicc?.overallHealth==='amber'?'var(--amber)':'var(--red)', lineHeight:1.2 }}>{result.meddpicc?.overallHealth?.toUpperCase()}</div>
+                            <div className="score-label">Deal Health</div>
+                            <div className="score-sub">{result.meddpicc?.forecastCategory}</div>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="card">
-                    <div className="card-title">MARKET CONTEXT</div>
-                    <div className="grid-2">
-                      <div>
-                        <div className="section-head">BUYING CULTURE</div>
-                        <div className="section-body">{result.accountBrief.buyingCulture}</div>
-                      </div>
-                      <div>
-                        <div className="section-head">APAC MARKET CONTEXT</div>
-                        <div className="section-body">{result.accountBrief.apacMarketContext}</div>
-                      </div>
-                    </div>
-                    <div className="divider" />
-                    <div className="section-head">NEXT BEST ACTIONS</div>
-                    {( Array.isArray(result.nextBestActions) ? result.nextBestActions : Object.values(result.nextBestActions || {}) ).map((a, i) => (
-                      <div className="action-item" key={i}>
-                        <div className="action-num" style={{ background: i === 0 ? "var(--amber)" : i === 1 ? "var(--blue)" : "var(--slate)", color: i === 0 ? "var(--navy)" : "white" }}>{a.priority}</div>
-                        <div className="action-content">
-                          <div className="action-title">{a.action}</div>
-                          <div className="action-why">{a.why}</div>
-                          <span className="tag tag-dim" style={{ fontSize: 9 }}>{a.timeframe?.toUpperCase()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              {/* ── TAB: MEDDPICC ── */}
-              {activeTab === "meddpicc" && result.meddpicc && (
-                <div className="fade-up">
-                  <div className="card">
-                    <div className="card-title">DEAL HEALTH SCORECARD</div>
-                    <div style={{ display: "flex", gap: 20, marginBottom: 20, alignItems: "center" }}>
-                      <div style={{ textAlign: "center" }}>
-                        {[["green","COMMIT","var(--green)"],["amber","PIPELINE","var(--amber)"],["red","AT RISK","var(--red)"]].find(([s]) => s === result.meddpicc.overallHealth)?.map(([s, label, color], i, arr) => (
-                          i === 0 ? null : i === 1 ? <div key={i} style={{ fontFamily: "'Syne', sans-serif", fontSize: 24, fontWeight: 800, color: arr[2] }}>{label}</div> : null
-                        ))}
-                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "var(--text-faint)", letterSpacing: 1 }}>{result.meddpicc.forecastCategory}</div>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-                          {["green","amber","red"].map(s => {
-                            const count = Object.values(result.meddpicc.elements).filter(e => e.status === s).length;
-                            return <div key={s}><span style={{ fontSize: 20, fontWeight: 800, color: s === "green" ? "var(--green)" : s === "amber" ? "var(--amber)" : "var(--red)", fontFamily: "'Syne', sans-serif" }}>{count}</span><span style={{ fontSize: 11, color: "var(--text-faint)", marginLeft: 4 }}>{statusLabel(s).toLowerCase()}</span></div>;
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="medd-grid">
-                      {Object.entries(result.meddpicc.elements).map(([key, el]) => (
-                        <div key={key} className={`medd-item ${expandedMedd === key ? "expanded" : ""}`} onClick={() => setExpandedMedd(expandedMedd === key ? null : key)}>
-                          <div className="medd-header">
-                            <div className="medd-name">{el.label}</div>
-                            <div className="medd-status-dot" style={{ background: el.status === "green" ? "var(--green)" : el.status === "amber" ? "var(--amber)" : "var(--red)", boxShadow: `0 0 8px ${el.status === "green" ? "rgba(16,185,129,0.5)" : el.status === "amber" ? "rgba(245,158,11,0.5)" : "rgba(239,68,68,0.5)"}` }} />
+                        {/* Top Gaps */}
+                        {ds?.gaps?.length > 0 && (
+                          <div className="card anim-slide-up-2" style={{ marginBottom:16, borderColor:'rgba(239,68,68,0.2)', background:'rgba(239,68,68,0.04)' }}>
+                            <div className="section-header" style={{ color:'var(--red)' }}>⚠ Top Deal Risks — Fix These First</div>
+                            <div className="r-grid-3">
+                              {ds.gaps.map((g,i) => (
+                                <div key={i} className="gap-card" style={{ '--gap-color': g.status==='red'?'var(--red)':'var(--amber)' }}>
+                                  <div className="gap-label" style={{ color: g.status==='red'?'var(--red)':'var(--amber)' }}>{g.element}</div>
+                                  <div className="gap-action">{g.nextAction}</div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <div className="medd-evidence">{el.evidence}</div>
-                          {expandedMedd === key && (
-                            <div className="medd-expanded">
-                              <div className="medd-next-action">▸ {el.nextAction}</div>
-                              <div style={{ fontSize: 10, color: "var(--text-faint)", letterSpacing: 1, marginBottom: 6, fontFamily: "var(--font-mono)" }}>QUESTIONS TO ASK →</div>
-                              {el.questions?.map((q, i) => <div key={i} style={{ fontSize: 12, color: "var(--text-dim)", padding: "4px 0", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>"{q}"</div>)}
+                        )}
+
+                        {/* Account Brief */}
+                        <div className="card anim-slide-up-2">
+                          <div className="card-title">Account Intelligence</div>
+                          <p style={{ fontSize:14, color:'var(--text)', lineHeight:1.8, marginBottom:18 }}>{ab.companyProfile}</p>
+                          <div className="r-grid-2" style={{ marginBottom:18 }}>
+                            <div>
+                              <div className="input-label">Why Now</div>
+                              <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.7 }}>{ab.whyNow}</p>
+                            </div>
+                            <div>
+                              <div className="input-label">Buying Culture</div>
+                              <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.7 }}>{ab.buyingCulture}</p>
+                            </div>
+                          </div>
+                          <div className="input-label" style={{ marginBottom:8 }}>Key Triggers</div>
+                          <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:18 }}>
+                            {ab.keyTriggers?.map((t,i) => <span key={i} className="tag tag-amber">{t}</span>)}
+                          </div>
+                          <div className="input-label" style={{ marginBottom:4 }}>Pain Points</div>
+                          {ab.painPoints?.map((p,i) => (
+                            <div key={i} className="pain-row">
+                              <span className={`tag ${p.urgency==='high'?'tag-red':p.urgency==='medium'?'tag-amber':'tag-dim'}`} style={{ minWidth:52, justifyContent:'center', marginTop:2, flexShrink:0 }}>{p.urgency?.toUpperCase()}</span>
+                              <div>
+                                <div className="pain-title">{p.pain}</div>
+                                <div className="pain-impact">{p.businessImpact}</div>
+                              </div>
+                            </div>
+                          ))}
+                          {ab.marketContext && (
+                            <div style={{ marginTop:16, padding:14, background:'rgba(96,165,250,0.06)', border:'1px solid rgba(96,165,250,0.15)', borderRadius:8 }}>
+                              <div className="input-label" style={{ color:'var(--blue-light)', marginBottom:6 }}>Market Context</div>
+                              <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.7 }}>{ab.marketContext}</p>
                             </div>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="card">
-                    <div className="card-title">DEAL RISKS & WIN CONDITIONS</div>
-                    <div className="grid-2">
-                      <div>
-                        <div className="section-head">TOP DEAL RISKS</div>
-                        <ul className="bullet-list">{result.meddpicc.dealRisks?.map((r, i) => <li key={i} style={{ color: "var(--red)" }}>{r}</li>)}</ul>
-                      </div>
-                      <div>
-                        <div className="section-head">WIN CONDITIONS</div>
-                        <ul className="bullet-list">{result.meddpicc.winConditions?.map((w, i) => <li key={i} style={{ color: "var(--green)" }}>{w}</li>)}</ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* ── TAB: STAKEHOLDERS ── */}
-              {activeTab === "stakeholders" && result.stakeholders && (
-                <div className="fade-up">
-                  <div className="card">
-                    <div className="card-title">BUYING COMMITTEE MAP</div>
-                    <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-                      <div className="info-panel blue" style={{ flex: 1, minWidth: 200 }}>
-                        <strong>Multithreading Status:</strong> {result.stakeholders.multithreadingStatus}
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-                        <div style={{ fontSize: 11, color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace" }}>CHAMPION SCORE</div>
-                        <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 800, color: result.stakeholders.championDevelopmentScore > 70 ? "var(--green)" : result.stakeholders.championDevelopmentScore > 40 ? "var(--amber)" : "var(--red)" }}>
-                          {result.stakeholders.championDevelopmentScore}/100
-                        </div>
-                      </div>
-                    </div>
-                    <div className="stakeholder-grid">
-                      {result.stakeholders.buyingCommittee?.map((s, i) => (
-                        <div className="stakeholder-card" key={i}>
-                          <div className="stakeholder-header">
-                            <div>
-                              <div className="stakeholder-role">{s.role}</div>
-                              <div style={{ marginTop: 6, display: "flex", gap: 6 }}>
-                                <span className={`tag ${archetypeColors[s.archetype] || "tag-dim"}`}>{s.archetype}</span>
-                                <span className={`tag ${accessClass(s.accessStatus)}`}>{accessLabel(s.accessStatus)}</span>
-                                <span className="tag tag-dim">PRIORITY {s.priority}</span>
+                        {/* MEDDPICC Compact */}
+                        {result.meddpicc && (
+                          <div className="card anim-slide-up-3">
+                            <div className="card-title">MEDDPICC Diagnostic</div>
+                            <div className="medd-compact-grid" style={{ marginBottom:16 }}>
+                              {Object.entries(result.meddpicc.elements || {}).map(([key, el]) => (
+                                <div key={key} className={`medd-item ${expandedMedd===key?'expanded':''}`} onClick={() => setExpandedMedd(expandedMedd===key?null:key)}>
+                                  <div className="medd-header">
+                                    <span className="medd-name" style={{ fontSize:11 }}>{el.label}</span>
+                                    <div className={`medd-status-dot ${el.status}`}></div>
+                                  </div>
+                                  <div className="medd-evidence" style={{ fontSize:11 }}>{el.description}</div>
+                                  {expandedMedd===key && (
+                                    <div className="medd-expanded">
+                                      <div className="medd-next-action">→ {el.nextAction}</div>
+                                      {el.questions?.map((q,i) => <div key={i} style={{ fontSize:11, color:'var(--blue-light)', marginBottom:3 }}>• {q}</div>)}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            <div className="r-grid-2">
+                              <div>
+                                <div className="input-label" style={{ color:'var(--red)' }}>Deal Risks</div>
+                                {result.meddpicc.dealRisks?.map((r,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>✗ {r}</div>)}
+                              </div>
+                              <div>
+                                <div className="input-label" style={{ color:'var(--green)' }}>Win Conditions</div>
+                                {result.meddpicc.winConditions?.map((w,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>✓ {w}</div>)}
                               </div>
                             </div>
                           </div>
-                          <div className="stakeholder-body">
-                            <div className="stakeholder-field">
-                              <div className="sf-label">MOTIVATIONS</div>
-                              <div className="sf-value">{s.motivations}</div>
-                            </div>
-                            <div className="stakeholder-field">
-                              <div className="sf-label">FEARS / BLOCKERS</div>
-                              <div className="sf-value">{s.fears}</div>
-                            </div>
-                            <div className="stakeholder-field">
-                              <div className="sf-label">ENGAGEMENT STRATEGY</div>
-                              <div className="sf-value">{s.engagementStrategy}</div>
-                            </div>
-                            <div className="stakeholder-field">
-                              <div className="sf-label">WARNING SIGN</div>
-                              <div className="sf-value" style={{ color: "var(--red)" }}>{s.warningSign}</div>
+                        )}
+
+                        {/* Next Best Actions */}
+                        {result.nextBestActions && (
+                          <div className="card anim-slide-up-4">
+                            <div className="card-title">Next Best Actions</div>
+                            {(Array.isArray(result.nextBestActions)?result.nextBestActions:Object.values(result.nextBestActions||{})).map((a,i) => (
+                              <div key={i} className="action-item">
+                                <div className="action-number" style={{ background:i===0?'var(--amber)':i===1?'var(--blue)':'var(--slate2)', color:i===0?'var(--navy)':'white' }}>{a.priority}</div>
+                                <div style={{ flex:1 }}>
+                                  <div className="action-title">{a.action}</div>
+                                  <div className="action-why">{a.why}</div>
+                                  <span className="tag tag-amber" style={{ fontSize:9 }}>{a.timeframe}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })() : (
+                    <div className="skeleton-card">
+                      <div className="skeleton skeleton-title" style={{ width:'40%', marginBottom:16 }}></div>
+                      <div className="skeleton skeleton-text" style={{ width:'100%', marginBottom:8 }}></div>
+                      <div className="skeleton skeleton-text" style={{ width:'80%' }}></div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ═══ TAB: PEOPLE & POWER ═══════════════════════════════════ */}
+              {activeTab === "people" && (
+                <div className="anim-slide-up">
+                  {result.stakeholders ? (() => {
+                    const st = result.stakeholders;
+                    return (
+                      <>
+                        {/* Champion Score */}
+                        <div className="r-grid-2" style={{ marginBottom:20 }}>
+                          <div className="card">
+                            <div className="card-title">Champion Score</div>
+                            <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+                              <div style={{ fontFamily:"'Syne',sans-serif", fontSize:40, fontWeight:900, color:(st.championDevelopmentScore||0)>=70?'var(--green)':(st.championDevelopmentScore||0)>=40?'var(--amber)':'var(--red)' }} className="anim-count">{st.championDevelopmentScore||0}</div>
+                              <div style={{ flex:1 }}>
+                                <div className="progress-track"><div className="progress-fill-anim" style={{ width:`${st.championDevelopmentScore||0}%`, background:(st.championDevelopmentScore||0)>=70?'var(--green)':'var(--amber)' }}></div></div>
+                                <p style={{ fontSize:12, color:'var(--text-muted)', marginTop:8, lineHeight:1.5 }}>{st.multithreadingStatus}</p>
+                              </div>
                             </div>
                           </div>
-                          <div className="talk-track">"{s.talkTrack}"</div>
+                          <div className="card">
+                            <div className="card-title" style={{ color:'var(--red)' }}>Champion Gaps</div>
+                            {st.championGaps?.map((g,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:6, paddingBottom:6, borderBottom:'1px solid var(--border)' }}>→ {g}</div>)}
+                          </div>
+                        </div>
+
+                        {/* Buying Committee */}
+                        <div className="stakeholder-grid" style={{ marginBottom:24 }}>
+                          {st.buyingCommittee?.map((s,i) => (
+                            <div key={i} className="stakeholder-card anim-slide-up" style={{ animationDelay:`${i*0.05}s` }}>
+                              <div className="stakeholder-header">
+                                <div>
+                                  <div className="stakeholder-role">{s.role}</div>
+                                  <div style={{ display:'flex', gap:6, marginTop:6, flexWrap:'wrap' }}>
+                                    <span className="tag tag-blue">{s.archetype}</span>
+                                    <span className={`tag ${s.accessStatus==='engaged'?'tag-green':s.accessStatus==='not-engaged'?'tag-red':'tag-dim'}`}>{s.accessStatus}</span>
+                                  </div>
+                                </div>
+                                <span className="tag tag-dim">P{s.priority}</span>
+                              </div>
+                              <div className="stakeholder-body">
+                                <div><div className="sf-label">Motivations</div><div className="sf-value">{s.motivations}</div></div>
+                                <div><div className="sf-label">Fears</div><div className="sf-value">{s.fears}</div></div>
+                                <div><div className="sf-label">Engagement</div><div className="sf-value">{s.engagementStrategy}</div></div>
+                                <div><div className="sf-label">Warning Sign</div><div className="sf-value">{s.warningSign}</div></div>
+                              </div>
+                              {s.talkTrack && <div className="talk-track">"{s.talkTrack}"</div>}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Org Chart */}
+                        <div className="inline-section">
+                          <div className="section-header">🏢 Org Chart</div>
+                          {!orgChart ? (
+                            <button className="gen-btn" onClick={() => generateOrgChart(form.company, form.market, form.industry, result, setOrgChart, setOrgLoading)} disabled={orgLoading}>
+                              {orgLoading ? '⏳ Researching...' : '🏢 Generate Org Chart'}
+                            </button>
+                          ) : (
+                            <div className="card anim-scale-in">
+                              {orgChart.emailPattern && <div style={{ fontSize:12, color:'var(--blue-light)', fontFamily:'monospace', marginBottom:12, padding:'8px 12px', background:'rgba(96,165,250,0.08)', borderRadius:6 }}>Email pattern: {orgChart.emailPattern}</div>}
+                              {orgChart.reportingStructure && <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>{orgChart.reportingStructure}</p>}
+                              {(() => {
+                                const renderNode = (node, level=0) => node ? (
+                                  <div key={node.title} style={{ marginLeft:level*18, marginBottom:5 }}>
+                                    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:level===0?'var(--amber)':'var(--card2)', border:'1px solid var(--border)', borderRadius:7, transition:'all 0.15s' }}>
+                                      <div style={{ width:5, height:5, borderRadius:'50%', background:node.relevance==='high'?'var(--green)':node.relevance==='medium'?'var(--amber)':'var(--text-dim)', flexShrink:0 }}></div>
+                                      <span style={{ fontSize:12, fontWeight:700, color:level===0?'var(--navy)':'var(--text)' }}>{node.name||'TBC'}</span>
+                                      <span style={{ fontSize:11, color:level===0?'var(--navy)':'var(--text-muted)' }}>· {node.title}</span>
+                                    </div>
+                                    {node.children?.map(child => renderNode(child, level+1))}
+                                  </div>
+                                ) : null;
+                                return orgChart.ceo ? renderNode(orgChart.ceo) : null;
+                              })()}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Email Finder */}
+                        <div className="inline-section">
+                          <div className="section-header">📧 Email Intelligence</div>
+                          {!emailData ? (
+                            <button className="gen-btn" onClick={() => findEmails(form.company, result?.stakeholders?.buyingCommittee||[], setEmailData, setEmailLoading)} disabled={emailLoading}>
+                              {emailLoading ? '⏳ Searching...' : '📧 Find Emails'}
+                            </button>
+                          ) : emailData.length===0 ? (
+                            <div style={{ fontSize:13, color:'var(--text-muted)', padding:'16px 0' }}>No emails found publicly. Check Org Chart for the email pattern and construct them manually.</div>
+                          ) : (
+                            <div className="anim-slide-up">
+                              {emailData.map((e,i) => (
+                                <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, marginBottom:8, transition:'all 0.2s' }}>
+                                  <div>
+                                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:3 }}>{e.role}{e.name?` — ${e.name}`:''}</div>
+                                    {e.email && <div style={{ fontSize:13, fontFamily:'monospace', color:'var(--blue-light)' }}>{e.email}</div>}
+                                    {e.emailPattern && <div style={{ fontSize:11, color:'var(--text-dim)', marginTop:2 }}>Pattern: {e.emailPattern}</div>}
+                                  </div>
+                                  <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                                    <span className={`tag ${e.confidence==='high'?'tag-green':e.confidence==='medium'?'tag-amber':'tag-dim'}`}>{e.confidence}</span>
+                                    {e.email && <button className="copy-btn" onClick={() => navigator.clipboard.writeText(e.email)}>COPY</button>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })() : (
+                    <div className="empty-state">
+                      <div className="empty-state-icon">👥</div>
+                      <div className="empty-state-title">No Stakeholder Data</div>
+                      <div className="empty-state-desc">Run the analysis to see your buying committee, talk tracks and champion development score.</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ═══ TAB: OUTREACH ENGINE ══════════════════════════════════ */}
+              {activeTab === "outreach" && result.outreach ? (() => {
+                const ou = result.outreach;
+                return (
+                  <div className="anim-slide-up">
+                    {/* Tone Selector */}
+                    <div style={{ display:'flex', gap:8, marginBottom:20 }}>
+                      {[['formal','🏛 Formal','Banking, Gov, Enterprise'],['warm','🤝 Warm','Tech, Startups'],['direct','⚡ Direct','C-Suite, Buyers']].map(([t,label,desc]) => (
+                        <button key={t} onClick={() => setEmailTone(t)} className={`tone-btn ${emailTone===t?'active':''}`} style={{ flex:1, minHeight:60 }}>
+                          <div style={{ fontSize:13, fontWeight:700, color:emailTone===t?'var(--amber)':'var(--text-muted)' }}>{label}</div>
+                          <div style={{ fontSize:10, color:'var(--text-dim)', marginTop:2 }}>{desc}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Email Sequence */}
+                    <div style={{ marginBottom:24 }}>
+                      <div className="section-header">Cold Outreach Sequence</div>
+                      {[
+                        { label:'Day 1 — Cold', subject:ou.coldEmail?.subject, preheader:ou.coldEmail?.preheader, body:ou.coldEmail?.body },
+                        { label:`Day ${ou.coldEmail?.followUp1?.dayToSend||5} — Follow Up`, subject:ou.coldEmail?.followUp1?.subject, body:ou.coldEmail?.followUp1?.body },
+                        { label:`Day ${ou.coldEmail?.followUp2?.dayToSend||12} — Break Up`, subject:ou.coldEmail?.followUp2?.subject, body:ou.coldEmail?.followUp2?.body },
+                      ].map((email,i) => email.subject && (
+                        <div key={i} className="email-box anim-slide-up" style={{ marginBottom:10, animationDelay:`${i*0.06}s` }}>
+                          <div className="email-header">
+                            <div>
+                              <span className="tag tag-dim" style={{ marginRight:8 }}>{email.label}</span>
+                              <span className="email-subject">{email.subject}</span>
+                              {email.preheader && <div style={{ fontSize:11, color:'var(--text-dim)', marginTop:3 }}>{email.preheader}</div>}
+                            </div>
+                            <CopyButton text={`Subject: ${email.subject}\n\n${email.body}`} />
+                          </div>
+                          <div className="email-body">{email.body}</div>
                         </div>
                       ))}
                     </div>
-                    {result.stakeholders.championGaps?.length > 0 && (
-                      <div style={{ marginTop: 20 }}>
-                        <div className="section-head">CHAMPION DEVELOPMENT GAPS</div>
-                        <ul className="bullet-list">{result.stakeholders.championGaps.map((g, i) => <li key={i}>{g}</li>)}</ul>
+
+                    {/* LinkedIn + Referral */}
+                    <div className="r-grid-2" style={{ marginBottom:24 }}>
+                      {ou.linkedInMessage && (
+                        <div className="card">
+                          <div className="section-header" style={{ color:'var(--blue-light)' }}>LinkedIn Message</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.7, marginBottom:10 }}>{ou.linkedInMessage}</p>
+                          <CopyButton text={ou.linkedInMessage} />
+                        </div>
+                      )}
+                      {ou.executiveReferral && (
+                        <div className="card">
+                          <div className="section-header">Executive Referral</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.7, marginBottom:10 }}>{ou.executiveReferral}</p>
+                          <CopyButton text={ou.executiveReferral} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* LinkedIn Variants */}
+                    <div className="inline-section">
+                      <div className="section-header" style={{ color:'var(--blue-light)' }}>🔗 LinkedIn Variants</div>
+                      {!liVariants ? (
+                        <button className="gen-btn" onClick={() => generateLiVariants(form, result, setLiVariants, setLiLoading)} disabled={liLoading}>
+                          {liLoading ? '⏳ Generating...' : '🔗 Generate LinkedIn Variants'}
+                        </button>
+                      ) : (
+                        <div className="r-grid-3 anim-scale-in">
+                          {Object.entries(liVariants).map(([key,v]) => v && (
+                            <div key={key} className="card">
+                              <div style={{ fontSize:9, fontWeight:700, color:'var(--blue-light)', letterSpacing:1.5, marginBottom:8, textTransform:'uppercase', fontFamily:"'JetBrains Mono',monospace" }}>{key}</div>
+                              <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.6, marginBottom:10 }}>{v.message||v}</p>
+                              <CopyButton text={v.message||v} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Languages */}
+                    <div className="inline-section">
+                      <div className="section-header">🌏 Multi-Language</div>
+                      <div className="lang-pills" style={{ marginBottom:12 }}>
+                        {[['bahasa','🇮🇩 Bahasa'],['mandarin','🇨🇳 Mandarin'],['thai','🇹🇭 Thai'],['tagalog','🇵🇭 Filipino'],['japanese','🇯🇵 Japanese'],['korean','🇰🇷 Korean'],['arabic','🇸🇦 Arabic'],['hindi','🇮🇳 Hindi'],['french','🇫🇷 French'],['german','🇩🇪 German'],['spanish','🇪🇸 Spanish']].map(([key,label]) => (
+                          <button key={key} onClick={() => setSelectedLanguage(key)} className={`lang-pill ${selectedLanguage===key?'active':''} ${langData?.[key]?'done':''}`}>
+                            {label}{langData?.[key]?' ✓':''}
+                          </button>
+                        ))}
+                      </div>
+                      <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading, selectedLanguage)} disabled={langLoading}
+                        className={`btn-amber`} style={{ fontSize:12, padding:'10px 22px', marginBottom:16 }}>
+                        {langLoading ? 'GENERATING...' : `🌏 GENERATE ${selectedLanguage.toUpperCase()}`}
+                      </button>
+                      {langData?.[selectedLanguage] && (() => {
+                        const lang = langData[selectedLanguage];
+                        return (
+                          <div className="card anim-scale-in">
+                            {lang.culturalNote && <div style={{ background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, padding:12, marginBottom:12, fontSize:13, color:'var(--text)' }}>{lang.culturalNote}</div>}
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--text-dim)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace", textTransform:'uppercase' }}>Subject</div>
+                            <div style={{ fontSize:14, fontWeight:600, color:'var(--blue-light)', marginBottom:14 }}>{lang.emailSubject}</div>
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--text-dim)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace", textTransform:'uppercase' }}>Body</div>
+                            <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.8, marginBottom:12, whiteSpace:'pre-line' }}>{lang.emailBody}</p>
+                            <CopyButton text={`Subject: ${lang.emailSubject}\n\n${lang.emailBody}`} />
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                );
+              })() : activeTab === "outreach" ? (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📣</div>
+                  <div className="empty-state-title">No Outreach Data</div>
+                  <div className="empty-state-desc">Run the analysis to generate your personalised email sequences, LinkedIn messages and multi-language outreach.</div>
+                </div>
+              ) : null}
+
+              {/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
+              {activeTab === "playbook" && (
+                <div className="anim-slide-up">
+                  {/* Discovery Questions */}
+                  {result.discoveryQuestions && (() => {
+                    const dq = result.discoveryQuestions;
+                    return (
+                      <div style={{ marginBottom:28 }}>
+                        <div className="section-header">💬 Discovery Questions</div>
+                        {dq.openingFramer && (
+                          <div style={{ background:'rgba(29,78,216,0.07)', border:'1px solid rgba(96,165,250,0.15)', borderRadius:10, padding:16, marginBottom:20, borderLeft:'3px solid var(--blue)' }}>
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace", textTransform:'uppercase' }}>Opening Framer</div>
+                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.7, fontStyle:'italic' }}>"{dq.openingFramer}"</p>
+                          </div>
+                        )}
+                        {dq.categories?.map((cat,ci) => (
+                          <div key={ci} className="q-category">
+                            <div className="q-cat-title">{cat.category}</div>
+                            {cat.questions?.map((q,qi) => (
+                              <div key={qi} className="q-item">
+                                <div className="q-text">{q.question}</div>
+                                <div className="q-meta">
+                                  {q.intent && <span className="q-intent">Intent: {q.intent}</span>}
+                                  {q.followUp && <span className="q-followup">↳ {q.followUp}</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                        <div className="r-grid-2">
+                          {dq.redFlags?.length > 0 && (
+                            <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:16 }}>
+                              <div style={{ fontSize:9, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>RED FLAGS</div>
+                              {dq.redFlags.map((f,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>⚠ {f}</div>)}
+                            </div>
+                          )}
+                          {dq.idealCallOutcome && (
+                            <div style={{ background:'var(--green-dim)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:10, padding:16 }}>
+                              <div style={{ fontSize:9, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>IDEAL OUTCOME</div>
+                              <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{dq.idealCallOutcome}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Command of Message */}
+                  {result.commandOfMessage && (() => {
+                    const com = result.commandOfMessage;
+                    return (
+                      <div className="inline-section">
+                        <div className="section-header">🏆 Command of the Message</div>
+                        <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap' }}>
+                          <span className="tag tag-blue">{com.salesStage}</span>
+                          <span style={{ fontSize:12, color:'var(--text-muted)' }}>{com.stageRationale}</span>
+                        </div>
+                        <div className="com-before-after" style={{ marginBottom:16 }}>
+                          <div className="com-before"><div className="com-box-label" style={{ color:'var(--red)' }}>BEFORE</div><p className="com-box-text">{com.beforeScenario}</p></div>
+                          <div className="com-after"><div className="com-box-label" style={{ color:'var(--green)' }}>AFTER — 12 months</div><p className="com-box-text">{com.afterScenario}</p></div>
+                        </div>
+                        {com.objectionHandlers?.map((o,i) => (
+                          <div key={i} className="objection-item">
+                            <div className="obj-q">"{o.objection}"</div>
+                            <div className="obj-a">{o.response}</div>
+                          </div>
+                        ))}
+                        {com.closingHypothesis && (
+                          <div style={{ background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:10, padding:16, marginTop:12 }}>
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>CLOSING HYPOTHESIS</div>
+                            <p style={{ fontSize:14, fontWeight:700, color:'var(--text)', lineHeight:1.7, fontStyle:'italic' }}>"{com.closingHypothesis}"</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Battle Cards */}
+                  <div className="inline-section">
+                    <div className="section-header">⚔️ Battle Cards</div>
+                    {!battleCards ? (
+                      <button className="gen-btn" onClick={() => generateBattleCards(form, result, setBattleCards, setBattleLoading)} disabled={battleLoading||!form.competitorsMentioned}>
+                        {battleLoading ? '⏳ Generating...' : form.competitorsMentioned ? '⚔️ Generate Battle Cards' : 'Add competitors in the form first'}
+                      </button>
+                    ) : (
+                      <div className="anim-scale-in">
+                        {battleCards.map((bc,i) => (
+                          <div key={i} className="card" style={{ marginBottom:10 }}>
+                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color:'var(--amber)', marginBottom:12 }}>vs. {bc.competitor}</div>
+                            <div className="compete-vs">
+                              <div className="compete-win"><div className="compete-label" style={{ color:'var(--green)' }}>✓ We Win When</div>{bc.weWinWhen?.map((w,j) => <div key={j} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>{w}</div>)}</div>
+                              <div className="compete-lose"><div className="compete-label" style={{ color:'var(--red)' }}>✗ They Attack With</div>{bc.theyAttackWith?.map((w,j) => <div key={j} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>{w}</div>)}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Competitive Intelligence */}
+                  <div className="inline-section">
+                    <div className="section-header">🗺️ Competitive Intel</div>
+                    <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:10 }}>
+                      {form.competitorsMentioned?.split(/[,;\/]/).map(comp => comp.trim()).filter(Boolean).map(comp => (
+                        <button key={comp} onClick={() => setSelectedCompetitor(comp)} className={`lang-pill ${selectedCompetitor===comp?'active':''}`}>{comp}</button>
+                      ))}
+                    </div>
+                    <div style={{ display:'flex', gap:8, marginBottom:14 }}>
+                      <input type="text" placeholder="Enter competitor..." value={selectedCompetitor} onChange={e => setSelectedCompetitor(e.target.value)} className="input-field" style={{ flex:1 }} />
+                      <button onClick={async () => {
+                        if(!selectedCompetitor.trim()) return;
+                        setCompeteLoading(true);
+                        try {
+                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:4000, stream:true,
+                              system:`Competitive intelligence expert. Return ONLY valid JSON: {"competitor":"Name","overallThreatLevel":"high/medium/low","whereWeWin":[{"scenario":"...","reason":"...","proofPoint":"..."}],"whereWeLose":[{"scenario":"...","reason":"...","mitigation":"..."}],"objectionHandlers":[{"objection":"...","response":"...","trap":"..."}],"displacementPlaybook":{"trigger":"...","approach":"...","landmines":["...","..."]},"competitorWeaknesses":["...","...","..."]}`,
+                              messages:[{role:"user",content:`Our product: ${form.product}. Competitor: ${selectedCompetitor}. Prospect: ${form.company} (${form.industry}, ${form.market}). Stage: ${form.dealStage}. Our edge: ${result?.commandOfMessage?.uniqueDifferentiators?.join(', ')||''}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}.`}]
+                            })
+                          });
+                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                          while(true) { const {done,value} = await reader.read(); if(done) break;
+                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setCompeteData(JSON.parse(raw.slice(s,e+1)));
+                        } catch(e) { alert("Failed. Try again."); }
+                        setCompeteLoading(false);
+                      }} disabled={competeLoading||!selectedCompetitor.trim()} className="btn-amber" style={{ fontSize:12, padding:'10px 20px', whiteSpace:'nowrap' }}>
+                        {competeLoading ? '⏳' : '🗺️ Analyse'}
+                      </button>
+                    </div>
+                    {competeData && (
+                      <div className="anim-scale-in">
+                        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+                          <div style={{ fontFamily:"'Syne',sans-serif", fontSize:16, fontWeight:800, color:'var(--text)' }}>vs. {competeData.competitor}</div>
+                          <span className={`tag ${competeData.overallThreatLevel==='high'?'tag-red':competeData.overallThreatLevel==='medium'?'tag-amber':'tag-green'}`}>{competeData.overallThreatLevel?.toUpperCase()} THREAT</span>
+                        </div>
+                        <div className="compete-vs" style={{ marginBottom:12 }}>
+                          <div className="compete-win"><div className="compete-label" style={{ color:'var(--green)' }}>WHERE WE WIN</div>{competeData.whereWeWin?.map((w,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:6 }}><strong style={{color:'var(--text)'}}>{w.scenario}</strong> — {w.reason}</div>)}</div>
+                          <div className="compete-lose"><div className="compete-label" style={{ color:'var(--red)' }}>WHERE WE LOSE</div>{competeData.whereWeLose?.map((w,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:6 }}><strong style={{color:'var(--text)'}}>{w.scenario}</strong><br/><span style={{color:'var(--amber)',fontSize:11}}>Counter: {w.mitigation}</span></div>)}</div>
+                        </div>
+                        {competeData.objectionHandlers?.map((o,i) => (
+                          <div key={i} className="objection-item">
+                            <div className="obj-q">"{o.objection}"</div>
+                            <div className="obj-a">{o.response}</div>
+                            {o.trap && <div style={{ fontSize:11, color:'var(--amber)', background:'var(--amber-glow)', borderRadius:5, padding:'5px 10px', marginTop:6 }}>🪤 {o.trap}</div>}
+                          </div>
+                        ))}
+                        {competeData.displacementPlaybook && (
+                          <div style={{ background:'rgba(96,165,250,0.06)', border:'1px solid rgba(96,165,250,0.15)', borderRadius:10, padding:16, marginTop:10 }}>
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>DISPLACEMENT PLAYBOOK</div>
+                            <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:8, lineHeight:1.6 }}>{competeData.displacementPlaybook.approach}</p>
+                            {competeData.displacementPlaybook.landmines?.map((l,i) => <div key={i} style={{ fontSize:12, color:'var(--amber)', marginBottom:4 }}>🪤 "{l}"</div>)}
+                          </div>
+                        )}
+                        <button onClick={() => setCompeteData(null)} className="btn-ghost" style={{ marginTop:12, fontSize:11 }}>Analyse Different Competitor</button>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* ── TAB: OUTREACH ── */}
-              {activeTab === "outreach" && result.outreach && (
-                <div className="fade-up">
-                  <div className="card">
-                    <div className="card-title">COLD EMAIL SEQUENCE</div>
-                    {/* Email 1 */}
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                        <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>EMAIL 1 — INITIAL OUTREACH</div>
-                        <span className="tag tag-amber">DAY 1</span>
-                      </div>
-                      <div className="email-box">
-                        <div className="email-header">
-                          <div>
-                            <div style={{ fontSize: 10, color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, marginBottom: 3 }}>SUBJECT</div>
-                            <div className="email-subject">{result.outreach.coldEmail?.subject}</div>
-                            {result.outreach.coldEmail?.preheader && <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 2 }}>{result.outreach.coldEmail.preheader}</div>}
-                          </div>
-                          <CopyButton text={`Subject: ${result.outreach.coldEmail?.subject}\n\n${result.outreach.coldEmail?.body}`} />
-                        </div>
-                        <div className="email-body">{result.outreach.coldEmail?.body}</div>
-                      </div>
-                    </div>
-                    {/* Follow-ups */}
-                    {[result.outreach.coldEmail?.followUp1, result.outreach.coldEmail?.followUp2].map((fu, i) => fu && (
-                      <div key={i} style={{ marginBottom: 16 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>EMAIL {i + 2} — {i === 0 ? "FOLLOW-UP" : "BREAK-UP"}</div>
-                          <span className="tag tag-dim">DAY {fu.dayToSend}</span>
-                        </div>
-                        <div className="email-box">
-                          <div className="email-header">
-                            <div className="email-subject">{fu.subject}</div>
-                            <CopyButton text={`Subject: ${fu.subject}\n\n${fu.body}`} />
-                          </div>
-                          <div className="email-body">{fu.body}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="card">
-                    <div className="card-title">OTHER CHANNELS</div>
-                    <div className="grid-2">
-                      <div>
-                        <div className="section-head">LINKEDIN CONNECTION MESSAGE</div>
-                        {!liVariants ? (
-                          <div style={{ marginBottom:10 }}>
-                            <button onClick={() => generateLiVariants(form, result, setLiVariants, setLiVariantsLoading)}
-                              disabled={liVariantsLoading}
-                              style={{ background:"rgba(26,86,219,0.1)", border:"1px solid rgba(26,86,219,0.3)", borderRadius:8, padding:"7px 16px", color:"var(--blue-light)", fontSize:12, fontWeight:700, cursor:"pointer", opacity:liVariantsLoading?0.6:1 }}>
-                              {liVariantsLoading ? "Generating..." : "+ Generate 3 Variants"}
-                            </button>
-                          </div>
-                        ) : (
-                          <div style={{ display:"flex", gap:8, marginBottom:10 }}>
-                            {liVariants.map((v,i) => (
-                              <button key={i} onClick={() => setLinkedInVariant(i)} style={{ flex:1, padding:"7px 6px", borderRadius:8, border:"1px solid", cursor:"pointer", fontSize:11, fontWeight:700,
-                                borderColor: linkedInVariant===i ? "var(--amber)" : "var(--border)",
-                                background: linkedInVariant===i ? "rgba(245,158,11,0.1)" : "transparent",
-                                color: linkedInVariant===i ? "var(--amber)" : "var(--text-muted)" }}>
-                                {v.type}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        <div style={{ background: "var(--card)", borderRadius: 10, padding: 14, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 8, fontStyle:"italic" }}>
-                          {liVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage}
-                        </div>
-                        <CopyButton text={liVariants?.[linkedInVariant]?.message || result.outreach.linkedInMessage} />
-                      </div>
-                      <div>
-                        <div className="section-head">CHAMPION → EXEC REFERRAL</div>
-                        <div style={{ background: "var(--card)", borderRadius: 10, padding: 14, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 8 }}>
-                          {result.outreach.executiveReferral}
-                        </div>
-                        <CopyButton text={result.outreach.executiveReferral} />
-                      </div>
-                    </div>
-                    <div className="divider" />
-                    <div className="section-head">SENDING TIPS FOR THIS PROSPECT</div>
-                    <ul className="bullet-list">{result.outreach.sendingTips?.map((t, i) => <li key={i}>{t}</li>)}</ul>
-                  </div>
-                </div>
-              )}
-
-              {/* ── TAB: DISCOVERY ── */}
-              {activeTab === "discovery" && result.discoveryQuestions && (
-                <div className="fade-up">
-                  <div className="card">
-                    <div className="card-title">DISCOVERY CALL PREP</div>
-                    <div className="section-head">OPENING FRAMER</div>
-                    <div className="highlight-text" style={{ marginBottom: 24 }}>"{result.discoveryQuestions.openingFramer}"</div>
-                    {result.discoveryQuestions.categories?.map((cat, ci) => (
-                      <div className="q-category" key={ci}>
-                        <div className="q-cat-title">{cat.category}</div>
-                        {cat.questions?.map((q, qi) => (
-                          <div className="q-item" key={qi}>
-                            <div className="q-text">{q.question}</div>
-                            <div className="q-meta">
-                              {q.intent && <span className="q-intent">Intent: {q.intent}</span>}
-                              {q.followUp && <span className="q-followup"> · If vague: {q.followUp}</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                    <div className="divider" />
-                    <div className="grid-2">
-                      <div>
-                        <div className="section-head">RED FLAG ANSWERS</div>
-                        <ul className="bullet-list">{result.discoveryQuestions.redFlags?.map((r, i) => <li key={i} style={{ color: "var(--red)" }}>{r}</li>)}</ul>
-                      </div>
-                      <div>
-                        <div className="section-head">IDEAL CALL OUTCOME</div>
-                        <div className="info-panel green">{result.discoveryQuestions.idealCallOutcome}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ── TAB: COMMAND OF MESSAGE ── */}
-              {activeTab === "com" && result.commandOfMessage && (
-                <div className="fade-up">
-                  <div className="card">
-                    <div className="card-title">COMMAND OF THE MESSAGE</div>
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
-                        <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: "var(--amber)" }}>{result.commandOfMessage.salesStage}</div>
-                        <span className="tag tag-amber">RECOMMENDED STAGE</span>
-                      </div>
-                      <div className="section-body">{result.commandOfMessage.stageRationale}</div>
-                    </div>
-                    <div className="com-before-after">
-                      <div className="com-before">
-                        <div className="com-box-label" style={{ color: "var(--red)" }}>BEFORE SCENARIO — TODAY</div>
-                        <div className="com-box-text" style={{ color: "#FCA5A5" }}>{result.commandOfMessage.beforeScenario}</div>
-                      </div>
-                      <div className="com-after">
-                        <div className="com-box-label" style={{ color: "var(--green)" }}>AFTER SCENARIO — 12 MONTHS IN</div>
-                        <div className="com-box-text" style={{ color: "#6EE7B7" }}>{result.commandOfMessage.afterScenario}</div>
-                      </div>
-                    </div>
-                    <div className="section-head">VALUE DRIVERS</div>
-                    {result.commandOfMessage.valueDrivers?.map((v, i) => (
-                      <div className="value-driver" key={i}>
-                        <div className="vd-icon">{i === 0 ? "💰" : i === 1 ? "🛡️" : "📈"}</div>
-                        <div>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--amber)", marginBottom: 4 }}>{v.driver}</div>
-                          <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>{v.specifics}</div>
-                          <span className="tag tag-green" style={{ fontSize: 10 }}>{v.estimatedImpact}</span>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="divider" />
-                    <div className="section-head">REQUIRED CAPABILITIES</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-                      {result.commandOfMessage.requiredCapabilities?.map((rc, i) => (
-                        <div key={i} style={{ background: "var(--card)", borderRadius: 10, padding: 12, border: "1px solid var(--border)" }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: "white", marginBottom: 6 }}>{rc.capability}</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{rc.proofPoint}</div>
+              {/* ═══ TAB: BUSINESS CASE ════════════════════════════════════ */}
+              {activeTab === "bizcase" && (
+                <div className="anim-slide-up">
+                  {/* ROI Calculator */}
+                  <div className="card" style={{ marginBottom:20 }}>
+                    <div className="card-title">💰 ROI Calculator</div>
+                    <div className="r-grid-2" style={{ marginBottom:20 }}>
+                      {[['employees','Team Size Affected','e.g. 25'],['avgSalary','Avg Annual Salary (USD)','e.g. 85000'],['hoursPerWeek','Hrs/Week Manual Work','e.g. 12'],['currentErrors','Annual Error/Risk Cost (USD)','e.g. 250000'],['revenueUpside','Revenue Upside (USD)','e.g. 500000'],['dealSize','Solution ACV (USD)','e.g. 200000']].map(([key,label,ph]) => (
+                        <div key={key} className="input-group">
+                          <label className="input-label">{label}</label>
+                          <input type="number" placeholder={ph} value={roiInputs[key]} onChange={e => setRoiInputs(p => ({...p,[key]:e.target.value}))} className="input-field" />
                         </div>
                       ))}
                     </div>
-                    <div className="section-head">UNIQUE DIFFERENTIATORS</div>
-                    <ul className="bullet-list" style={{ marginBottom: 20 }}>
-                      {result.commandOfMessage.uniqueDifferentiators?.map((d, i) => <li key={i} style={{ color: "var(--blue-light)" }}>{d}</li>)}
-                    </ul>
-                    <div className="section-head">OBJECTION HANDLERS</div>
-                    {result.commandOfMessage.objectionHandlers?.map((o, i) => (
-                      <div className="objection-item" key={i}>
-                        <div className="obj-q">"{o.objection}"</div>
-                        <div className="obj-a">{o.response}</div>
-                      </div>
-                    ))}
-                    <div className="divider" />
-                    <div className="section-head">CLOSING HYPOTHESIS</div>
-                    <div className="highlight-text">{result.commandOfMessage.closingHypothesis}</div>
+                    <button onClick={() => setRoiResult(calcROI(roiInputs, result))} className="btn-amber">CALCULATE ROI</button>
                   </div>
-                </div>
-              )}
 
-              {/* ── TAB: MEETING PREP ── */}
-              {activeTab === "meetingprep" && (
-                <div className="fade-up-1">
-                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:16, padding:28, marginBottom:20 }}>
-                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:900, color:"var(--amber)", marginBottom:4 }}>⚡ Meeting Prep Brief</div>
-                    <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:24 }}>30-second prep for your next meeting. Tell us who you're meeting and we'll brief you instantly.</div>
-
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
-                      <div>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Person's Name</div>
-                        <input type="text" placeholder="e.g. Sarah Chen" value={meetingInputs.personName}
-                          onChange={e => setMeetingInputs(p => ({...p, personName: e.target.value}))}
-                          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none" }} />
-                      </div>
-                      <div>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Their Role</div>
-                        <input type="text" placeholder="e.g. CFO / Head of Finance" value={meetingInputs.personRole}
-                          onChange={e => setMeetingInputs(p => ({...p, personRole: e.target.value}))}
-                          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none" }} />
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom:16 }}>
-                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Meeting Type</div>
-                      <div style={{ display:"flex", gap:8 }}>
-                        {[["discovery","🔍 Discovery"],["demo","🎯 Demo"],["negotiation","🤝 Negotiation"],["qbr","📊 QBR"],["checkin","☎️ Check-in"],["execsponsor","👔 Exec Sponsor"]].map(([val, label]) => (
-                          <button key={val} onClick={() => setMeetingInputs(p => ({...p, meetingType: val}))}
-                            style={{ padding:"8px 14px", borderRadius:8, border:"1px solid", fontSize:12, fontWeight:600, cursor:"pointer", transition:"all 0.2s",
-                              borderColor: meetingInputs.meetingType === val ? "var(--amber)" : "var(--border)",
-                              background: meetingInputs.meetingType === val ? "var(--amber-glow)" : "transparent",
-                              color: meetingInputs.meetingType === val ? "var(--amber)" : "var(--text-muted)" }}>
-                            {label}
-                          </button>
+                  {roiResult && (
+                    <div className="anim-scale-in" style={{ marginBottom:20 }}>
+                      <div className="r-grid-3" style={{ marginBottom:16 }}>
+                        {[['ROI',`${roiResult.roi}%`,'#10B981'],['Payback',`${roiResult.payback} mo`,'#F59E0B'],['Monthly CoI',`$${roiResult.costOfInaction?.toLocaleString()}`,'#EF4444']].map(([label,val,color]) => (
+                          <div key={label} className="roi-metric" style={{ borderColor:`${color}33` }}>
+                            <div className="roi-value" style={{ color }}>{val}</div>
+                            <div className="roi-label">{label}</div>
+                          </div>
                         ))}
                       </div>
+                      <div style={{ background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:12, padding:18, marginBottom:14 }}>
+                        <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>CFO TALK TRACK</div>
+                        <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, fontStyle:'italic', marginBottom:10 }}>
+                          "The cost of inaction is ${roiResult.costOfInaction?.toLocaleString()} per month — ${roiResult.totalBenefit?.toLocaleString()} annually. Our solution delivers {roiResult.roi}% ROI with a {roiResult.payback}-month payback. Every month you delay costs more than the solution itself."
+                        </p>
+                        <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`The cost of inaction is $${roiResult.costOfInaction?.toLocaleString()} per month. Our solution delivers ${roiResult.roi}% ROI with a ${roiResult.payback}-month payback period.`)}>COPY</button>
+                      </div>
+                      {!roiResearch ? (
+                        <button onClick={async () => {
+                          setRoiResearchLoading(true);
+                          try {
+                            const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                              body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2000, tools:[{type:"web_search_20250305",name:"web_search"}],
+                                system:`Find ROI studies. Return ONLY valid JSON: {"studies":[{"source":"Forrester TEI","title":"...","keyFinding":"...","year":"2024"}],"industryBenchmarks":["..."]}`,
+                                messages:[{role:"user",content:`ROI research for ${form.product} in ${form.industry}.`}]
+                              })
+                            });
+                            const data = await res.json();
+                            const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'{}';
+                            const s=text.indexOf('{'),e=text.lastIndexOf('}'); if(s!==-1&&e!==-1) setRoiResearch(JSON.parse(text.slice(s,e+1)));
+                          } catch(err) {} setRoiResearchLoading(false);
+                        }} disabled={roiResearchLoading} className="gen-btn" style={{ width:'100%', justifyContent:'center' }}>
+                          {roiResearchLoading ? '⏳ Searching...' : '🔍 Find Forrester/Gartner Research'}
+                        </button>
+                      ) : (
+                        <div className="card anim-scale-in">
+                          <div style={{ fontSize:9, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:12, fontFamily:"'JetBrains Mono',monospace" }}>ANALYST RESEARCH</div>
+                          {roiResearch.studies?.map((s,i) => (
+                            <div key={i} style={{ paddingBottom:12, marginBottom:12, borderBottom:'1px solid var(--border)' }}>
+                              <div style={{ fontSize:9, color:'var(--blue-light)', fontFamily:"'JetBrains Mono',monospace", marginBottom:4 }}>{s.source} {s.year&&`· ${s.year}`}</div>
+                              <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:4 }}>{s.title}</div>
+                              <div style={{ fontSize:12, color:'var(--text-muted)' }}>{s.keyFinding}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                  )}
 
-                    <div style={{ marginBottom:20 }}>
-                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Additional Context (optional)</div>
-                      <textarea placeholder="e.g. They mentioned budget concerns last call. Their CTO will also be joining. We need to address the data security question..."
-                        value={meetingInputs.additionalContext}
-                        onChange={e => setMeetingInputs(p => ({...p, additionalContext: e.target.value}))}
-                        style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none", minHeight:80, resize:"vertical", lineHeight:1.6 }} />
+                  {/* Meeting Prep */}
+                  <div className="inline-section">
+                    <div className="section-header">⚡ Meeting Prep</div>
+                    <div className="r-grid-2" style={{ marginBottom:10 }}>
+                      <div className="input-group">
+                        <label className="input-label">Name</label>
+                        <input type="text" placeholder="e.g. Sarah Chen" value={meetingInputs.personName} onChange={e => setMeetingInputs(p => ({...p,personName:e.target.value}))} className="input-field" />
+                      </div>
+                      <div className="input-group">
+                        <label className="input-label">Role</label>
+                        <input type="text" placeholder="e.g. CFO" value={meetingInputs.personRole} onChange={e => setMeetingInputs(p => ({...p,personRole:e.target.value}))} className="input-field" />
+                      </div>
                     </div>
-
+                    <div className="meeting-types" style={{ marginBottom:10 }}>
+                      {[['discovery','🔍 Discovery'],['demo','🎯 Demo'],['negotiation','🤝 Negotiation'],['qbr','📊 QBR'],['checkin','☎️ Check-in'],['execsponsor','👔 Exec Sponsor']].map(([val,label]) => (
+                        <button key={val} onClick={() => setMeetingInputs(p => ({...p,meetingType:val}))} className={`meeting-type-btn ${meetingInputs.meetingType===val?'active':''}`}>{label}</button>
+                      ))}
+                    </div>
+                    <textarea placeholder="Additional context..." value={meetingInputs.additionalContext} onChange={e => setMeetingInputs(p => ({...p,additionalContext:e.target.value}))} style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'9px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:56, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }} />
                     <button onClick={async () => {
                       setMeetingPrepLoading(true);
                       try {
-                        const res = await fetch("/api/anthropic", {
-                          method:"POST", headers:{"Content-Type":"application/json"},
-                          body: JSON.stringify({
-                            model:"claude-sonnet-4-20250514", max_tokens:4000, stream:true,
-                            system:`You are Ankur Sehgal — a 7x President's Club enterprise sales expert. Generate a sharp, actionable meeting prep brief. Return ONLY valid JSON:
-{"meetingObjective":"Single clear objective for this meeting","personIntel":{"archetype":"Their buyer archetype","likelyMotivations":["motivation 1","motivation 2","motivation 3"],"likelyFears":["fear 1","fear 2"],"communicationStyle":"How they prefer to communicate","whatTheyWillJudgeYouOn":"What matters most to them"},"openingLine":"Your exact opening line for this meeting — word for word","powerQuestions":[{"question":"Question 1","intent":"Why ask this","expectedInsight":"What you'll learn"},{"question":"Question 2","intent":"Why ask this","expectedInsight":"What you'll learn"},{"question":"Question 3","intent":"Why ask this","expectedInsight":"What you'll learn"}],"landminesToAvoid":["Landmine 1","Landmine 2","Landmine 3"],"yourValueHypothesis":"One sentence on why they should care about your solution right now","meetingAgenda":["Agenda item 1 (time)","Agenda item 2 (time)","Agenda item 3 (time)","Agenda item 4 (time)"],"successCriteria":"What does a perfect outcome look like?","followUpTemplate":"Exact follow-up email subject and first line to send after"}`,
-                            messages:[{role:"user",content:`Meeting with: ${meetingInputs.personName || "Unknown"} — ${meetingInputs.personRole}
-Meeting type: ${meetingInputs.meetingType}
-Company: ${form.company} | Market: ${form.market} | Industry: ${form.industry}
-Product: ${form.product}
-Deal stage: ${form.dealStage}
-Their MEDDPICC context: ${JSON.stringify(result?.meddpicc?.elements || {})}
-Stakeholder info: ${JSON.stringify(result?.stakeholders?.buyingCommittee?.find(s => s.role?.toLowerCase().includes(meetingInputs.personRole?.toLowerCase().split(' ')[0]?.toLowerCase() || 'x')) || {})}
-Additional context: ${meetingInputs.additionalContext || "None provided"}`}]
+                        const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                          body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:3000, stream:true,
+                            system:`Generate meeting prep. Return ONLY valid JSON: {"meetingObjective":"...","personIntel":{"archetype":"...","likelyMotivations":["..."],"whatTheyWillJudgeYouOn":"..."},"openingLine":"...","powerQuestions":[{"question":"...","intent":"...","expectedInsight":"..."},{"question":"...","intent":"...","expectedInsight":"..."},{"question":"...","intent":"...","expectedInsight":"..."}],"landminesToAvoid":["...","...","..."],"successCriteria":"...","followUpTemplate":"..."}`,
+                            messages:[{role:"user",content:`Meeting: ${meetingInputs.personName||'Unknown'} — ${meetingInputs.personRole}. Type: ${meetingInputs.meetingType}. Company: ${form.company}. Product: ${form.product}. Stage: ${form.dealStage}. Context: ${meetingInputs.additionalContext||'None'}.`}]
                           })
                         });
-                        const reader = res.body.getReader();
-                        const decoder = new TextDecoder();
-                        let raw = "";
-                        while(true) {
-                          const {done,value} = await reader.read();
-                          if(done) break;
-                          for(const line of decoder.decode(value,{stream:true}).split("\n")) {
-                            if(line.startsWith("data: ")) {
-                              try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){}
-                            }
-                          }
-                        }
-                        const s=raw.indexOf("{"),e=raw.lastIndexOf("}");
-                        setMeetingPrep(JSON.parse(raw.slice(s,e+1)));
-                      } catch(e) { alert("Failed to generate meeting prep. Try again."); }
+                        const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                        while(true) { const {done,value} = await reader.read(); if(done) break;
+                          for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                        const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setMeetingPrep(JSON.parse(raw.slice(s,e+1)));
+                      } catch(e) { alert("Failed. Try again."); }
                       setMeetingPrepLoading(false);
-                    }} disabled={meetingPrepLoading || !meetingInputs.personRole}
-                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:(meetingPrepLoading||!meetingInputs.personRole)?0.5:1 }}>
-                      {meetingPrepLoading ? "GENERATING BRIEF..." : "⚡ GENERATE MEETING PREP"}
+                    }} disabled={meetingPrepLoading||!meetingInputs.personRole} className="btn-amber" style={{ fontSize:12, padding:'10px 24px', marginBottom: meetingPrep ? 16 : 0 }}>
+                      {meetingPrepLoading ? 'GENERATING...' : '⚡ GENERATE PREP'}
                     </button>
+
+                    {meetingPrep && (
+                      <div className="anim-scale-in">
+                        <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.1),rgba(234,88,12,0.07))', border:'1px solid rgba(245,158,11,0.2)', borderRadius:12, padding:16, marginBottom:12 }}>
+                          <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>OBJECTIVE</div>
+                          <p style={{ fontSize:14, fontWeight:700, color:'var(--text)' }}>{meetingPrep.meetingObjective}</p>
+                        </div>
+                        <div style={{ background:'rgba(29,78,216,0.07)', border:'1px solid rgba(96,165,250,0.15)', borderLeft:'3px solid var(--blue)', borderRadius:'0 10px 10px 0', padding:16, marginBottom:12 }}>
+                          <div style={{ fontSize:9, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>OPENING LINE</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.7, fontStyle:'italic', marginBottom:8 }}>"{meetingPrep.openingLine}"</p>
+                          <button className="copy-btn" onClick={() => navigator.clipboard.writeText(meetingPrep.openingLine)}>COPY</button>
+                        </div>
+                        <div className="card" style={{ marginBottom:12 }}>
+                          <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:12, fontFamily:"'JetBrains Mono',monospace" }}>POWER QUESTIONS</div>
+                          {meetingPrep.powerQuestions?.map((q,i) => (
+                            <div key={i} style={{ paddingBottom:12, marginBottom:12, borderBottom:i<2?'1px solid var(--border)':'none' }}>
+                              <p style={{ fontSize:13, color:'var(--text)', fontStyle:'italic', marginBottom:6 }}>"{q.question}"</p>
+                              <div className="r-grid-2">
+                                <div style={{ fontSize:11, color:'var(--text-dim)' }}>Intent: {q.intent}</div>
+                                <div style={{ fontSize:11, color:'var(--blue-light)' }}>Learn: {q.expectedInsight}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="r-grid-2">
+                          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:14 }}>
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>LANDMINES</div>
+                            {meetingPrep.landminesToAvoid?.map((l,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>✗ {l}</div>)}
+                          </div>
+                          <div className="card">
+                            <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>FOLLOW-UP</div>
+                            <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.6 }}>{meetingPrep.followUpTemplate}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {meetingPrep && (
-                    <div className="fade-up-1">
-                      {/* Objective Banner */}
-                      <div style={{ background:"linear-gradient(135deg,rgba(245,158,11,0.15),rgba(234,88,12,0.1))", border:"1px solid rgba(245,158,11,0.3)", borderRadius:12, padding:20, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:3, marginBottom:8, textTransform:"uppercase" }}>Meeting Objective</div>
-                        <div style={{ fontSize:16, fontWeight:700, color:"var(--text)" }}>{meetingPrep.meetingObjective}</div>
-                      </div>
-
-                      {/* Opening Line */}
-                      <div style={{ background:"rgba(29,78,216,0.08)", border:"1px solid rgba(96,165,250,0.2)", borderRadius:12, padding:20, marginBottom:16, borderLeft:"3px solid var(--blue)" }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--blue-light)", letterSpacing:3, marginBottom:8, textTransform:"uppercase" }}>Your Opening Line — Say This Verbatim</div>
-                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, fontStyle:"italic" }}>"{meetingPrep.openingLine}"</div>
-                        <button onClick={() => navigator.clipboard.writeText(meetingPrep.openingLine)}
-                          style={{ marginTop:10, background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-dim)", fontSize:10, cursor:"pointer", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>
-                          COPY
+                  {/* Exec Brief */}
+                  <div className="inline-section">
+                    <div className="section-header">📋 Executive Brief</div>
+                    {!roiResult && <div style={{ fontSize:11, color:'var(--amber)', marginBottom:12, padding:'8px 12px', background:'var(--amber-glow)', borderRadius:6 }}>💡 Calculate ROI first for more accurate financial figures</div>}
+                    {!execBrief ? (
+                      <div className="empty-state" style={{ padding:'32px 16px' }}>
+                        <div className="empty-state-icon">📋</div>
+                        <div className="empty-state-title">Executive Briefing Document</div>
+                        <div className="empty-state-desc">A board-ready business case written for your buyer — CFO/CEO language, outcome-focused, data-driven.</div>
+                        <button onClick={async () => {
+                          setExecBriefLoading(true);
+                          try {
+                            const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                              body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:5000, stream:true,
+                                system:`Write executive briefing for CFO/CEO. Use actual ROI figures. Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","currentStateAnalysis":{"headline":"...","painPoints":["...","...","..."],"costOfStatusQuo":"...","urgencyDrivers":["...","..."]},"businessCase":{"totalInvestment":"...","year1Benefits":"...","roiPercentage":"...","paybackPeriod":"...","npv3Year":"..."},"riskAnalysis":{"risksOfInaction":["...","...","..."]},"peerValidation":{"industryBenchmark":"...","analystPerspective":"..."},"recommendation":{"decision":"...","immediateNextSteps":["...","...","..."],"executiveSponsorAsk":"..."}}`,
+                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. ROI: ${roiResult?`${roiResult.roi}% ROI, ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit`:'not calculated'}.`}]
+                              })
+                            });
+                            const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                            while(true) { const {done,value} = await reader.read(); if(done) break;
+                              for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                            const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setExecBrief(JSON.parse(raw.slice(s,e+1)));
+                          } catch(e) { alert("Failed. Try again."); }
+                          setExecBriefLoading(false);
+                        }} disabled={execBriefLoading} className="btn-amber">
+                          {execBriefLoading ? 'GENERATING...' : '📋 GENERATE EXEC BRIEF'}
                         </button>
                       </div>
-
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
-                        {/* Person Intel */}
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
-                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>Person Intelligence</div>
-                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:4 }}>ARCHETYPE</div>
-                          <div style={{ fontSize:13, color:"var(--amber)", fontWeight:700, marginBottom:12 }}>{meetingPrep.personIntel?.archetype}</div>
-                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:6 }}>MOTIVATIONS</div>
-                          {meetingPrep.personIntel?.likelyMotivations?.map((m,i) => (
-                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:4 }}>→ {m}</div>
-                          ))}
-                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:6, marginTop:12 }}>THEY WILL JUDGE YOU ON</div>
-                          <div style={{ fontSize:12, color:"var(--text)", background:"var(--amber-glow)", borderRadius:6, padding:"8px 10px" }}>{meetingPrep.personIntel?.whatTheyWillJudgeYouOn}</div>
+                    ) : (
+                      <div className="anim-scale-in">
+                        <div style={{ background:'linear-gradient(135deg,rgba(29,78,216,0.1),rgba(8,17,30,0.6))', border:'1px solid rgba(96,165,250,0.2)', borderRadius:14, padding:22, marginBottom:14 }}>
+                          <div style={{ fontSize:9, color:'var(--blue-light)', fontFamily:"'JetBrains Mono',monospace", letterSpacing:2, marginBottom:6 }}>EXECUTIVE BRIEFING · CONFIDENTIAL</div>
+                          <div style={{ fontFamily:"'Syne',sans-serif", fontSize:17, fontWeight:900, color:'white', lineHeight:1.3 }}>{execBrief.documentTitle}</div>
                         </div>
-
-                        {/* Agenda + Success */}
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
-                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>Suggested Agenda</div>
-                          {meetingPrep.meetingAgenda?.map((item,i) => (
-                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8, display:"flex", gap:8 }}>
-                              <span style={{ color:"var(--amber)", fontWeight:700, minWidth:16 }}>{i+1}.</span>
-                              <span>{item}</span>
-                            </div>
-                          ))}
-                          <div style={{ marginTop:16, padding:12, background:"var(--green-dim)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:8 }}>
-                            <div style={{ fontSize:10, fontWeight:700, color:"var(--green)", letterSpacing:1, marginBottom:4 }}>SUCCESS LOOKS LIKE</div>
-                            <div style={{ fontSize:12, color:"var(--text-muted)" }}>{meetingPrep.successCriteria}</div>
-                          </div>
+                        <div className="card" style={{ marginBottom:12 }}>
+                          <div className="section-header">Executive Summary</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.8 }}>{execBrief.executiveSummary}</p>
                         </div>
-                      </div>
-
-                      {/* Power Questions */}
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:16, textTransform:"uppercase" }}>3 Power Questions</div>
-                        {meetingPrep.powerQuestions?.map((q,i) => (
-                          <div key={i} style={{ marginBottom:16, paddingBottom:16, borderBottom: i < 2 ? "1px solid var(--border)" : "none" }}>
-                            <div style={{ fontSize:14, color:"var(--text)", fontStyle:"italic", marginBottom:8 }}>"{q.question}"</div>
-                            <div style={{ display:"flex", gap:16 }}>
-                              <div style={{ flex:1 }}>
-                                <div style={{ fontSize:9, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:3 }}>WHY ASK</div>
-                                <div style={{ fontSize:11, color:"var(--text-muted)" }}>{q.intent}</div>
-                              </div>
-                              <div style={{ flex:1 }}>
-                                <div style={{ fontSize:9, fontWeight:700, color:"var(--blue-light)", letterSpacing:1, marginBottom:3 }}>YOU'LL LEARN</div>
-                                <div style={{ fontSize:11, color:"var(--text-muted)" }}>{q.expectedInsight}</div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Landmines + Follow Up */}
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-                        <div style={{ background:"var(--red-dim)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:12, padding:20 }}>
-                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--red)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>⚠ Landmines to Avoid</div>
-                          {meetingPrep.landminesToAvoid?.map((l,i) => (
-                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>✗ {l}</div>
-                          ))}
-                        </div>
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
-                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>Follow-Up Template</div>
-                          <div style={{ fontSize:12, color:"var(--text)", lineHeight:1.7 }}>{meetingPrep.followUpTemplate}</div>
-                          <button onClick={() => navigator.clipboard.writeText(meetingPrep.followUpTemplate)}
-                            style={{ marginTop:10, background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-dim)", fontSize:10, cursor:"pointer", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>
-                            COPY
-                          </button>
-                        </div>
-                      </div>
-
-                      <button onClick={() => setMeetingPrep(null)}
-                        style={{ marginTop:16, background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 20px", color:"var(--text-dim)", fontSize:11, cursor:"pointer" }}>
-                        Generate New Prep
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: EXEC BRIEF ── */}
-              {activeTab === "execbrief" && (
-                <div className="fade-up-1">
-                  {!execBrief ? (
-                    <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:16, padding:40, textAlign:"center" }}>
-                      <div style={{ fontSize:48, marginBottom:16 }}>📋</div>
-                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"var(--amber)", marginBottom:8 }}>Executive Briefing Document</div>
-                      <div style={{ fontSize:14, color:"var(--text-muted)", marginBottom:8, maxWidth:500, margin:"0 auto 24px" }}>
-                        A board-ready business case written <em>for your buyer</em> — in their language, focused on their outcomes. Give this to your champion to take to the CFO or CEO.
-                      </div>
-                      <div style={{ display:"flex", gap:12, justifyContent:"center", marginBottom:28, flexWrap:"wrap" }}>
-                        {["Executive Summary","Business Case & ROI","Risk of Inaction","Peer Validation","Recommended Next Step"].map(s => (
-                          <span key={s} style={{ background:"var(--amber-glow)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:6, padding:"4px 12px", fontSize:11, color:"var(--amber)", fontFamily:"'JetBrains Mono',monospace" }}>{s}</span>
-                        ))}
-                      </div>
-                      <button onClick={async () => {
-                        setExecBriefLoading(true);
-                        try {
-                          const res = await fetch("/api/anthropic", {
-                            method:"POST", headers:{"Content-Type":"application/json"},
-                            body: JSON.stringify({
-                              model:"claude-sonnet-4-20250514", max_tokens:6000, stream:true,
-                              system:`You are a McKinsey-trained enterprise business case writer. Write an executive briefing document that a champion can take to their CFO or CEO to get approval for a purchase. This document is written FOR the buyer, not the seller. It should be authoritative, data-driven, and free of vendor language. Use the actual ROI figures provided — do NOT make up numbers. Return ONLY valid JSON:
-{"documentTitle":"[Company] — Business Case for [Solution Category]","executiveSummary":"3-4 sentence board-ready summary of the opportunity and recommendation","currentStateAnalysis":{"headline":"The problem headline","painPoints":["Specific pain 1 with $ impact","Specific pain 2 with $ impact","Specific pain 3 with $ impact"],"costOfStatusQuo":"Annual cost of doing nothing in $ terms","urgencyDrivers":["Why act now — regulatory/competitive/market driver 1","Driver 2"]},"proposedSolution":{"whatItDoes":"What the solution does in buyer language — no vendor speak","keyCapabilities":["Capability 1 and its outcome","Capability 2 and its outcome","Capability 3 and its outcome"],"implementationTimeline":"Realistic timeline to value"},"businessCase":{"totalInvestment":"Investment range","year1Benefits":"Year 1 financial benefit","year2Benefits":"Year 2 financial benefit","roiPercentage":"Expected ROI %","paybackPeriod":"Payback period in months","npv3Year":"3-year NPV estimate"},"riskAnalysis":{"risksOfAction":["Implementation risk and mitigation"],"risksOfInaction":["Risk of not acting 1","Risk of not acting 2","Risk of not acting 3"]},"peerValidation":{"industryBenchmark":"What peer companies are doing based on your knowledge","analystPerspective":"Relevant Gartner/Forrester perspective based on your knowledge","caseStudy":"Brief relevant case study based on your knowledge"},"recommendation":{"decision":"Clear recommended decision","immediateNextSteps":["Step 1","Step 2","Step 3"],"successMetrics":["How we measure success 1","How we measure success 2"],"executiveSponsorAsk":"What you need from the executive sponsor"}}`,
-                              messages:[{role:"user",content:`Company: ${form.company} | Market: ${form.market} | Industry: ${form.industry}
-Solution: ${form.product} — ${form.productDesc || ""}
-Deal size: ${form.dealSize || "TBD"}
-Key pain points: ${result?.accountBrief?.painPoints?.map(p => p.pain).join(", ") || ""}
-Value drivers: ${JSON.stringify(result?.commandOfMessage?.valueDrivers || [])}
-ACTUAL ROI FIGURES (use these exact numbers): ${roiResult ? `Labor savings: $${roiResult.laborSavings?.toLocaleString()}, Error costs eliminated: $${roiResult.errorCost?.toLocaleString()}, Revenue upside: $${roiResult.revenueUpside?.toLocaleString()}, Total annual benefit: $${roiResult.totalBenefit?.toLocaleString()}, ROI: ${roiResult.roi}%, Payback: ${roiResult.payback} months, Cost of inaction per month: $${roiResult.costOfInaction?.toLocaleString()}` : "ROI calculator not yet completed — use conservative estimates based on industry benchmarks"}
-Deal stage: ${form.dealStage}
-Market context: ${result?.accountBrief?.marketContext || ""}`}]
-                            })
-                          });
-                          const reader = res.body.getReader();
-                          const decoder = new TextDecoder();
-                          let raw = "";
-                          while(true) {
-                            const {done,value} = await reader.read();
-                            if(done) break;
-                            for(const line of decoder.decode(value,{stream:true}).split("\n")) {
-                              if(line.startsWith("data: ")) {
-                                try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){}
-                              }
-                            }
-                          }
-                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}");
-                          setExecBrief(JSON.parse(raw.slice(s,e+1)));
-                        } catch(e) { alert("Failed to generate executive brief. Try again."); }
-                        setExecBriefLoading(false);
-                      }} disabled={execBriefLoading}
-                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 36px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:execBriefLoading?0.6:1 }}>
-                        {execBriefLoading ? "GENERATING BUSINESS CASE..." : "📋 GENERATE EXEC BRIEF"}
-                      </button>
-                      {execBriefLoading && <div style={{ fontSize:12, color:"var(--text-dim)", marginTop:12 }}>Researching industry data and analyst reports... ~20 seconds</div>}
-                    </div>
-                  ) : (
-                    <div className="fade-up-1">
-                      {/* Document Header */}
-                      <div style={{ background:"linear-gradient(135deg,rgba(29,78,216,0.15),rgba(8,17,30,0.8))", border:"1px solid rgba(96,165,250,0.2)", borderRadius:16, padding:28, marginBottom:20 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--blue-light)", letterSpacing:3, marginBottom:8, textTransform:"uppercase" }}>Executive Briefing Document · Confidential</div>
-                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"white", marginBottom:4 }}>{execBrief.documentTitle}</div>
-                        <div style={{ display:"flex", gap:12, marginTop:12 }}>
-                          <span style={{ fontSize:11, color:"var(--text-dim)" }}>Prepared for: {form.company} Leadership</span>
-                          <span style={{ fontSize:11, color:"var(--text-dim)" }}>· {new Date().toLocaleDateString('en-SG',{month:'long',year:'numeric'})}</span>
-                        </div>
-                        <div style={{ display:"flex", gap:10, marginTop:16 }}>
-                          <button onClick={() => navigator.clipboard.writeText(JSON.stringify(execBrief, null, 2))}
-                            style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 16px", color:"var(--text-dim)", fontSize:11, cursor:"pointer", fontFamily:"'JetBrains Mono',monospace" }}>
-                            COPY AS TEXT
-                          </button>
-                          <button onClick={() => setExecBrief(null)}
-                            style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 16px", color:"var(--text-dim)", fontSize:11, cursor:"pointer" }}>
-                            Regenerate
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Executive Summary */}
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:3, marginBottom:12, textTransform:"uppercase" }}>Executive Summary</div>
-                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.8 }}>{execBrief.executiveSummary}</div>
-                      </div>
-
-                      {/* Current State */}
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--red)", letterSpacing:3, marginBottom:12, textTransform:"uppercase" }}>Current State Analysis</div>
-                        <div style={{ fontSize:16, fontWeight:700, color:"var(--text)", marginBottom:16 }}>{execBrief.currentStateAnalysis?.headline}</div>
-                        {execBrief.currentStateAnalysis?.painPoints?.map((p,i) => (
-                          <div key={i} style={{ display:"flex", gap:10, marginBottom:10, alignItems:"flex-start" }}>
-                            <span style={{ color:"var(--red)", fontWeight:700, marginTop:1 }}>✗</span>
-                            <span style={{ fontSize:13, color:"var(--text-muted)" }}>{p}</span>
-                          </div>
-                        ))}
-                        <div style={{ marginTop:16, background:"var(--red-dim)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:8, padding:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:"var(--red)", letterSpacing:1, marginBottom:6 }}>ANNUAL COST OF STATUS QUO</div>
-                          <div style={{ fontSize:18, fontWeight:900, color:"var(--red)" }}>{execBrief.currentStateAnalysis?.costOfStatusQuo}</div>
-                        </div>
-                      </div>
-
-                      {/* Business Case */}
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--green)", letterSpacing:3, marginBottom:16, textTransform:"uppercase" }}>Financial Business Case</div>
-                        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:16 }}>
-                          {[
-                            ["Total Investment", execBrief.businessCase?.totalInvestment, "var(--text-muted)"],
-                            ["Expected ROI", execBrief.businessCase?.roiPercentage, "var(--green)"],
-                            ["Payback Period", execBrief.businessCase?.paybackPeriod, "var(--amber)"],
-                            ["Year 1 Benefit", execBrief.businessCase?.year1Benefits, "var(--green)"],
-                            ["Year 2 Benefit", execBrief.businessCase?.year2Benefits, "var(--green)"],
-                            ["3-Year NPV", execBrief.businessCase?.npv3Year, "var(--amber)"],
-                          ].map(([label,val,color]) => (
-                            <div key={label} style={{ background:"var(--card2)", border:"1px solid var(--border)", borderRadius:10, padding:16, textAlign:"center" }}>
-                              <div style={{ fontSize:16, fontWeight:800, color, marginBottom:4 }}>{val}</div>
-                              <div style={{ fontSize:9, color:"var(--text-dim)", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1, textTransform:"uppercase" }}>{label}</div>
+                        <div className="r-grid-3" style={{ marginBottom:12 }}>
+                          {[['ROI',execBrief.businessCase?.roiPercentage,'var(--green)'],['Payback',execBrief.businessCase?.paybackPeriod,'var(--amber)'],['3yr NPV',execBrief.businessCase?.npv3Year,'var(--blue-light)']].map(([l,v,col]) => (
+                            <div key={l} className="roi-metric" style={{ borderColor:`${col}22` }}>
+                              <div className="roi-value" style={{ color:col, fontSize:18 }}>{v}</div>
+                              <div className="roi-label">{l}</div>
                             </div>
                           ))}
                         </div>
+                        <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:12, padding:18, marginBottom:12 }}>
+                          <div className="section-header" style={{ color:'var(--red)' }}>Risk of Inaction</div>
+                          {execBrief.riskAnalysis?.risksOfInaction?.map((r,i) => <div key={i} style={{ fontSize:13, color:'var(--text-muted)', marginBottom:6 }}>⚠ {r}</div>)}
+                        </div>
+                        <div style={{ background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:12, padding:18 }}>
+                          <div className="section-header">Recommendation</div>
+                          <p style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:10 }}>{execBrief.recommendation?.decision}</p>
+                          {execBrief.recommendation?.immediateNextSteps?.map((s,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:5 }}>{i+1}. {s}</div>)}
+                        </div>
+                        <button onClick={() => setExecBrief(null)} className="btn-ghost" style={{ marginTop:12, fontSize:11 }}>Regenerate</button>
                       </div>
-
-                      {/* Risk of Inaction */}
-                      <div style={{ background:"rgba(239,68,68,0.05)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:14, padding:24, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--red)", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Risk of Inaction</div>
-                        {execBrief.riskAnalysis?.risksOfInaction?.map((r,i) => (
-                          <div key={i} style={{ display:"flex", gap:10, marginBottom:10 }}>
-                            <span style={{ color:"var(--red)", fontWeight:700 }}>⚠</span>
-                            <span style={{ fontSize:13, color:"var(--text-muted)" }}>{r}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Peer Validation */}
-                      {execBrief.peerValidation && (
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
-                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--blue-light)", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Peer Validation & Market Context</div>
-                          {execBrief.peerValidation.industryBenchmark && <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12, lineHeight:1.7 }}>📊 {execBrief.peerValidation.industryBenchmark}</div>}
-                          {execBrief.peerValidation.analystPerspective && <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12, lineHeight:1.7 }}>🔍 {execBrief.peerValidation.analystPerspective}</div>}
-                          {execBrief.peerValidation.caseStudy && <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7 }}>✓ {execBrief.peerValidation.caseStudy}</div>}
-                        </div>
-                      )}
-
-                      {/* Recommendation */}
-                      <div style={{ background:"linear-gradient(135deg,rgba(245,158,11,0.1),rgba(234,88,12,0.08))", border:"1px solid rgba(245,158,11,0.25)", borderRadius:14, padding:24 }}>
-                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Recommendation & Next Steps</div>
-                        <div style={{ fontSize:15, fontWeight:700, color:"var(--text)", marginBottom:16 }}>{execBrief.recommendation?.decision}</div>
-                        {execBrief.recommendation?.immediateNextSteps?.map((s,i) => (
-                          <div key={i} style={{ display:"flex", gap:10, marginBottom:10 }}>
-                            <span style={{ color:"var(--amber)", fontWeight:800, minWidth:20 }}>{i+1}.</span>
-                            <span style={{ fontSize:13, color:"var(--text-muted)" }}>{s}</span>
-                          </div>
-                        ))}
-                        <div style={{ marginTop:16, padding:14, background:"rgba(245,158,11,0.08)", borderRadius:8 }}>
-                          <div style={{ fontSize:10, fontWeight:700, color:"var(--amber)", letterSpacing:1, marginBottom:6 }}>ASK FROM EXECUTIVE SPONSOR</div>
-                          <div style={{ fontSize:13, color:"var(--text)" }}>{execBrief.recommendation?.executiveSponsorAsk}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: ORG CHART ── */}
-              {activeTab === "orgchart" && (
-                <div className="fade-up-1">
-                  {!orgChart ? (
-                    <div style={{ textAlign:"center", padding:"60px 20px" }}>
-                      <div style={{ fontSize:48, marginBottom:16 }}>🏢</div>
-                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>Org Chart Intelligence</div>
-                      <div style={{ color:"var(--text-muted)", fontSize:14, marginBottom:24 }}>AI searches the web to map {form.company}'s leadership structure and decision-making hierarchy.</div>
-                      <button onClick={() => generateOrgChart(form.company, form.market, form.industry, result, setOrgChart, setOrgLoading)}
-                        disabled={orgLoading}
-                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:orgLoading?0.6:1 }}>
-                        {orgLoading ? "RESEARCHING..." : "🏢 GENERATE ORG CHART"}
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)" }}>{form.company} — Leadership Structure</div>
-                        <button onClick={() => setOrgChart(null)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Refresh</button>
-                      </div>
-                      {orgChart.emailPattern && (
-                        <div style={{ background:"rgba(26,86,219,0.08)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:8, padding:12, marginBottom:16 }}>
-                          <span style={{ fontSize:11, fontWeight:700, color:"var(--blue-light)", letterSpacing:1 }}>EMAIL PATTERN: </span>
-                          <span style={{ fontSize:13, color:"var(--text)", fontFamily:"monospace" }}>{orgChart.emailPattern}</span>
-                        </div>
-                      )}
-                      {orgChart.reportingStructure && (
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:16, marginBottom:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-muted)", letterSpacing:1, marginBottom:8 }}>DECISION-MAKING STRUCTURE</div>
-                          <div style={{ fontSize:13, color:"var(--text)" }}>{orgChart.reportingStructure}</div>
-                        </div>
-                      )}
-                      {/* Render org tree */}
-                      {(() => {
-                        const renderNode = (node, level=0) => (
-                          <div key={node.title} style={{ marginLeft: level * 24, marginBottom:8 }}>
-                            <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background: level===0?"var(--amber)":"var(--card)", border:"1px solid var(--border)", borderRadius:8 }}>
-                              <div style={{ width:8, height:8, borderRadius:"50%", background: node.relevance==="high"?"#10B981":node.relevance==="medium"?"#F59E0B":"#6B7280" }}></div>
-                              <div>
-                                <div style={{ fontSize:13, fontWeight:700, color:level===0?"var(--navy)":"var(--text)" }}>{node.name || "Name TBC"}</div>
-                                <div style={{ fontSize:11, color:level===0?"var(--navy)":"var(--text-muted)" }}>{node.title} {node.department ? `· ${node.department}` : ""}</div>
-                              </div>
-                            </div>
-                            {node.children?.map(child => renderNode(child, level+1))}
-                          </div>
-                        );
-                        return orgChart.ceo ? renderNode(orgChart.ceo) : null;
-                      })()}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: EMAIL FINDER ── */}
-              {activeTab === "emails" && (
-                <div className="fade-up-1">
-                  {!emailData ? (
-                    <div style={{ textAlign:"center", padding:"60px 20px" }}>
-                      <div style={{ fontSize:48, marginBottom:16 }}>📧</div>
-                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>Email Intelligence</div>
-                      <div style={{ color:"var(--text-muted)", fontSize:14, marginBottom:24 }}>AI searches the web to find email addresses and patterns for {form.company} stakeholders.</div>
-                      <button onClick={() => findEmails(form.company, result?.stakeholders?.buyingCommittee || [], setEmailData, setEmailLoading)}
-                        disabled={emailLoading}
-                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:emailLoading?0.6:1 }}>
-                        {emailLoading ? "SEARCHING..." : "📧 FIND EMAILS"}
-                      </button>
-                      <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:12 }}>Uses web search. Results are best-effort — always verify before sending.</div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)" }}>Email Intelligence — {form.company}</div>
-                        <button onClick={() => setEmailData(null)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Refresh</button>
-                      </div>
-                      {emailData.length === 0 ? (
-                        <div style={{ textAlign:"center", padding:"40px", color:"var(--text-muted)" }}>No emails found. Try searching LinkedIn directly or use the email pattern from Org Chart.</div>
-                      ) : (
-                        emailData.map((e, i) => (
-                          <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:12 }}>
-                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
-                              <div>
-                                <div style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:800, color:"var(--text)" }}>{e.role}</div>
-                                {e.name && <div style={{ fontSize:13, color:"var(--text-muted)" }}>{e.name}</div>}
-                              </div>
-                              <div style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:6,
-                                background: e.confidence==="high"?"rgba(16,185,129,0.1)":e.confidence==="medium"?"rgba(245,158,11,0.1)":"rgba(107,114,128,0.1)",
-                                color: e.confidence==="high"?"#10B981":e.confidence==="medium"?"#F59E0B":"#6B7280" }}>
-                                {e.confidence?.toUpperCase()} CONFIDENCE
-                              </div>
-                            </div>
-                            {e.email && (
-                              <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:6 }}>
-                                <span style={{ fontSize:14, fontFamily:"monospace", color:"var(--blue-light)", background:"rgba(26,86,219,0.08)", padding:"4px 10px", borderRadius:6 }}>{e.email}</span>
-                                <button onClick={() => navigator.clipboard.writeText(e.email)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"3px 10px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Copy</button>
-                              </div>
-                            )}
-                            {e.emailPattern && <div style={{ fontSize:12, color:"var(--text-muted)" }}>Pattern: <span style={{ fontFamily:"monospace" }}>{e.emailPattern}</span></div>}
-                            {e.source && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4 }}>Source: {e.source}</div>}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: BATTLE CARDS ── */}
-              {activeTab === "battle" && (
-                <div className="fade-up-1">
-                  {!battleCards ? (
-                    <div style={{ textAlign:"center", padding:"60px 20px" }}>
-                      <div style={{ fontSize:48, marginBottom:16 }}>⚔️</div>
-                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800, color:"var(--amber)", marginBottom:8 }}>Battle Cards</div>
-                      <div style={{ color:"var(--text-muted)", fontSize:14, marginBottom:24 }}>
-                        {form.competitorsMentioned ? `Generate battle cards for: ${form.competitorsMentioned}` : "Add competitor names in the deal context form first."}
-                      </div>
-                      {form.competitorsMentioned && (
-                        <button onClick={() => generateBattleCards(form.competitorsMentioned, form, result, setBattleCards, setBattleLoading)}
-                          disabled={battleLoading}
-                          style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:battleLoading?0.6:1 }}>
-                          {battleLoading ? "GENERATING..." : "⚔️ GENERATE BATTLE CARDS"}
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    battleCards?.map((card, i) => (
-                      <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
-                        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-                          <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"var(--text)" }}>{card.competitor}</div>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", border:"1px solid var(--amber)", borderRadius:6, padding:"4px 10px" }}>BATTLE CARD</div>
-                        </div>
-                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
-                          <div style={{ background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:8, padding:16 }}>
-                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#10B981", marginBottom:10 }}>OUR STRENGTHS VS THEM</div>
-                            {card.ourStrengths?.map((s,j) => <div key={j} style={{ fontSize:13, color:"var(--text)", marginBottom:6, paddingLeft:12, borderLeft:"2px solid #10B981" }}>{s}</div>)}
-                          </div>
-                          <div style={{ background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:8, padding:16 }}>
-                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#EF4444", marginBottom:10 }}>THEIR WEAKNESSES</div>
-                            {card.theirWeaknesses?.map((w,j) => <div key={j} style={{ fontSize:13, color:"var(--text)", marginBottom:6, paddingLeft:12, borderLeft:"2px solid #EF4444" }}>{w}</div>)}
-                          </div>
-                        </div>
-                        <div style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:8, padding:16, marginBottom:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", marginBottom:10 }}>WIN MOVES — HOW TO BEAT THEM</div>
-                          {card.winMoves?.map((m,j) => (
-                            <div key={j} style={{ display:"flex", gap:10, marginBottom:8, alignItems:"flex-start" }}>
-                              <span style={{ color:"var(--amber)", fontWeight:700, minWidth:20 }}>{j+1}.</span>
-                              <span style={{ fontSize:13, color:"var(--text)" }}>{m}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-                          <div>
-                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--blue-light)", marginBottom:8 }}>TRAP QUESTIONS</div>
-                            {card.trapQuestions?.map((q,j) => <div key={j} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:6, fontStyle:"italic" }}>&quot;{q}&quot;</div>)}
-                          </div>
-                          <div>
-                            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#A78BFA", marginBottom:8 }}>LANDMINES TO PLANT</div>
-                            {card.landmines?.map((l,j) => <div key={j} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:6 }}>{l}</div>)}
-                          </div>
-                        </div>
-                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginTop:16 }}>
-                          <div style={{ background:"rgba(16,185,129,0.05)", borderRadius:8, padding:12 }}>
-                            <div style={{ fontSize:11, fontWeight:700, color:"#10B981", marginBottom:6 }}>WHEN WE WIN</div>
-                            <div style={{ fontSize:13, color:"var(--text-muted)" }}>{card.whenWeWin}</div>
-                          </div>
-                          <div style={{ background:"rgba(239,68,68,0.05)", borderRadius:8, padding:12 }}>
-                            <div style={{ fontSize:11, fontWeight:700, color:"#EF4444", marginBottom:6 }}>WHEN WE LOSE</div>
-                            <div style={{ fontSize:13, color:"var(--text-muted)" }}>{card.whenWeLose}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                  {battleCards && (
-                    <button onClick={() => setBattleCards(null)} style={{ marginTop:16, background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 20px", color:"var(--text-muted)", fontSize:12, cursor:"pointer" }}>
-                      Regenerate
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: MULTI-LANGUAGE OUTREACH ── */}
-              {activeTab === "languages" && (
-                <div className="fade-up-1">
-                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:20 }}>
-                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:16, fontWeight:800, color:"var(--amber)", marginBottom:6 }}>Multi-Language Outreach</div>
-                    <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:16 }}>Same message, localised for every APAC market. Select language to view.</div>
-                    <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                      {[["bahasa","🇮🇩 Bahasa"],["mandarin","🇨🇳 Mandarin"],["thai","🇹🇭 Thai"],["tagalog","🇵🇭 Filipino"],["japanese","🇯🇵 Japanese"],["korean","🇰🇷 Korean"],["arabic","🇸🇦 Arabic"],["hindi","🇮🇳 Hindi"],["french","🇫🇷 French"],["german","🇩🇪 German"],["spanish","🇪🇸 Spanish"]].map(([key,label]) => (
-                        <button key={key} onClick={() => setSelectedLanguage(key)}
-                          style={{ padding:"8px 16px", borderRadius:8, border:"1px solid", fontSize:13, fontWeight:600, cursor:"pointer",
-                            borderColor: selectedLanguage === key ? "var(--amber)" : "var(--border)",
-                            background: selectedLanguage === key ? "rgba(245,158,11,0.1)" : "transparent",
-                            color: selectedLanguage === key ? "var(--amber)" : "var(--text-muted)" }}>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
+                    )}
                   </div>
-                  <div style={{ textAlign:"center", marginBottom:16 }}>
-                    <button onClick={() => generateLanguages(form, result, setLangData, setLangLoading, selectedLanguage)}
-                      disabled={langLoading}
-                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"12px 28px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:langLoading?0.6:1 }}>
-                      {langLoading ? "GENERATING..." : `🌏 GENERATE ${selectedLanguage.toUpperCase()}`}
-                    </button>
-                    {langData?.[selectedLanguage] && <span style={{ marginLeft:12, fontSize:12, color:"#10B981" }}>✓ Generated</span>}
-                  </div>
-                  {langData?.[selectedLanguage] && (() => {
-                    const lang = langData[selectedLanguage];
-                    return (
-                      <div>
-                        <div style={{ background:"rgba(245,158,11,0.06)", border:"1px solid rgba(245,158,11,0.15)", borderRadius:8, padding:14, marginBottom:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:"var(--amber)", marginBottom:6 }}>CULTURAL NOTE</div>
-                          <div style={{ fontSize:13, color:"var(--text)" }}>{lang.culturalNote}</div>
-                        </div>
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)", marginBottom:8 }}>EMAIL SUBJECT</div>
-                          <div style={{ background:"rgba(26,86,219,0.1)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:8, padding:12, fontSize:14, fontWeight:600, color:"var(--blue-light)", marginBottom:16 }}>{lang.emailSubject}</div>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)", marginBottom:8 }}>EMAIL BODY</div>
-                          <div style={{ background:"var(--bg)", borderRadius:8, padding:16, fontSize:13, color:"var(--text)", lineHeight:1.7, whiteSpace:"pre-wrap" }}>{lang.emailBody}</div>
-                        </div>
-                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)", marginBottom:8 }}>LINKEDIN MESSAGE</div>
-                          <div style={{ background:"var(--bg)", borderRadius:8, padding:16, fontSize:13, color:"var(--text)", fontStyle:"italic" }}>&quot;{lang.linkedIn}&quot;</div>
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </div>
               )}
 
-              {/* ── TAB: ROI BUILDER ── */}
-              {activeTab === "roi" && (
-                <div className="fade-up-1">
-                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
-                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)", marginBottom:4 }}>ROI & Business Case Builder</div>
-                    <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:20 }}>Build a CFO-ready business case in 60 seconds. Enter their numbers to quantify the cost of inaction.</div>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
-                      {[
-                        ["employees","Team Size Affected","e.g. 25 people"],
-                        ["avgSalary","Average Annual Salary (USD)","e.g. 85000"],
-                        ["hoursPerWeek","Hours/Week on Manual/Inefficient Work","e.g. 12"],
-                        ["currentErrors","Annual Cost of Errors/Rework/Risk (USD)","e.g. 250000"],
-                        ["revenueUpside","Annual Revenue Upside Enabled (USD)","e.g. 500000"],
-                        ["dealSize","Your Solution ACV (USD)","e.g. 200000"],
-                      ].map(([key,label,ph]) => (
-                        <div key={key}>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:1, color:"var(--text-muted)", marginBottom:6 }}>{label.toUpperCase()}</div>
-                          <input type="number" placeholder={ph} value={roiInputs[key]}
-                            onChange={e => setRoiInputs(p => ({...p, [key]: e.target.value}))}
-                            style={{ width:"100%", background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:14 }} />
-                        </div>
-                      ))}
-                    </div>
-                    <button onClick={() => setRoiResult(calcROI(roiInputs, result))}
-                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1 }}>
-                      CALCULATE ROI
-                    </button>
-                  </div>
-                  {roiResult && (
-                    <div>
-                      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, marginBottom:20 }}>
-                        {[
-                          ["ROI", `${roiResult.roi}%`, "#10B981"],
-                          ["Payback Period", `${roiResult.payback} months`, "#F59E0B"],
-                          ["Monthly Cost of Inaction", `$${roiResult.costOfInaction.toLocaleString()}`, "#EF4444"],
-                        ].map(([label,val,color]) => (
-                          <div key={label} style={{ background:"var(--card)", border:`1px solid ${color}33`, borderRadius:12, padding:20, textAlign:"center" }}>
-                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:900, color }}>{val}</div>
-                            <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4, letterSpacing:1 }}>{label.toUpperCase()}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:16 }}>
-                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:"var(--amber)", marginBottom:16, letterSpacing:1 }}>COST BREAKDOWN</div>
-                        {[
-                          ["Labor Savings (70% efficiency gain)", roiResult.laborSavings, "#10B981"],
-                          ["Error & Rework Cost Elimination", roiResult.errorCost, "#10B981"],
-                          ...(roiResult.revenueUpside > 0 ? [["Revenue Upside Enabled", roiResult.revenueUpside, "#10B981"]] : []),
-                          ["Total Annual Benefit", roiResult.totalBenefit, "#F59E0B"],
-                        ].map(([label,val,color]) => (
-                          <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:"1px solid var(--border)" }}>
-                            <span style={{ fontSize:13, color:"var(--text)" }}>{label}</span>
-                            <span style={{ fontSize:15, fontWeight:700, color }}>${val.toLocaleString()}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:20 }}>
-                        <div style={{ fontSize:11, fontWeight:700, color:"var(--amber)", marginBottom:10, letterSpacing:1 }}>CFO TALK TRACK</div>
-                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, fontStyle:"italic" }}>
-                          "Based on your team size and current processes, the cost of inaction is approximately ${roiResult.costOfInaction.toLocaleString()} per month — or ${roiResult.totalBenefit.toLocaleString()} annually. Our solution delivers a {roiResult.roi}% ROI with a {roiResult.payback}-month payback period. Every month you delay costs more than the solution itself."
-                        </div>
-                        <button onClick={() => navigator.clipboard.writeText(`Based on your team size and current processes, the cost of inaction is approximately $${roiResult.costOfInaction.toLocaleString()} per month — or $${roiResult.totalBenefit.toLocaleString()} annually. Our solution delivers a ${roiResult.roi}% ROI with a ${roiResult.payback}-month payback period. Every month you delay costs more than the solution itself.`)}
-                          style={{ marginTop:12, background:"transparent", border:"1px solid var(--amber)", borderRadius:6, padding:"6px 16px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer" }}>
-                          COPY TALK TRACK
-                        </button>
-                      </div>
-
-                      {/* Analyst Research */}
-                      <div style={{ marginTop:16 }}>
-                        {!roiResearch ? (
-                          <button onClick={async () => {
-                            setRoiResearchLoading(true);
-                            try {
-                              const res = await fetch("/api/anthropic", {
-                                method:"POST", headers:{"Content-Type":"application/json"},
-                                body: JSON.stringify({
-                                  model:"claude-sonnet-4-20250514", max_tokens:3000,
-                                  tools:[{type:"web_search_20250305",name:"web_search"}],
-                                  system:`You are a B2B analyst researcher. Search for ROI studies, TEI reports, Forrester/Gartner research and customer case studies relevant to this product and industry. Return ONLY valid JSON:
-{"studies":[{"source":"Forrester TEI","title":"Study title","keyFinding":"Main ROI finding","url":"link if available","year":"2024"}],"industryBenchmarks":["Benchmark 1","Benchmark 2","Benchmark 3"],"valueStories":["Story 1","Story 2"]}`,
-                                  messages:[{role:"user",content:`Find ROI research, analyst reports (Forrester TEI, Gartner, IDC), and customer value stories for: Product: ${form.product} in the ${form.industry} industry. Search for "${form.product} ROI", "${form.industry} digital transformation ROI", "Forrester TEI ${form.product}", "${form.product} case study ${form.industry}".`}]
-                                })
-                              });
-                              const data = await res.json();
-                              const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('') || '{}';
-                              const s=text.indexOf('{'),e=text.lastIndexOf('}');
-                              if(s!==-1&&e!==-1) setRoiResearch(JSON.parse(text.slice(s,e+1)));
-                            } catch(e) { }
-                            setRoiResearchLoading(false);
-                          }} disabled={roiResearchLoading}
-                            style={{ width:"100%", background:"rgba(26,86,219,0.08)", border:"1px solid rgba(26,86,219,0.3)", borderRadius:10, padding:"12px 24px", color:"var(--blue-light)", fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:800, cursor:"pointer", letterSpacing:1, opacity:roiResearchLoading?0.6:1 }}>
-                            {roiResearchLoading ? "SEARCHING ANALYST REPORTS..." : "🔍 FIND FORRESTER/GARTNER RESEARCH & CASE STUDIES"}
-                          </button>
-                        ) : (
-                          <div>
-                            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:"var(--blue-light)", marginBottom:12, letterSpacing:1 }}>ANALYST RESEARCH & CASE STUDIES</div>
-                            {roiResearch.studies?.map((s,i) => (
-                              <div key={i} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:10 }}>
-                                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                                  <span style={{ fontSize:11, fontWeight:700, color:"var(--blue-light)", letterSpacing:1 }}>{s.source} {s.year && `· ${s.year}`}</span>
-                                  {s.url && <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:"var(--amber)" }}>View →</a>}
-                                </div>
-                                <div style={{ fontSize:13, fontWeight:700, color:"var(--text)", marginBottom:4 }}>{s.title}</div>
-                                <div style={{ fontSize:13, color:"var(--text-muted)" }}>{s.keyFinding}</div>
-                              </div>
-                            ))}
-                            {roiResearch.industryBenchmarks?.length > 0 && (
-                              <div style={{ background:"rgba(16,185,129,0.06)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:10, padding:16, marginBottom:10 }}>
-                                <div style={{ fontSize:11, fontWeight:700, color:"#10B981", marginBottom:8, letterSpacing:1 }}>INDUSTRY BENCHMARKS</div>
-                                {roiResearch.industryBenchmarks.map((b,i) => <div key={i} style={{ fontSize:13, color:"var(--text)", marginBottom:4 }}>→ {b}</div>)}
-                              </div>
-                            )}
-                            <button onClick={() => setRoiResearch(null)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Clear Research</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: TRANSCRIPT ANALYSER ── */}
-              {activeTab === "transcript" && (
-                <div className="fade-up-1">
-                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:24, marginBottom:20 }}>
-                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)", marginBottom:4 }}>Call Transcript Analyser</div>
-                    <div style={{ color:"var(--text-muted)", fontSize:13, marginBottom:16 }}>Paste your call transcript below. AI extracts MEDDPICC signals, buying signals, red flags, missed opportunities, and generates your follow-up email.</div>
-                    <textarea value={transcript} onChange={e => setTranscript(e.target.value)}
-                      placeholder="Paste full call transcript here... (Zoom auto-transcript, Gong export, manual notes — any format works)"
-                      style={{ width:"100%", minHeight:200, background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:16, color:"var(--text)", fontSize:13, lineHeight:1.6, resize:"vertical", marginBottom:16, boxSizing:"border-box" }} />
-                    <button onClick={async () => {
-                      if (!transcript.trim()) return;
-                      setTranscriptLoading(true); setTranscriptResult(null);
-                      try { setTranscriptResult(await analyseTranscript(transcript, form, result)); }
-                      catch(e) { alert("Analysis failed. Try again."); }
-                      setTranscriptLoading(false);
-                    }} disabled={transcriptLoading || !transcript.trim()}
-                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity: transcriptLoading || !transcript.trim() ? 0.6 : 1 }}>
-                      {transcriptLoading ? "ANALYSING..." : "ANALYSE CALL"}
-                    </button>
-                  </div>
-                  {transcriptResult && (
-                    <div>
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
-                        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", marginBottom:10 }}>CALL SUMMARY</div>
-                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7 }}>{transcriptResult.summary}</div>
-                        <div style={{ display:"flex", gap:10, marginTop:12 }}>
-                          {[["improved","#10B981"],["unchanged","#F59E0B"],["deteriorated","#EF4444"]].map(([s,c]) => (
-                            <div key={s} style={{ padding:"4px 12px", borderRadius:6, background: transcriptResult.dealHealthChange===s ? c+"33" : "transparent", border:`1px solid ${transcriptResult.dealHealthChange===s ? c : "var(--border)"}`, fontSize:11, fontWeight:700, color: transcriptResult.dealHealthChange===s ? c : "var(--text-muted)", textTransform:"uppercase" }}>{s}</div>
-                          ))}
-                        </div>
-                      </div>
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:16 }}>
-                        <div style={{ background:"rgba(16,185,129,0.06)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:12, padding:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:"#10B981", marginBottom:10, letterSpacing:1 }}>BUYING SIGNALS</div>
-                          {transcriptResult.positiveSignals?.map((s,i) => <div key={i} style={{ fontSize:12, color:"var(--text)", marginBottom:6, paddingLeft:10, borderLeft:"2px solid #10B981" }}>{s}</div>)}
-                        </div>
-                        <div style={{ background:"rgba(239,68,68,0.06)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:12, padding:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:"#EF4444", marginBottom:10, letterSpacing:1 }}>RED FLAGS</div>
-                          {transcriptResult.redFlags?.map((r,i) => <div key={i} style={{ fontSize:12, color:"var(--text)", marginBottom:6, paddingLeft:10, borderLeft:"2px solid #EF4444" }}>{r}</div>)}
-                        </div>
-                        <div style={{ background:"rgba(167,139,250,0.06)", border:"1px solid rgba(167,139,250,0.2)", borderRadius:12, padding:16 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:"#A78BFA", marginBottom:10, letterSpacing:1 }}>MISSED OPPORTUNITIES</div>
-                          {transcriptResult.missedOpportunities?.map((m,i) => <div key={i} style={{ fontSize:12, color:"var(--text)", marginBottom:6, paddingLeft:10, borderLeft:"2px solid #A78BFA" }}>{m}</div>)}
-                        </div>
-                      </div>
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
-                        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--amber)", marginBottom:12 }}>NEXT ACTIONS</div>
-                        {transcriptResult.nextActions?.map((a,i) => (
-                          <div key={i} style={{ display:"flex", gap:12, padding:"10px 0", borderBottom:"1px solid var(--border)", alignItems:"flex-start" }}>
-                            <div style={{ minWidth:24, height:24, borderRadius:"50%", background: i===0?"var(--amber)":i===1?"var(--blue)":"var(--border)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color: i<2?"var(--navy)":"var(--text)" }}>{i+1}</div>
-                            <div style={{ flex:1 }}>
-                              <div style={{ fontSize:13, color:"var(--text)", fontWeight:600 }}>{a.action}</div>
-                              <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:2 }}>{a.owner} · {a.timeframe}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ background:"rgba(245,158,11,0.06)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:20, marginBottom:16 }}>
-                        <div style={{ fontSize:11, fontWeight:700, color:"var(--amber)", marginBottom:8, letterSpacing:1 }}>COACHING NOTE</div>
-                        <div style={{ fontSize:13, color:"var(--text)", fontStyle:"italic" }}>{transcriptResult.coachingNote}</div>
-                      </div>
-                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
-                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--text-muted)" }}>FOLLOW-UP EMAIL</div>
-                          <button onClick={() => navigator.clipboard.writeText(transcriptResult.followUpEmail?.body || "")} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-muted)", fontSize:11, cursor:"pointer" }}>Copy</button>
-                        </div>
-                        <div style={{ background:"rgba(26,86,219,0.1)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:8, padding:10, fontSize:13, fontWeight:600, color:"var(--blue-light)", marginBottom:12 }}>{transcriptResult.followUpEmail?.subject}</div>
-                        <div style={{ background:"var(--bg)", borderRadius:8, padding:16, fontSize:13, color:"var(--text)", lineHeight:1.7, whiteSpace:"pre-wrap" }}>{transcriptResult.followUpEmail?.body}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── TAB: DEAL COACH ── */}
-              {activeTab === "coach" && (
+{activeTab === "coach" && (
                 <div className="fade-up">
                   <div className="chat-window">
                     <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10, background: "var(--navy2)" }}>
