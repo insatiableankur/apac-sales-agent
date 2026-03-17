@@ -423,7 +423,9 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
 
     if (meetingInputs?.personName || meetingInputs?.personRole) {
       setTxt('#6B7280'); doc.setFontSize(10);
-      doc.text(`Prepared for: ${meetingInputs.personName || ''} — ${meetingInputs.personRole || ''} · ${meetingInputs.meetingType?.toUpperCase() || ''}`, M, y); y += 10;
+      const prepLine = `Prepared for: ${meetingInputs.personName || ''} — ${meetingInputs.personRole || ''} · ${meetingInputs.meetingType?.toUpperCase() || ''}`;
+      const prepLines = doc.splitTextToSize(prepLine, CW);
+      prepLines.forEach(l => { doc.text(l, M, y); y += 5; }); y += 2;
     }
 
     sectionHeader('Meeting Objective');
@@ -458,7 +460,8 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
     doc.text('CONFIDENTIAL — Prepared for internal use', M, y); y += 10;
 
     setTxt('#1A56DB'); doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text(execBrief.documentTitle, M, y); y += 10;
+    const dtLines = doc.splitTextToSize(execBrief.documentTitle || '', CW);
+    dtLines.forEach(l => { checkY(7); doc.text(l, M, y); y += 7; }); y += 3;
 
     sectionHeader('Executive Summary');
     bodyText(execBrief.executiveSummary, 0, '#111827'); y += 4;
@@ -466,7 +469,8 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
     sectionHeader('Current State Analysis', '#EF4444');
     if (execBrief.currentStateAnalysis) {
       setTxt('#111827'); doc.setFontSize(11); doc.setFont('helvetica','bold');
-      doc.text(execBrief.currentStateAnalysis.headline || '', M, y); y += 6;
+      const hlLines = doc.splitTextToSize(execBrief.currentStateAnalysis.headline || '', CW);
+      hlLines.forEach(l => { checkY(6); doc.text(l, M, y); y += 6; });
       execBrief.currentStateAnalysis.painPoints?.forEach(p => { checkY(12); bulletItem(p, '#374151'); });
       checkY(14);
       setFill('#FEF2F2'); doc.roundedRect(M, y, CW, 12, 2, 2, 'F');
@@ -490,8 +494,9 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
         setTxt('#374151'); doc.setFontSize(9); doc.setFont('helvetica','normal');
         doc.text(k, M, y);
         setTxt('#111827'); doc.setFont('helvetica','bold');
-        doc.text(v, M + 60, y);
-        y += 6;
+        const vLines = doc.splitTextToSize(String(v), CW - 65);
+        vLines.forEach((vl, vi) => { if(vi>0) checkY(5); doc.text(vl, M + 60, y + vi*5); });
+        y += Math.max(6, vLines.length * 5);
       });
       y += 4;
     }
