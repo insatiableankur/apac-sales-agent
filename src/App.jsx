@@ -27,7 +27,7 @@ Be deeply specific to the company, market, country, industry, product and deal s
 
 
 // ─── PDF EXPORT ───────────────────────────────────────────────────────────────
-const exportToPDF = async (result, form) => {
+const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) => {
   // Dynamically load jsPDF
   if (!window.jspdf) {
     await new Promise((resolve, reject) => {
@@ -414,6 +414,98 @@ const exportToPDF = async (result, form) => {
     doc.text(a.timeframe || '', W - M - 15, y + 6, { align: 'center' });
     y += bH;
   });
+
+  // ── MODULE 8: MEETING PREP ──────────────────────────────────────────────
+  if (meetingPrep && meetingPrep.meetingObjective) {
+    addPage();
+    setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.text('08 — Meeting Prep Brief', M, y); y += 10;
+
+    if (meetingInputs?.personName || meetingInputs?.personRole) {
+      setTxt('#6B7280'); doc.setFontSize(10);
+      doc.text(`Prepared for: ${meetingInputs.personName || ''} — ${meetingInputs.personRole || ''} · ${meetingInputs.meetingType?.toUpperCase() || ''}`, M, y); y += 10;
+    }
+
+    sectionHeader('Meeting Objective');
+    bodyText(meetingPrep.meetingObjective, 0, '#111827'); y += 4;
+
+    sectionHeader('Your Opening Line');
+    infoBox(meetingPrep.openingLine, '#EFF6FF', '#1E40AF'); y += 2;
+
+    sectionHeader('Power Questions');
+    meetingPrep.powerQuestions?.forEach((q, i) => {
+      checkY(20);
+      setTxt('#111827'); doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text(`Q${i+1}: ${q.question}`, M, y); y += 5;
+      bodyText(`Intent: ${q.intent}`, 6, '#6B7280');
+      bodyText(`You'll learn: ${q.expectedInsight}`, 6, '#1A56DB'); y += 2;
+    });
+
+    sectionHeader('Landmines to Avoid');
+    meetingPrep.landminesToAvoid?.forEach(l => bulletItem(`✗ ${l}`, '#EF4444')); y += 2;
+
+    sectionHeader('Follow-Up Template');
+    bodyText(meetingPrep.followUpTemplate, 0, '#374151');
+  }
+
+  // ── MODULE 9: EXECUTIVE BRIEFING ─────────────────────────────────────────
+  if (execBrief && execBrief.documentTitle) {
+    addPage();
+    setTxt('#08111E'); doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.text('09 — Executive Briefing Document', M, y); y += 6;
+    setTxt('#6B7280'); doc.setFontSize(9);
+    doc.text('CONFIDENTIAL — Prepared for internal use', M, y); y += 10;
+
+    setTxt('#1A56DB'); doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text(execBrief.documentTitle, M, y); y += 10;
+
+    sectionHeader('Executive Summary');
+    bodyText(execBrief.executiveSummary, 0, '#111827'); y += 4;
+
+    sectionHeader('Current State Analysis', '#EF4444');
+    if (execBrief.currentStateAnalysis) {
+      setTxt('#111827'); doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text(execBrief.currentStateAnalysis.headline || '', M, y); y += 6;
+      execBrief.currentStateAnalysis.painPoints?.forEach(p => bulletItem(p, '#374151'));
+      checkY(14);
+      setFill('#FEF2F2'); doc.roundedRect(M, y, CW, 12, 2, 2, 'F');
+      setTxt('#DC2626'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(`Annual Cost of Status Quo: ${execBrief.currentStateAnalysis.costOfStatusQuo || 'See analysis'}`, M+4, y+8);
+      y += 16;
+    }
+
+    sectionHeader('Financial Business Case', '#10B981');
+    if (execBrief.businessCase) {
+      const bc = execBrief.businessCase;
+      const bRows = [
+        ['Total Investment', bc.totalInvestment || '—'],
+        ['Expected ROI', bc.roiPercentage || '—'],
+        ['Payback Period', bc.paybackPeriod || '—'],
+        ['Year 1 Benefit', bc.year1Benefits || '—'],
+        ['3-Year NPV', bc.npv3Year || '—'],
+      ];
+      bRows.forEach(([k,v]) => {
+        checkY(8);
+        setTxt('#374151'); doc.setFontSize(9); doc.setFont('helvetica','normal');
+        doc.text(k, M, y);
+        setTxt('#111827'); doc.setFont('helvetica','bold');
+        doc.text(v, M + 60, y);
+        y += 6;
+      });
+      y += 4;
+    }
+
+    sectionHeader('Risk of Inaction', '#EF4444');
+    execBrief.riskAnalysis?.risksOfInaction?.forEach(r => bulletItem(`⚠ ${r}`, '#374151')); y += 2;
+
+    sectionHeader('Recommendation');
+    bodyText(execBrief.recommendation?.decision, 0, '#111827'); y += 4;
+    execBrief.recommendation?.immediateNextSteps?.forEach((s, i) => {
+      checkY(6);
+      setTxt('#1A56DB'); doc.setFontSize(9); doc.text(`${i+1}.`, M, y);
+      setTxt('#374151'); doc.text(s, M+8, y); y += 5;
+    });
+  }
 
   // ── FOOTER ON ALL PAGES ──────────────────────────────────────────────
   const total = doc.getNumberOfPages();
@@ -1853,7 +1945,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button className="btn-ghost" onClick={() => exportToPDF(result, form)} style={{ display: "flex", alignItems: "center", gap: 6, borderColor: "var(--amber)", color: "var(--amber)" }}>
+                    <button className="btn-ghost" onClick={() => exportToPDF(result, form, meetingPrep, execBrief, meetingInputs)} style={{ display: "flex", alignItems: "center", gap: 6, borderColor: "var(--amber)", color: "var(--amber)" }}>
                       ⬇ Export PDF
                     </button>
                     <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]);
@@ -1869,7 +1961,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "var(--amber-glow)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px 18px" }}>
                 <div style={{ fontSize: 13, color: "var(--amber)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>📄 INTELLIGENCE BRIEF READY</div>
                 <button
-                  onClick={() => exportToPDF(result, form)}
+                  onClick={() => exportToPDF(result, form, meetingPrep, execBrief, meetingInputs)}
                   style={{ background: "linear-gradient(135deg, #F59E0B, #EA580C)", border: "none", borderRadius: 8, padding: "10px 20px", color: "#08111E", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 16px rgba(245,158,11,0.4)" }}
                 >
                   ⬇ Export PDF
@@ -1899,13 +1991,13 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   { id: "outreach", label: "✉️ OUTREACH" },
                   { id: "discovery", label: "💬 DISCOVERY" },
                   { id: "com", label: "🏆 COMMAND" },
-                  { id: "coach", label: "🎯 COACH" },
-                  { id: "battle", label: "⚔️ BATTLE" },
+                  { id: "roi", label: "💰 ROI" },
                   { id: "meetingprep", label: "⚡ MEETING PREP" },
                   { id: "execbrief", label: "📋 EXEC BRIEF" },
+                  { id: "coach", label: "🎯 DEAL COACH" },
+                  { id: "battle", label: "⚔️ BATTLE" },
                   { id: "orgchart", label: "🏢 ORG CHART" },
                   { id: "emails", label: "📧 EMAILS" },
-                  { id: "roi", label: "💰 ROI" },
                   { id: "transcript", label: "📞 TRANSCRIPT" },
                   { id: "languages", label: "🌏 LANGUAGES" },
                 ].map(t => (
