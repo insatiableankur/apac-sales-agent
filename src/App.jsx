@@ -697,6 +697,37 @@ const generateOrgChart = async (company, market, industry, result, setFn, setLoa
   setLoading(false);
 };
 
+// ─── DEAL SCORE ENGINE ───────────────────────────────────────────────────────
+const calcDealScore = (result, meddQual) => {
+  if (!result?.meddpicc) return null;
+  const els = result.meddpicc.elements || {};
+  const statusScore = { green: 100, amber: 50, red: 10 };
+  const meddKeys = ['metrics','economicBuyer','decisionCriteria','decisionProcess','paperProcess','identifiedPain','champion','competition'];
+  const meddTotal = meddKeys.reduce((sum, k) => sum + (statusScore[els[k]?.status] || 10), 0);
+  const meddScore = (meddTotal / (meddKeys.length * 100)) * 60;
+  let qualScore = 0;
+  if (meddQual?.budgetConfirmed?.toLowerCase().includes('yes')) qualScore += 5;
+  if (meddQual?.ebIdentified?.toLowerCase().includes('yes')) qualScore += 5;
+  if (meddQual?.timelineDefined?.length > 5) qualScore += 5;
+  if (meddQual?.competitorsKnown?.length > 3) qualScore += 5;
+  if (meddQual?.painQuantified?.length > 5) qualScore += 5;
+  const icpBonus = ((result.accountBrief?.icpScore || 50) / 100) * 15;
+  const total = Math.round(meddScore + qualScore + icpBonus);
+  const capped = Math.min(98, Math.max(5, total));
+  const gaps = meddKeys
+    .filter(k => els[k]?.status !== 'green')
+    .sort((a, b) => (statusScore[els[a]?.status] || 0) - (statusScore[els[b]?.status] || 0))
+    .slice(0, 3)
+    .map(k => ({ element: els[k]?.label || k, status: els[k]?.status, nextAction: els[k]?.nextAction }));
+  return {
+    score: capped,
+    rating: capped >= 75 ? 'Strong' : capped >= 50 ? 'Developing' : capped >= 30 ? 'Early' : 'At Risk',
+    color: capped >= 75 ? '#10B981' : capped >= 50 ? '#F59E0B' : capped >= 30 ? '#F97316' : '#EF4444',
+    gaps,
+    forecast: result.meddpicc.forecastCategory || 'Pipeline',
+  };
+};
+
 // ─── ROI CALCULATOR ──────────────────────────────────────────────────────────
 const calcROI = (inputs, result) => {
   const emp = parseFloat(inputs.employees) || 0;
@@ -1562,6 +1593,9 @@ export default function SalesIntelligenceAgent() {
   const [roiResult, setRoiResult] = useState(null);
   const [roiResearch, setRoiResearch] = useState(null);
   const [roiResearchLoading, setRoiResearchLoading] = useState(false);
+  const [competeData, setCompeteData] = useState(null);
+  const [competeLoading, setCompeteLoading] = useState(false);
+  const [selectedCompetitor, setSelectedCompetitor] = useState("");
   // Meeting Prep
   const [meetingInputs, setMeetingInputs] = useState({ personName: "", personRole: "", meetingType: "discovery", additionalContext: "" });
   const [meetingPrep, setMeetingPrep] = useState(null);
