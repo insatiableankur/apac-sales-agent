@@ -1464,9 +1464,16 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
             return JSON.parse(fixed);
           }
         } catch(e) {
-          // Retry with aggressive sanitization
-          const safe = clean.replace(/[\u0000-\u001F]/g, " ");
-          return JSON.parse(safe);
+          // Retry with aggressive sanitization + bad property removal
+          let safe = clean.replace(/[\u0000-\u001F]/g, " ");
+          // Remove malformed properties: "key": value where value is broken
+          safe = safe.replace(/,\s*"[^"\n]{0,50}"\s*:\s*(?=[,}\]])/g, '');
+          // Remove trailing comma before closing brace/bracket
+          safe = safe.replace(/,\s*([}\]])/g, '$1');
+          try { return JSON.parse(safe); } catch(e2) {
+            // Last resort: return empty object so app doesn't crash
+            throw new Error("JSON parse failed after all repairs: " + e.message);
+          }
         }
       };
 
