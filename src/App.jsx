@@ -434,11 +434,12 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
 
     sectionHeader('Power Questions');
     meetingPrep.powerQuestions?.forEach((q, i) => {
-      checkY(20);
+      const qLines = doc.splitTextToSize(`Q${i+1}: ${q.question}`, CW);
+      checkY(qLines.length * 5 + 20);
       setTxt('#111827'); doc.setFontSize(11); doc.setFont('helvetica','bold');
-      doc.text(`Q${i+1}: ${q.question}`, M, y); y += 5;
+      qLines.forEach(l => { doc.text(l, M, y); y += 5; });
       bodyText(`Intent: ${q.intent}`, 6, '#6B7280');
-      bodyText(`You'll learn: ${q.expectedInsight}`, 6, '#1A56DB'); y += 2;
+      bodyText(`You will learn: ${q.expectedInsight}`, 6, '#1A56DB'); y += 3;
     });
 
     sectionHeader('Landmines to Avoid');
@@ -466,7 +467,7 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
     if (execBrief.currentStateAnalysis) {
       setTxt('#111827'); doc.setFontSize(11); doc.setFont('helvetica','bold');
       doc.text(execBrief.currentStateAnalysis.headline || '', M, y); y += 6;
-      execBrief.currentStateAnalysis.painPoints?.forEach(p => bulletItem(p, '#374151'));
+      execBrief.currentStateAnalysis.painPoints?.forEach(p => { checkY(12); bulletItem(p, '#374151'); });
       checkY(14);
       setFill('#FEF2F2'); doc.roundedRect(M, y, CW, 12, 2, 2, 'F');
       setTxt('#DC2626'); doc.setFontSize(9); doc.setFont('helvetica','bold');
@@ -496,14 +497,18 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
     }
 
     sectionHeader('Risk of Inaction', '#EF4444');
-    execBrief.riskAnalysis?.risksOfInaction?.forEach(r => bulletItem(`⚠ ${r}`, '#374151')); y += 2;
+    execBrief.riskAnalysis?.risksOfInaction?.forEach(r => { checkY(12); bulletItem(r, '#374151'); }); y += 2;
 
     sectionHeader('Recommendation');
     bodyText(execBrief.recommendation?.decision, 0, '#111827'); y += 4;
     execBrief.recommendation?.immediateNextSteps?.forEach((s, i) => {
-      checkY(6);
-      setTxt('#1A56DB'); doc.setFontSize(9); doc.text(`${i+1}.`, M, y);
-      setTxt('#374151'); doc.text(s, M+8, y); y += 5;
+      const sLines = doc.splitTextToSize(s, CW - 8);
+      checkY(sLines.length * 5 + 4);
+      setTxt('#1A56DB'); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(`${i+1}.`, M, y);
+      setTxt('#374151'); doc.setFont('helvetica','normal');
+      sLines.forEach((l, li) => { doc.text(l, M+8, y + li*5); });
+      y += sLines.length * 5 + 2;
     });
   }
 
