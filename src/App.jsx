@@ -1314,6 +1314,13 @@ export default function SalesIntelligenceAgent() {
   const [roiResult, setRoiResult] = useState(null);
   const [roiResearch, setRoiResearch] = useState(null);
   const [roiResearchLoading, setRoiResearchLoading] = useState(false);
+  // Meeting Prep
+  const [meetingInputs, setMeetingInputs] = useState({ personName: "", personRole: "", meetingType: "discovery", additionalContext: "" });
+  const [meetingPrep, setMeetingPrep] = useState(null);
+  const [meetingPrepLoading, setMeetingPrepLoading] = useState(false);
+  // Executive Brief
+  const [execBrief, setExecBrief] = useState(null);
+  const [execBriefLoading, setExecBriefLoading] = useState(false);
   const [linkedInVariant, setLinkedInVariant] = useState(0);
   const [battleCards, setBattleCards] = useState(null);
   const [battleLoading, setBattleLoading] = useState(false);
@@ -1843,7 +1850,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       ⬇ Export PDF
                     </button>
                     <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]);
-      setBattleCards(null); setLangData(null); setLiVariants(null); setEmailData(null); setOrgChart(null); }}>
+      setBattleCards(null); setLangData(null); setLiVariants(null); setEmailData(null); setOrgChart(null); setMeetingPrep(null); setExecBrief(null); }}>
                       + New Account
                     </button>
                   </div>
@@ -1887,6 +1894,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   { id: "com", label: "🏆 COMMAND" },
                   { id: "coach", label: "🎯 COACH" },
                   { id: "battle", label: "⚔️ BATTLE" },
+                  { id: "meetingprep", label: "⚡ MEETING PREP" },
+                  { id: "execbrief", label: "📋 EXEC BRIEF" },
                   { id: "orgchart", label: "🏢 ORG CHART" },
                   { id: "emails", label: "📧 EMAILS" },
                   { id: "roi", label: "💰 ROI" },
@@ -2248,6 +2257,348 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div className="section-head">CLOSING HYPOTHESIS</div>
                     <div className="highlight-text">{result.commandOfMessage.closingHypothesis}</div>
                   </div>
+                </div>
+              )}
+
+              {/* ── TAB: MEETING PREP ── */}
+              {activeTab === "meetingprep" && (
+                <div className="fade-up-1">
+                  <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:16, padding:28, marginBottom:20 }}>
+                    <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:900, color:"var(--amber)", marginBottom:4 }}>⚡ Meeting Prep Brief</div>
+                    <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:24 }}>30-second prep for your next meeting. Tell us who you're meeting and we'll brief you instantly.</div>
+
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+                      <div>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Person's Name</div>
+                        <input type="text" placeholder="e.g. Sarah Chen" value={meetingInputs.personName}
+                          onChange={e => setMeetingInputs(p => ({...p, personName: e.target.value}))}
+                          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none" }} />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Their Role</div>
+                        <input type="text" placeholder="e.g. CFO / Head of Finance" value={meetingInputs.personRole}
+                          onChange={e => setMeetingInputs(p => ({...p, personRole: e.target.value}))}
+                          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none" }} />
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom:16 }}>
+                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Meeting Type</div>
+                      <div style={{ display:"flex", gap:8 }}>
+                        {[["discovery","🔍 Discovery"],["demo","🎯 Demo"],["negotiation","🤝 Negotiation"],["qbr","📊 QBR"],["checkin","☎️ Check-in"],["execsponsor","👔 Exec Sponsor"]].map(([val, label]) => (
+                          <button key={val} onClick={() => setMeetingInputs(p => ({...p, meetingType: val}))}
+                            style={{ padding:"8px 14px", borderRadius:8, border:"1px solid", fontSize:12, fontWeight:600, cursor:"pointer", transition:"all 0.2s",
+                              borderColor: meetingInputs.meetingType === val ? "var(--amber)" : "var(--border)",
+                              background: meetingInputs.meetingType === val ? "var(--amber-glow)" : "transparent",
+                              color: meetingInputs.meetingType === val ? "var(--amber)" : "var(--text-muted)" }}>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom:20 }}>
+                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--text-dim)", letterSpacing:2, marginBottom:8, textTransform:"uppercase" }}>Additional Context (optional)</div>
+                      <textarea placeholder="e.g. They mentioned budget concerns last call. Their CTO will also be joining. We need to address the data security question..."
+                        value={meetingInputs.additionalContext}
+                        onChange={e => setMeetingInputs(p => ({...p, additionalContext: e.target.value}))}
+                        style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none", minHeight:80, resize:"vertical", lineHeight:1.6 }} />
+                    </div>
+
+                    <button onClick={async () => {
+                      setMeetingPrepLoading(true);
+                      try {
+                        const res = await fetch("/api/anthropic", {
+                          method:"POST", headers:{"Content-Type":"application/json"},
+                          body: JSON.stringify({
+                            model:"claude-sonnet-4-20250514", max_tokens:4000, stream:true,
+                            system:`You are Ankur Sehgal — a 7x President's Club enterprise sales expert. Generate a sharp, actionable meeting prep brief. Return ONLY valid JSON:
+{"meetingObjective":"Single clear objective for this meeting","personIntel":{"archetype":"Their buyer archetype","likelyMotivations":["motivation 1","motivation 2","motivation 3"],"likelyFears":["fear 1","fear 2"],"communicationStyle":"How they prefer to communicate","whatTheyWillJudgeYouOn":"What matters most to them"},"openingLine":"Your exact opening line for this meeting — word for word","powerQuestions":[{"question":"Question 1","intent":"Why ask this","expectedInsight":"What you'll learn"},{"question":"Question 2","intent":"Why ask this","expectedInsight":"What you'll learn"},{"question":"Question 3","intent":"Why ask this","expectedInsight":"What you'll learn"}],"landminesToAvoid":["Landmine 1","Landmine 2","Landmine 3"],"yourValueHypothesis":"One sentence on why they should care about your solution right now","meetingAgenda":["Agenda item 1 (time)","Agenda item 2 (time)","Agenda item 3 (time)","Agenda item 4 (time)"],"successCriteria":"What does a perfect outcome look like?","followUpTemplate":"Exact follow-up email subject and first line to send after"}`,
+                            messages:[{role:"user",content:`Meeting with: ${meetingInputs.personName || "Unknown"} — ${meetingInputs.personRole}
+Meeting type: ${meetingInputs.meetingType}
+Company: ${form.company} | Market: ${form.market} | Industry: ${form.industry}
+Product: ${form.product}
+Deal stage: ${form.dealStage}
+Their MEDDPICC context: ${JSON.stringify(result?.meddpicc?.elements || {})}
+Stakeholder info: ${JSON.stringify(result?.stakeholders?.buyingCommittee?.find(s => s.role?.toLowerCase().includes(meetingInputs.personRole?.toLowerCase().split(' ')[0]?.toLowerCase() || 'x')) || {})}
+Additional context: ${meetingInputs.additionalContext || "None provided"}`}]
+                          })
+                        });
+                        const reader = res.body.getReader();
+                        const decoder = new TextDecoder();
+                        let raw = "";
+                        while(true) {
+                          const {done,value} = await reader.read();
+                          if(done) break;
+                          for(const line of decoder.decode(value,{stream:true}).split("\n")) {
+                            if(line.startsWith("data: ")) {
+                              try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){}
+                            }
+                          }
+                        }
+                        const s=raw.indexOf("{"),e=raw.lastIndexOf("}");
+                        setMeetingPrep(JSON.parse(raw.slice(s,e+1)));
+                      } catch(e) { alert("Failed to generate meeting prep. Try again."); }
+                      setMeetingPrepLoading(false);
+                    }} disabled={meetingPrepLoading || !meetingInputs.personRole}
+                      style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 32px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:(meetingPrepLoading||!meetingInputs.personRole)?0.5:1 }}>
+                      {meetingPrepLoading ? "GENERATING BRIEF..." : "⚡ GENERATE MEETING PREP"}
+                    </button>
+                  </div>
+
+                  {meetingPrep && (
+                    <div className="fade-up-1">
+                      {/* Objective Banner */}
+                      <div style={{ background:"linear-gradient(135deg,rgba(245,158,11,0.15),rgba(234,88,12,0.1))", border:"1px solid rgba(245,158,11,0.3)", borderRadius:12, padding:20, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:3, marginBottom:8, textTransform:"uppercase" }}>Meeting Objective</div>
+                        <div style={{ fontSize:16, fontWeight:700, color:"var(--text)" }}>{meetingPrep.meetingObjective}</div>
+                      </div>
+
+                      {/* Opening Line */}
+                      <div style={{ background:"rgba(29,78,216,0.08)", border:"1px solid rgba(96,165,250,0.2)", borderRadius:12, padding:20, marginBottom:16, borderLeft:"3px solid var(--blue)" }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--blue-light)", letterSpacing:3, marginBottom:8, textTransform:"uppercase" }}>Your Opening Line — Say This Verbatim</div>
+                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, fontStyle:"italic" }}>"{meetingPrep.openingLine}"</div>
+                        <button onClick={() => navigator.clipboard.writeText(meetingPrep.openingLine)}
+                          style={{ marginTop:10, background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-dim)", fontSize:10, cursor:"pointer", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>
+                          COPY
+                        </button>
+                      </div>
+
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+                        {/* Person Intel */}
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
+                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>Person Intelligence</div>
+                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:4 }}>ARCHETYPE</div>
+                          <div style={{ fontSize:13, color:"var(--amber)", fontWeight:700, marginBottom:12 }}>{meetingPrep.personIntel?.archetype}</div>
+                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:6 }}>MOTIVATIONS</div>
+                          {meetingPrep.personIntel?.likelyMotivations?.map((m,i) => (
+                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:4 }}>→ {m}</div>
+                          ))}
+                          <div style={{ fontSize:11, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:6, marginTop:12 }}>THEY WILL JUDGE YOU ON</div>
+                          <div style={{ fontSize:12, color:"var(--text)", background:"var(--amber-glow)", borderRadius:6, padding:"8px 10px" }}>{meetingPrep.personIntel?.whatTheyWillJudgeYouOn}</div>
+                        </div>
+
+                        {/* Agenda + Success */}
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
+                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>Suggested Agenda</div>
+                          {meetingPrep.meetingAgenda?.map((item,i) => (
+                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8, display:"flex", gap:8 }}>
+                              <span style={{ color:"var(--amber)", fontWeight:700, minWidth:16 }}>{i+1}.</span>
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                          <div style={{ marginTop:16, padding:12, background:"var(--green-dim)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:8 }}>
+                            <div style={{ fontSize:10, fontWeight:700, color:"var(--green)", letterSpacing:1, marginBottom:4 }}>SUCCESS LOOKS LIKE</div>
+                            <div style={{ fontSize:12, color:"var(--text-muted)" }}>{meetingPrep.successCriteria}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Power Questions */}
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:16, textTransform:"uppercase" }}>3 Power Questions</div>
+                        {meetingPrep.powerQuestions?.map((q,i) => (
+                          <div key={i} style={{ marginBottom:16, paddingBottom:16, borderBottom: i < 2 ? "1px solid var(--border)" : "none" }}>
+                            <div style={{ fontSize:14, color:"var(--text)", fontStyle:"italic", marginBottom:8 }}>"{q.question}"</div>
+                            <div style={{ display:"flex", gap:16 }}>
+                              <div style={{ flex:1 }}>
+                                <div style={{ fontSize:9, fontWeight:700, color:"var(--text-dim)", letterSpacing:1, marginBottom:3 }}>WHY ASK</div>
+                                <div style={{ fontSize:11, color:"var(--text-muted)" }}>{q.intent}</div>
+                              </div>
+                              <div style={{ flex:1 }}>
+                                <div style={{ fontSize:9, fontWeight:700, color:"var(--blue-light)", letterSpacing:1, marginBottom:3 }}>YOU'LL LEARN</div>
+                                <div style={{ fontSize:11, color:"var(--text-muted)" }}>{q.expectedInsight}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Landmines + Follow Up */}
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+                        <div style={{ background:"var(--red-dim)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:12, padding:20 }}>
+                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--red)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>⚠ Landmines to Avoid</div>
+                          {meetingPrep.landminesToAvoid?.map((l,i) => (
+                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>✗ {l}</div>
+                          ))}
+                        </div>
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:20 }}>
+                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:2, marginBottom:14, textTransform:"uppercase" }}>Follow-Up Template</div>
+                          <div style={{ fontSize:12, color:"var(--text)", lineHeight:1.7 }}>{meetingPrep.followUpTemplate}</div>
+                          <button onClick={() => navigator.clipboard.writeText(meetingPrep.followUpTemplate)}
+                            style={{ marginTop:10, background:"transparent", border:"1px solid var(--border)", borderRadius:6, padding:"4px 12px", color:"var(--text-dim)", fontSize:10, cursor:"pointer", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>
+                            COPY
+                          </button>
+                        </div>
+                      </div>
+
+                      <button onClick={() => setMeetingPrep(null)}
+                        style={{ marginTop:16, background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 20px", color:"var(--text-dim)", fontSize:11, cursor:"pointer" }}>
+                        Generate New Prep
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── TAB: EXEC BRIEF ── */}
+              {activeTab === "execbrief" && (
+                <div className="fade-up-1">
+                  {!execBrief ? (
+                    <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:16, padding:40, textAlign:"center" }}>
+                      <div style={{ fontSize:48, marginBottom:16 }}>📋</div>
+                      <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"var(--amber)", marginBottom:8 }}>Executive Briefing Document</div>
+                      <div style={{ fontSize:14, color:"var(--text-muted)", marginBottom:8, maxWidth:500, margin:"0 auto 24px" }}>
+                        A board-ready business case written <em>for your buyer</em> — in their language, focused on their outcomes. Give this to your champion to take to the CFO or CEO.
+                      </div>
+                      <div style={{ display:"flex", gap:12, justifyContent:"center", marginBottom:28, flexWrap:"wrap" }}>
+                        {["Executive Summary","Business Case & ROI","Risk of Inaction","Peer Validation","Recommended Next Step"].map(s => (
+                          <span key={s} style={{ background:"var(--amber-glow)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:6, padding:"4px 12px", fontSize:11, color:"var(--amber)", fontFamily:"'JetBrains Mono',monospace" }}>{s}</span>
+                        ))}
+                      </div>
+                      <button onClick={async () => {
+                        setExecBriefLoading(true);
+                        try {
+                          const res = await fetch("/api/anthropic", {
+                            method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({
+                              model:"claude-sonnet-4-20250514", max_tokens:6000, stream:true,
+                              tools:[{type:"web_search_20250305",name:"web_search"}],
+                              system:`You are a McKinsey-trained enterprise business case writer. Write an executive briefing document that a champion can take to their CFO or CEO to get approval for a purchase. This document is written FOR the buyer, not the seller. It should be authoritative, data-driven, and free of vendor language. Return ONLY valid JSON:
+{"documentTitle":"[Company] — Business Case for [Solution Category]","executiveSummary":"3-4 sentence board-ready summary of the opportunity and recommendation","currentStateAnalysis":{"headline":"The problem headline","painPoints":["Specific pain 1 with $ impact","Specific pain 2 with $ impact","Specific pain 3 with $ impact"],"costOfStatusQuo":"Annual cost of doing nothing in $ terms","urgencyDrivers":["Why act now — regulatory/competitive/market driver 1","Driver 2"]},"proposedSolution":{"whatItDoes":"What the solution does in buyer language — no vendor speak","keyCapabilities":["Capability 1 and its outcome","Capability 2 and its outcome","Capability 3 and its outcome"],"implementationTimeline":"Realistic timeline to value"},"businessCase":{"totalInvestment":"Investment range","year1Benefits":"Year 1 financial benefit","year2Benefits":"Year 2 financial benefit","roiPercentage":"Expected ROI %","paybackPeriod":"Payback period in months","npv3Year":"3-year NPV estimate"},"riskAnalysis":{"risksOfAction":["Implementation risk and mitigation"],"risksOfInaction":["Risk of not acting 1","Risk of not acting 2","Risk of not acting 3"]},"peerValidation":{"industryBenchmark":"What peer companies are doing","analystPerspective":"Relevant Gartner/Forrester view","caseStudy":"Brief relevant case study"},"recommendation":{"decision":"Clear recommended decision","immediateNextSteps":["Step 1","Step 2","Step 3"],"successMetrics":["How we measure success 1","How we measure success 2"],"executiveSponsorAsk":"What you need from the executive sponsor"}}`,
+                              messages:[{role:"user",content:`Company: ${form.company} | Market: ${form.market} | Industry: ${form.industry}
+Solution: ${form.product} — ${form.productDesc || ""}
+Deal size: ${form.dealSize || "TBD"}
+Key pain points: ${result?.accountBrief?.painPoints?.map(p => p.pain).join(", ") || ""}
+ROI context: ${JSON.stringify(result?.commandOfMessage?.valueDrivers || [])}
+Deal stage: ${form.dealStage}
+Search for relevant industry ROI data, peer benchmarks, and analyst perspectives on ${form.industry} digital transformation.`}]
+                            })
+                          });
+                          const reader = res.body.getReader();
+                          const decoder = new TextDecoder();
+                          let raw = "";
+                          while(true) {
+                            const {done,value} = await reader.read();
+                            if(done) break;
+                            for(const line of decoder.decode(value,{stream:true}).split("\n")) {
+                              if(line.startsWith("data: ")) {
+                                try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){}
+                              }
+                            }
+                          }
+                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}");
+                          setExecBrief(JSON.parse(raw.slice(s,e+1)));
+                        } catch(e) { alert("Failed to generate executive brief. Try again."); }
+                        setExecBriefLoading(false);
+                      }} disabled={execBriefLoading}
+                        style={{ background:"linear-gradient(135deg,var(--amber),var(--orange))", border:"none", borderRadius:10, padding:"14px 36px", color:"var(--navy)", fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:900, cursor:"pointer", letterSpacing:1, opacity:execBriefLoading?0.6:1 }}>
+                        {execBriefLoading ? "GENERATING BUSINESS CASE..." : "📋 GENERATE EXEC BRIEF"}
+                      </button>
+                      {execBriefLoading && <div style={{ fontSize:12, color:"var(--text-dim)", marginTop:12 }}>Researching industry data and analyst reports... ~20 seconds</div>}
+                    </div>
+                  ) : (
+                    <div className="fade-up-1">
+                      {/* Document Header */}
+                      <div style={{ background:"linear-gradient(135deg,rgba(29,78,216,0.15),rgba(8,17,30,0.8))", border:"1px solid rgba(96,165,250,0.2)", borderRadius:16, padding:28, marginBottom:20 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--blue-light)", letterSpacing:3, marginBottom:8, textTransform:"uppercase" }}>Executive Briefing Document · Confidential</div>
+                        <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:900, color:"white", marginBottom:4 }}>{execBrief.documentTitle}</div>
+                        <div style={{ display:"flex", gap:12, marginTop:12 }}>
+                          <span style={{ fontSize:11, color:"var(--text-dim)" }}>Prepared for: {form.company} Leadership</span>
+                          <span style={{ fontSize:11, color:"var(--text-dim)" }}>· {new Date().toLocaleDateString('en-SG',{month:'long',year:'numeric'})}</span>
+                        </div>
+                        <div style={{ display:"flex", gap:10, marginTop:16 }}>
+                          <button onClick={() => navigator.clipboard.writeText(JSON.stringify(execBrief, null, 2))}
+                            style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 16px", color:"var(--text-dim)", fontSize:11, cursor:"pointer", fontFamily:"'JetBrains Mono',monospace" }}>
+                            COPY AS TEXT
+                          </button>
+                          <button onClick={() => setExecBrief(null)}
+                            style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"8px 16px", color:"var(--text-dim)", fontSize:11, cursor:"pointer" }}>
+                            Regenerate
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Executive Summary */}
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:3, marginBottom:12, textTransform:"uppercase" }}>Executive Summary</div>
+                        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.8 }}>{execBrief.executiveSummary}</div>
+                      </div>
+
+                      {/* Current State */}
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--red)", letterSpacing:3, marginBottom:12, textTransform:"uppercase" }}>Current State Analysis</div>
+                        <div style={{ fontSize:16, fontWeight:700, color:"var(--text)", marginBottom:16 }}>{execBrief.currentStateAnalysis?.headline}</div>
+                        {execBrief.currentStateAnalysis?.painPoints?.map((p,i) => (
+                          <div key={i} style={{ display:"flex", gap:10, marginBottom:10, alignItems:"flex-start" }}>
+                            <span style={{ color:"var(--red)", fontWeight:700, marginTop:1 }}>✗</span>
+                            <span style={{ fontSize:13, color:"var(--text-muted)" }}>{p}</span>
+                          </div>
+                        ))}
+                        <div style={{ marginTop:16, background:"var(--red-dim)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:8, padding:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:"var(--red)", letterSpacing:1, marginBottom:6 }}>ANNUAL COST OF STATUS QUO</div>
+                          <div style={{ fontSize:18, fontWeight:900, color:"var(--red)" }}>{execBrief.currentStateAnalysis?.costOfStatusQuo}</div>
+                        </div>
+                      </div>
+
+                      {/* Business Case */}
+                      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--green)", letterSpacing:3, marginBottom:16, textTransform:"uppercase" }}>Financial Business Case</div>
+                        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:16 }}>
+                          {[
+                            ["Total Investment", execBrief.businessCase?.totalInvestment, "var(--text-muted)"],
+                            ["Expected ROI", execBrief.businessCase?.roiPercentage, "var(--green)"],
+                            ["Payback Period", execBrief.businessCase?.paybackPeriod, "var(--amber)"],
+                            ["Year 1 Benefit", execBrief.businessCase?.year1Benefits, "var(--green)"],
+                            ["Year 2 Benefit", execBrief.businessCase?.year2Benefits, "var(--green)"],
+                            ["3-Year NPV", execBrief.businessCase?.npv3Year, "var(--amber)"],
+                          ].map(([label,val,color]) => (
+                            <div key={label} style={{ background:"var(--card2)", border:"1px solid var(--border)", borderRadius:10, padding:16, textAlign:"center" }}>
+                              <div style={{ fontSize:16, fontWeight:800, color, marginBottom:4 }}>{val}</div>
+                              <div style={{ fontSize:9, color:"var(--text-dim)", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1, textTransform:"uppercase" }}>{label}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Risk of Inaction */}
+                      <div style={{ background:"rgba(239,68,68,0.05)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:14, padding:24, marginBottom:16 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--red)", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Risk of Inaction</div>
+                        {execBrief.riskAnalysis?.risksOfInaction?.map((r,i) => (
+                          <div key={i} style={{ display:"flex", gap:10, marginBottom:10 }}>
+                            <span style={{ color:"var(--red)", fontWeight:700 }}>⚠</span>
+                            <span style={{ fontSize:13, color:"var(--text-muted)" }}>{r}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Peer Validation */}
+                      {execBrief.peerValidation && (
+                        <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:14, padding:24, marginBottom:16 }}>
+                          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--blue-light)", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Peer Validation & Market Context</div>
+                          {execBrief.peerValidation.industryBenchmark && <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12, lineHeight:1.7 }}>📊 {execBrief.peerValidation.industryBenchmark}</div>}
+                          {execBrief.peerValidation.analystPerspective && <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12, lineHeight:1.7 }}>🔍 {execBrief.peerValidation.analystPerspective}</div>}
+                          {execBrief.peerValidation.caseStudy && <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7 }}>✓ {execBrief.peerValidation.caseStudy}</div>}
+                        </div>
+                      )}
+
+                      {/* Recommendation */}
+                      <div style={{ background:"linear-gradient(135deg,rgba(245,158,11,0.1),rgba(234,88,12,0.08))", border:"1px solid rgba(245,158,11,0.25)", borderRadius:14, padding:24 }}>
+                        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:9, color:"var(--amber)", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Recommendation & Next Steps</div>
+                        <div style={{ fontSize:15, fontWeight:700, color:"var(--text)", marginBottom:16 }}>{execBrief.recommendation?.decision}</div>
+                        {execBrief.recommendation?.immediateNextSteps?.map((s,i) => (
+                          <div key={i} style={{ display:"flex", gap:10, marginBottom:10 }}>
+                            <span style={{ color:"var(--amber)", fontWeight:800, minWidth:20 }}>{i+1}.</span>
+                            <span style={{ fontSize:13, color:"var(--text-muted)" }}>{s}</span>
+                          </div>
+                        ))}
+                        <div style={{ marginTop:16, padding:14, background:"rgba(245,158,11,0.08)", borderRadius:8 }}>
+                          <div style={{ fontSize:10, fontWeight:700, color:"var(--amber)", letterSpacing:1, marginBottom:6 }}>ASK FROM EXECUTIVE SPONSOR</div>
+                          <div style={{ fontSize:13, color:"var(--text)" }}>{execBrief.recommendation?.executiveSponsorAsk}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
