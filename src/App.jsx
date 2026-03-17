@@ -547,29 +547,26 @@ const generateBattleCards = async (competitors, form, result, setFn, setLoading)
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 4000,
-        system: `You are Ankur Sehgal — global enterprise SaaS sales expert. Generate battle cards for the given competitors. Return ONLY valid JSON array:
-[{
-  "competitor": "name",
-  "ourStrengths": ["strength 1","strength 2","strength 3"],
-  "theirWeaknesses": ["weakness 1","weakness 2","weakness 3"],
-  "theirStrengths": ["their strength 1","their strength 2"],
-  "winMoves": ["move 1","move 2","move 3"],
-  "trapQuestions": ["question 1","question 2"],
-  "landmines": ["landmine 1","landmine 2"],
-  "whenWeWin": "conditions for winning",
-  "whenWeLose": "honest assessment"
-}]`,
-        messages: [{ role: "user", content: `Competitors: ${competitors}
-Company: ${form.company}
-Industry: ${form.industry}
-Product: ${form.product}
-Our pain points addressed: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')}` }]
+        stream: true,
+        system: `You are a global enterprise SaaS sales expert. Generate battle cards. Return ONLY valid JSON array:
+[{"competitor":"name","ourStrengths":["...","...","..."],"theirWeaknesses":["...","..."],"theirStrengths":["...","..."],"winMoves":["...","...","..."],"trapQuestions":["...","..."],"landmines":["...","..."],"weWinWhen":"...","theyAttackWith":["...","..."]}]`,
+        messages: [{ role: "user", content: `Competitors: ${competitors}. Company: ${form.company}. Industry: ${form.industry}. Product: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}` }]
       })
     });
-    const data = await res.json();
-    const raw = data.content?.map(b => b.text || "").join("") || "";
-    const clean = raw.split("```").join("").split("\n").filter(l => l.trim() && l.trim() !== "json").join("\n").trim();
-    setFn(JSON.parse(clean));
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let raw = "";
+    while(true) {
+      const {done, value} = await reader.read();
+      if(done) break;
+      for(const line of decoder.decode(value, {stream:true}).split("\n")) {
+        if(line.startsWith("data: ")) {
+          try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){}
+        }
+      }
+    }
+    const s=raw.indexOf("["), e=raw.lastIndexOf("]");
+    if(s!==-1&&e!==-1) setFn(JSON.parse(raw.slice(s,e+1)));
   } catch(e) { alert("Failed to generate battle cards. Try again."); }
   setLoading(false);
 };
