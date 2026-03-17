@@ -436,18 +436,19 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
 
     sectionHeader('Power Questions');
     meetingPrep.powerQuestions?.forEach((q, i) => {
-      const qLines = doc.splitTextToSize(`Q${i+1}: ${q.question}`, CW);
+      doc.setFontSize(9);
+      const qLines = doc.splitTextToSize(`Q${i+1}: ${q.question || ''}`, CW);
       const intentLines = doc.splitTextToSize(`Intent: ${q.intent || ''}`, CW - 6);
-      const learnLines = doc.splitTextToSize(`You will learn: ${q.expectedInsight || ''}`, CW - 6);
-      const blockH = (qLines.length + intentLines.length + learnLines.length) * 5 + 10;
+      const learnLines = doc.splitTextToSize(`Learn: ${q.expectedInsight || ''}`, CW - 6);
+      const blockH = (qLines.length + intentLines.length + learnLines.length) * 4.5 + 8;
       checkY(blockH);
-      setTxt('#111827'); doc.setFontSize(11); doc.setFont('helvetica','bold');
-      qLines.forEach(l => { doc.text(l, M, y); y += 5; });
-      setTxt('#6B7280'); doc.setFontSize(9); doc.setFont('helvetica','normal');
-      intentLines.forEach(l => { checkY(5); doc.text(l, M + 6, y); y += 4.5; });
+      setTxt('#111827'); doc.setFont('helvetica','bold');
+      qLines.forEach(l => { doc.text(l, M, y); y += 4.5; });
+      setTxt('#6B7280'); doc.setFont('helvetica','normal');
+      intentLines.forEach(l => { doc.text(l, M + 6, y); y += 4; });
       setTxt('#1A56DB');
-      learnLines.forEach(l => { checkY(5); doc.text(l, M + 6, y); y += 4.5; });
-      y += 3;
+      learnLines.forEach(l => { doc.text(l, M + 6, y); y += 4; });
+      y += 4;
     });
 
     sectionHeader('Landmines to Avoid');
