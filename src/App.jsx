@@ -2522,8 +2522,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <div className="inline-section">
                       <div className="section-header" style={{ color:'var(--blue-light)' }}>🔗 LinkedIn Variants</div>
                       {!liVariants ? (
-                        <button className="gen-btn" onClick={() => generateLiVariants(form, result, setLiVariants, setLiLoading)} disabled={liLoading}>
-                          {liLoading ? '⏳ Generating...' : '🔗 Generate LinkedIn Variants'}
+                        <button className="gen-btn" onClick={() => generateLiVariants(form, result, setLiVariants, setLiVariantsLoading)} disabled={liVariantsLoading}>
+                          {liVariantsLoading ? '⏳ Generating...' : '🔗 Generate LinkedIn Variants'}
                         </button>
                       ) : (
                         <div className="r-grid-3 anim-scale-in">
