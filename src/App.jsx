@@ -1686,7 +1686,7 @@ ${liveIntel}
 Generate the complete 7-module intelligence brief as specified. Where live intelligence is provided above, incorporate specific recent facts, dates, and events into the brief — especially in keyTriggers, whyNow, and painPoints.`;
 
       // CALL 1: Brief + MEDDPICC + Stakeholders
-      const streamCall = async (userPrompt, systemPrompt, model = "claude-sonnet-4-20250514") => {
+      const streamCall = async (userPrompt, systemPrompt, model = "claude-sonnet-4-20250514", retryCount = 0) => {
         const r = await fetch("/api/anthropic", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1698,6 +1698,14 @@ Generate the complete 7-module intelligence brief as specified. Where live intel
             messages: [{ role: "user", content: userPrompt }],
           }),
         });
+        if (r.status === 529) {
+          // Rate limited - wait and retry
+          if (retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+            return streamCall(userPrompt, systemPrompt, model, retryCount + 1);
+          }
+          throw new Error('Rate limit exceeded. Please try again in a moment.');
+        }
         if (!r.ok) throw new Error(`API error: ${r.status}`);
         const reader = r.body.getReader();
         const decoder = new TextDecoder();
