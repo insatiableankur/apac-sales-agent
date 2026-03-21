@@ -1947,6 +1947,27 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
         <div className="main">
           {/* Step indicator */}
           {step < 4 && (
+            {/* Pre-fill banner */}
+            {formPreFilled && form.company && (
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', borderRadius:10, marginBottom:16, gap:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+                  <span style={{ fontSize:18, flexShrink:0 }}>🔄</span>
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>Continuing with {form.company}</div>
+                    <div style={{ fontSize:11, color:'var(--text-muted)' }}>Pre-filled from last analysis — edit anything or run as-is</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setForm({ company:'', website:'', market:'', industry:'', product:'', productDesc:'', dealStage:'', dealSize:'', knownContacts:'', recentNews:'', competitorsMentioned:'' }); setFormPreFilled(false); }}
+                  style={{ background:'transparent', border:'1px solid var(--border)', borderRadius:7, padding:'6px 14px', color:'var(--text-muted)', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0, transition:'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor='var(--red)'; e.currentTarget.style.color='var(--red)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-muted)'; }}
+                >
+                  Clear & Start Fresh
+                </button>
+              </div>
+            )}
+
             <div className="steps fade-up">
               {[["01", "Company"], ["02", "Context"], ["03", "Analyse"], ["04", "Brief"]].map(([num, label], i) => {
                 const s = i + 1;
@@ -2134,9 +2155,50 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     </div>
                   ))}
                 </div>
-                <button className="btn-amber" onClick={runAnalysis} disabled={!canProceed2}>
-                  🚀 Run Intelligence Analysis
-                </button>
+                {/* ── RUN BUTTON ── */}
+                <div style={{ marginTop:24, borderTop:'1px solid var(--border)', paddingTop:24 }}>
+                  <button
+                    onClick={runAnalysis}
+                    disabled={!canProceed2}
+                    style={{
+                      width:'100%',
+                      background: canProceed2
+                        ? 'linear-gradient(135deg, #F59E0B 0%, #EA580C 100%)'
+                        : 'var(--slate2)',
+                      border:'none',
+                      borderRadius:14,
+                      padding:'18px 32px',
+                      color: canProceed2 ? '#050C18' : 'var(--text-dim)',
+                      fontFamily:"'Syne', sans-serif",
+                      fontSize:16,
+                      fontWeight:900,
+                      letterSpacing:1.5,
+                      cursor: canProceed2 ? 'pointer' : 'not-allowed',
+                      transition:'all 0.2s',
+                      display:'flex',
+                      alignItems:'center',
+                      justifyContent:'center',
+                      gap:12,
+                      boxShadow: canProceed2 ? '0 8px 32px rgba(245,158,11,0.25)' : 'none',
+                      transform:'translateY(0)',
+                    }}
+                    onMouseEnter={e => { if(canProceed2) e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(245,158,11,0.35)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=canProceed2?'0 8px 32px rgba(245,158,11,0.25)':'none'; }}
+                  >
+                    <span style={{ fontSize:20 }}>🚀</span>
+                    <span>RUN INTELLIGENCE ANALYSIS</span>
+                  </button>
+                  {!canProceed2 && (
+                    <p style={{ textAlign:'center', fontSize:11, color:'var(--text-dim)', marginTop:8, fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>
+                      FILL IN REQUIRED FIELDS TO CONTINUE
+                    </p>
+                  )}
+                  {canProceed2 && (
+                    <p style={{ textAlign:'center', fontSize:11, color:'var(--text-dim)', marginTop:8 }}>
+                      Generates full deal intelligence in ~20 seconds
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -3566,6 +3628,19 @@ ${povDoc.closingPerspective}`;
                   <div className="inline-section">
                     <div className="section-header" style={{ color:'var(--red)' }}>🤝 Negotiation Playbook</div>
                     <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:12, lineHeight:1.6 }}>Anchoring strategy, concession framework and walk-away lines — built from your actual deal data.</p>
+                    {!roiResult ? (
+                      <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}>
+                        <span style={{ fontSize:15, flexShrink:0 }}>💡</span>
+                        <p style={{ fontSize:12, color:'var(--amber)', lineHeight:1.5, margin:0 }}>Complete the <strong>ROI Calculator</strong> above first for precise anchoring numbers. Without it, figures will be estimated from deal context.</p>
+                      </div>
+                    ) : (
+                      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
+                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ ROI {roiResult.roi}%</span>
+                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Payback {roiResult.payback}mo</span>
+                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Benefit ${roiResult.totalBenefit?.toLocaleString()}</span>
+                        <span className="tag tag-dim" style={{ fontSize:9 }}>Using your confirmed data</span>
+                      </div>
+                    )}
                     {!roiResult ? (
                       <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}>
                         <span style={{ fontSize:15, flexShrink:0 }}>💡</span>
