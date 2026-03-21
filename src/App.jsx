@@ -183,7 +183,7 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) 
     fieldLabel('BUYING CULTURE');
     bodyText(ab.buyingCulture, 0, '#374151'); y += 2;
     fieldLabel('APAC MARKET CONTEXT');
-    bodyText(ab.apacMarketContext, 0, '#374151');
+    bodyText(ab.marketContext, 0, '#374151');
   }
 
   // ── MODULE 2: MEDDPICC ───────────────────────────────────────────────
@@ -1602,6 +1602,20 @@ export default function SalesIntelligenceAgent() {
   // Mutual Success Plan
   const [mutualSuccessPlan, setMutualSuccessPlan] = useState(null);
   const [mutualSuccessLoading, setMutualSuccessLoading] = useState(false);
+  // POV Builder
+  const [povDoc, setPovDoc] = useState(null);
+  const [povLoading, setPovLoading] = useState(false);
+  // Objection Simulator
+  const [objectionInput, setObjectionInput] = useState("");
+  const [objectionResponse, setObjectionResponse] = useState(null);
+  const [objectionLoading, setObjectionLoading] = useState(false);
+  // Email Reply Analyser
+  const [emailReplyInput, setEmailReplyInput] = useState("");
+  const [emailReplyAnalysis, setEmailReplyAnalysis] = useState(null);
+  const [emailReplyLoading, setEmailReplyLoading] = useState(false);
+  // Negotiation Playbook
+  const [negotiationPlaybook, setNegotiationPlaybook] = useState(null);
+  const [negotiationLoading, setNegotiationLoading] = useState(false);
   // News Triggers
   const [newsTriggers, setNewsTriggers] = useState(null);
   const [newsLoading, setNewsLoading] = useState(false);
@@ -2864,6 +2878,69 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     );
                   })()}
 
+                  {/* Objection Simulator */}
+                  <div className="inline-section">
+                    <div className="section-header" style={{ color:'var(--red)' }}>⚡ Objection Simulator</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Heard an objection in a live meeting? Get the perfect response instantly.</p>
+                    <textarea placeholder='Type the objection exactly as they said it... e.g. "We already have a solution for this" or "The price is too high" or "We need to involve procurement first"'
+                      value={objectionInput} onChange={e => setObjectionInput(e.target.value)}
+                      style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:72, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }} />
+                    <button onClick={async () => {
+                      if(!objectionInput.trim()) return;
+                      setObjectionLoading(true);
+                      setObjectionResponse(null);
+                      try {
+                        const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                          body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2000, stream:true,
+                            system:`You are a world-class enterprise sales coach. Handle this objection brilliantly. Return ONLY valid JSON: {"objectionType":"Price|Timeline|Status Quo|Authority|Need|Trust|Competition","sentiment":"hostile|skeptical|curious|genuine","whatTheyReallyMean":"What's behind this objection — the real concern","immediateResponse":"Your exact response — word for word. Natural, confident, not defensive. Under 60 words.","followUpQuestion":"The single best question to ask after your response","trapToSet":"A question that reveals their weakness or creates urgency","reframingStatement":"How to completely reframe this objection as a buying signal","neverSay":["Do not say this","Do not say this either"],"closingMove":"How to turn this objection into a next step"}`,
+                            messages:[{role:"user",content:`Objection: "${objectionInput}". Context: Selling ${form.product} to ${form.company} (${form.industry}). Deal stage: ${form.dealStage}. Their key pain: ${result?.accountBrief?.painPoints?.[0]?.pain||'Unknown'}. MEDDPICC health: ${result?.meddpicc?.overallHealth||'unknown'}.`}]
+                          })
+                        });
+                        const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                        while(true) { const {done,value} = await reader.read(); if(done) break;
+                          for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                        const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setObjectionResponse(JSON.parse(raw.slice(s,e+1)));
+                      } catch(e) { alert("Failed. Try again."); }
+                      setObjectionLoading(false);
+                    }} disabled={objectionLoading||!objectionInput.trim()} className="btn-amber" style={{ fontSize:12, padding:'10px 22px', marginBottom: objectionResponse ? 16 : 0 }}>
+                      {objectionLoading ? 'ANALYSING...' : '⚡ HANDLE THIS OBJECTION'}
+                    </button>
+                    {objectionResponse && (
+                      <div className="anim-scale-in">
+                        <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+                          <span className={`tag ${objectionResponse.sentiment==='hostile'?'tag-red':objectionResponse.sentiment==='skeptical'?'tag-amber':'tag-dim'}`}>{objectionResponse.sentiment?.toUpperCase()}</span>
+                          <span className="tag tag-blue">{objectionResponse.objectionType}</span>
+                        </div>
+                        <div style={{ background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.12)', borderRadius:8, padding:12, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:5, fontFamily:"'JetBrains Mono',monospace" }}>WHAT THEY REALLY MEAN</div>
+                          <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{objectionResponse.whatTheyReallyMean}</p>
+                        </div>
+                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderLeft:'3px solid var(--blue)', borderRadius:'0 10px 10px 0', padding:'14px 16px', marginBottom:10 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>SAY THIS — VERBATIM</div>
+                          <p style={{ fontSize:14, color:'var(--text)', lineHeight:1.75, marginBottom:10 }}>"{objectionResponse.immediateResponse}"</p>
+                          <button className="copy-btn" onClick={() => navigator.clipboard.writeText(objectionResponse.immediateResponse)}>COPY</button>
+                        </div>
+                        <div className="r-grid-2" style={{ marginBottom:10 }}>
+                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>FOLLOW-UP QUESTION</div>
+                            <p style={{ fontSize:12, color:'var(--text)', fontStyle:'italic', lineHeight:1.6 }}>"{objectionResponse.followUpQuestion}"</p>
+                          </div>
+                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>🪤 TRAP TO SET</div>
+                            <p style={{ fontSize:12, color:'var(--text)', fontStyle:'italic', lineHeight:1.6 }}>"{objectionResponse.trapToSet}"</p>
+                          </div>
+                        </div>
+                        {objectionResponse.closingMove && (
+                          <div style={{ background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, padding:12 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:5, fontFamily:"'JetBrains Mono',monospace" }}>CLOSING MOVE</div>
+                            <p style={{ fontSize:12, color:'var(--text)', lineHeight:1.6 }}>{objectionResponse.closingMove}</p>
+                          </div>
+                        )}
+                        <button onClick={() => { setObjectionResponse(null); setObjectionInput(""); }} className="btn-ghost" style={{ marginTop:10, fontSize:11 }}>Try Another Objection</button>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Battle Cards */}
                   <div className="inline-section">
                     <div className="section-header">⚔️ Battle Cards</div>
@@ -2950,6 +3027,151 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               {/* ═══ TAB: BUSINESS CASE ════════════════════════════════════ */}
               {activeTab === "bizcase" && (
                 <div className="anim-slide-up">
+                  {/* POV Builder */}
+                  <div className="card" style={{ marginBottom:20 }}>
+                    <div className="card-title" style={{ color:'var(--blue-light)' }}>📐 Point of View Document</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:16, lineHeight:1.6 }}>A strategic advisor document — not a pitch. Written from your perspective on their industry, their situation and the path forward. Champions use this to build internal consensus.</p>
+                    {!povDoc ? (
+                      <button onClick={async () => {
+                        setPovLoading(true);
+                        try {
+                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:5000,
+                              tools:[{type:"web_search_20250305",name:"web_search"}],
+                              system:`You are a McKinsey-trained strategic advisor writing a Point of View document for an enterprise sales engagement. This is NOT a sales pitch. It is a thought leadership document that demonstrates deep industry expertise. Return ONLY valid JSON:
+{"title":"Point of View: [Topic relevant to their industry]","executiveTheme":"The single strategic insight that ties everything together","industryPerspective":{"headline":"What is happening in this industry right now","trends":["Trend 1 with data point","Trend 2 with data point","Trend 3 with data point"],"regulatoryContext":"Key regulatory or compliance forces at play","competitiveDynamics":"How the competitive landscape is shifting","analystPerspective":"What Gartner/Forrester/IDC are saying about this space"},"yourSituation":{"headline":"What this means for [Company]","specificChallenges":["Challenge specific to their situation 1","Challenge 2","Challenge 3"],"costOfInaction":"The strategic risk of not acting","opportunityWindow":"Why now is the right time","peersAreMoving":"What leading peers in their space are doing"},"recommendedPath":{"headline":"A recommended path forward","principlesForSuccess":["Principle 1","Principle 2","Principle 3"],"phaseApproach":"High-level phased approach","quickWins":["Quick win 1 achievable in 30 days","Quick win 2"],"longerTermVision":"Where this leads in 18-24 months"},"closingPerspective":"2-3 sentence closing that positions you as a trusted advisor, not a vendor"}`,
+                              messages:[{role:"user",content:`Write a Point of View for ${form.company} in the ${form.industry} industry, ${form.market} market. Their key pain points: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. We sell: ${form.product} — ${form.productDesc||''}. Market context: ${result?.accountBrief?.marketContext||''}. Search for the latest trends, analyst reports and news in the ${form.industry} industry in ${form.market} to make this data-driven and credible.`}]
+                            })
+                          });
+                          const data = await res.json();
+                          const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'{}';
+                          const s=text.indexOf('{'),e=text.lastIndexOf('}');
+                          if(s!==-1&&e!==-1) setPovDoc(JSON.parse(text.slice(s,e+1)));
+                        } catch(err) { alert("Failed to generate POV. Try again."); }
+                        setPovLoading(false);
+                      }} disabled={povLoading} className="btn-amber" style={{ fontSize:12, padding:'11px 28px' }}>
+                        {povLoading ? 'RESEARCHING & WRITING...' : '📐 GENERATE POINT OF VIEW'}
+                      </button>
+                    ) : (
+                      <div className="anim-scale-in">
+                        {/* POV Header */}
+                        <div style={{ background:'linear-gradient(135deg,rgba(29,78,216,0.15),rgba(8,17,30,0.8))', border:'1px solid rgba(96,165,250,0.2)', borderRadius:14, padding:22, marginBottom:16 }}>
+                          <div style={{ fontSize:9, color:'var(--blue-light)', fontFamily:"'JetBrains Mono',monospace", letterSpacing:2, marginBottom:6 }}>POINT OF VIEW DOCUMENT · {form.company?.toUpperCase()}</div>
+                          <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:'white', lineHeight:1.3, marginBottom:8 }}>{povDoc.title}</div>
+                          <p style={{ fontSize:13, color:'var(--blue-light)', lineHeight:1.7, fontStyle:'italic' }}>{povDoc.executiveTheme}</p>
+                          <div style={{ display:'flex', gap:8, marginTop:14 }}>
+                            <button className="copy-btn" onClick={() => {
+                              const full = `POINT OF VIEW: ${povDoc.title}
+
+${povDoc.executiveTheme}
+
+INDUSTRY PERSPECTIVE
+${povDoc.industryPerspective?.headline}
+${povDoc.industryPerspective?.trends?.join('
+')}
+
+YOUR SITUATION
+${povDoc.yourSituation?.headline}
+${povDoc.yourSituation?.specificChallenges?.join('
+')}
+
+RECOMMENDED PATH
+${povDoc.recommendedPath?.headline}
+${povDoc.recommendedPath?.principlesForSuccess?.join('
+')}
+
+${povDoc.closingPerspective}`;
+                              navigator.clipboard.writeText(full);
+                            }}>COPY FULL DOCUMENT</button>
+                            <button onClick={() => setPovDoc(null)} className="btn-ghost" style={{ fontSize:11, padding:'4px 12px' }}>Regenerate</button>
+                          </div>
+                        </div>
+
+                        {/* Section 1: Industry Perspective */}
+                        <div className="card" style={{ marginBottom:12 }}>
+                          <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
+                            <div style={{ width:24, height:24, borderRadius:6, background:'var(--blue)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:900, color:'white', flexShrink:0 }}>1</div>
+                            <div className="section-header" style={{ margin:0, flex:1 }}>Industry Perspective</div>
+                          </div>
+                          <p style={{ fontSize:14, fontWeight:700, color:'var(--text)', marginBottom:14, lineHeight:1.5 }}>{povDoc.industryPerspective?.headline}</p>
+                          {povDoc.industryPerspective?.trends?.map((t,i) => (
+                            <div key={i} style={{ display:'flex', gap:10, marginBottom:8, alignItems:'flex-start' }}>
+                              <span style={{ color:'var(--blue-light)', fontWeight:700, fontSize:12, marginTop:1, flexShrink:0 }}>→</span>
+                              <span style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{t}</span>
+                            </div>
+                          ))}
+                          {povDoc.industryPerspective?.regulatoryContext && (
+                            <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.12)', borderRadius:8 }}>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>REGULATORY CONTEXT</div>
+                              <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.6 }}>{povDoc.industryPerspective.regulatoryContext}</p>
+                            </div>
+                          )}
+                          {povDoc.industryPerspective?.analystPerspective && (
+                            <div style={{ marginTop:8, padding:'10px 12px', background:'rgba(96,165,250,0.06)', border:'1px solid rgba(96,165,250,0.12)', borderRadius:8 }}>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>ANALYST PERSPECTIVE</div>
+                              <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.6 }}>{povDoc.industryPerspective.analystPerspective}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Section 2: Your Situation */}
+                        <div className="card" style={{ marginBottom:12 }}>
+                          <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
+                            <div style={{ width:24, height:24, borderRadius:6, background:'var(--red)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:900, color:'white', flexShrink:0 }}>2</div>
+                            <div className="section-header" style={{ margin:0, flex:1 }}>Your Situation</div>
+                          </div>
+                          <p style={{ fontSize:14, fontWeight:700, color:'var(--text)', marginBottom:14, lineHeight:1.5 }}>{povDoc.yourSituation?.headline}</p>
+                          {povDoc.yourSituation?.specificChallenges?.map((ch,i) => (
+                            <div key={i} style={{ display:'flex', gap:10, marginBottom:8 }}>
+                              <span style={{ color:'var(--red)', fontWeight:700, fontSize:12, flexShrink:0 }}>✗</span>
+                              <span style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{ch}</span>
+                            </div>
+                          ))}
+                          {povDoc.yourSituation?.costOfInaction && (
+                            <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.12)', borderRadius:8 }}>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>COST OF INACTION</div>
+                              <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.6 }}>{povDoc.yourSituation.costOfInaction}</p>
+                            </div>
+                          )}
+                          {povDoc.yourSituation?.peersAreMoving && (
+                            <div style={{ marginTop:8, padding:'10px 12px', background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.15)', borderRadius:8 }}>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>PEERS ARE MOVING</div>
+                              <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.6 }}>{povDoc.yourSituation.peersAreMoving}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Section 3: Recommended Path */}
+                        <div className="card" style={{ marginBottom:12 }}>
+                          <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
+                            <div style={{ width:24, height:24, borderRadius:6, background:'var(--green)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:900, color:'white', flexShrink:0 }}>3</div>
+                            <div className="section-header" style={{ margin:0, flex:1 }}>Recommended Path</div>
+                          </div>
+                          <p style={{ fontSize:14, fontWeight:700, color:'var(--text)', marginBottom:14, lineHeight:1.5 }}>{povDoc.recommendedPath?.headline}</p>
+                          {povDoc.recommendedPath?.principlesForSuccess?.map((p,i) => (
+                            <div key={i} style={{ display:'flex', gap:10, marginBottom:8 }}>
+                              <span style={{ color:'var(--green)', fontWeight:700, fontSize:12, flexShrink:0 }}>✓</span>
+                              <span style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{p}</span>
+                            </div>
+                          ))}
+                          {povDoc.recommendedPath?.quickWins?.length > 0 && (
+                            <div style={{ marginTop:12, padding:'10px 12px', background:'var(--green-dim)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:8 }}>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>QUICK WINS (30 DAYS)</div>
+                              {povDoc.recommendedPath.quickWins.map((w,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>→ {w}</div>)}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Closing */}
+                        {povDoc.closingPerspective && (
+                          <div style={{ background:'rgba(29,78,216,0.07)', border:'1px solid rgba(96,165,250,0.15)', borderLeft:'3px solid var(--blue)', borderRadius:'0 10px 10px 0', padding:'14px 16px' }}>
+                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.8, fontStyle:'italic' }}>{povDoc.closingPerspective}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {/* ROI Calculator */}
                   <div className="card" style={{ marginBottom:20 }}>
                     <div className="card-title">💰 ROI Calculator</div>
