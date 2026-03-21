@@ -1593,6 +1593,18 @@ export default function SalesIntelligenceAgent() {
   const [competeData, setCompeteData] = useState(null);
   const [competeLoading, setCompeteLoading] = useState(false);
   const [selectedCompetitor, setSelectedCompetitor] = useState("");
+  // Champion Playbook
+  const [championPlaybook, setChampionPlaybook] = useState(null);
+  const [championPlaybookLoading, setChampionPlaybookLoading] = useState(false);
+  // Persona Intelligence
+  const [personaData, setPersonaData] = useState({});
+  const [personaLoading, setPersonaLoading] = useState(null);
+  // Mutual Success Plan
+  const [mutualSuccessPlan, setMutualSuccessPlan] = useState(null);
+  const [mutualSuccessLoading, setMutualSuccessLoading] = useState(false);
+  // News Triggers
+  const [newsTriggers, setNewsTriggers] = useState(null);
+  const [newsLoading, setNewsLoading] = useState(false);
   // Meeting Prep
   const [meetingInputs, setMeetingInputs] = useState({ personName: "", personRole: "", meetingType: "discovery", additionalContext: "" });
   const [meetingPrep, setMeetingPrep] = useState(null);
@@ -2253,6 +2265,62 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                           </div>
                         )}
 
+                        {/* News Triggers */}
+                        <div className="card anim-slide-up-2" style={{ marginBottom:16 }}>
+                          <div className="card-title" style={{ color:'var(--blue-light)' }}>📡 Real-Time News Triggers</div>
+                          {!newsTriggers ? (
+                            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                              <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>Surface buying signals, org changes and competitive threats from live news.</p>
+                              <button className="gen-btn" onClick={async () => {
+                                setNewsLoading(true);
+                                try {
+                                  const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                                    body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2000,
+                                      tools:[{type:"web_search_20250305",name:"web_search"}],
+                                      system:`Search for the latest news about this company. Return ONLY valid JSON: {"lastUpdated":"today","triggers":[{"type":"Leadership Change|M&A|Regulatory|Earnings|Strategy|Technology|Risk","headline":"...","detail":"...","salesAngle":"How to use this in a sales conversation","urgency":"high|medium|low"}],"buyingSignals":["Signal 1","Signal 2"],"risks":["Risk 1","Risk 2"],"conversationStarter":"Exact opening line referencing recent news"}`,
+                                      messages:[{role:"user",content:`Find the latest news, announcements, financial results, leadership changes, regulatory issues and strategic initiatives for ${form.company} in ${form.market}. Search for "${form.company} news 2025", "${form.company} results", "${form.company} strategy". What's happened in the last 3 months that a sales rep should know about?`}]
+                                    })
+                                  });
+                                  const data = await res.json();
+                                  const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'{}';
+                                  const s=text.indexOf('{'),e=text.lastIndexOf('}');
+                                  if(s!==-1&&e!==-1) setNewsTriggers(JSON.parse(text.slice(s,e+1)));
+                                } catch(err) { alert("Failed to fetch news. Try again."); }
+                                setNewsLoading(false);
+                              }} disabled={newsLoading} style={{ flexShrink:0, marginLeft:16 }}>
+                                {newsLoading ? '⏳ Searching...' : '📡 Get Latest News'}
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="anim-scale-in">
+                              {newsTriggers.conversationStarter && (
+                                <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderLeft:'3px solid var(--blue)', borderRadius:'0 8px 8px 0', padding:'12px 14px', marginBottom:14 }}>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:5, fontFamily:"'JetBrains Mono',monospace" }}>CONVERSATION STARTER</div>
+                                  <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.7, fontStyle:'italic', marginBottom:8 }}>"{newsTriggers.conversationStarter}"</p>
+                                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText(newsTriggers.conversationStarter)}>COPY</button>
+                                </div>
+                              )}
+                              {newsTriggers.triggers?.map((t,i) => (
+                                <div key={i} style={{ padding:'12px 0', borderBottom:'1px solid var(--border)' }}>
+                                  <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:4 }}>
+                                    <span className={`tag ${t.urgency==='high'?'tag-red':t.urgency==='medium'?'tag-amber':'tag-dim'}`} style={{ flexShrink:0, fontSize:8 }}>{t.type}</span>
+                                    <div style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>{t.headline}</div>
+                                  </div>
+                                  <p style={{ fontSize:12, color:'var(--text-muted)', marginBottom:5, lineHeight:1.5 }}>{t.detail}</p>
+                                  <div style={{ fontSize:11, color:'var(--amber)', background:'var(--amber-glow)', borderRadius:5, padding:'4px 8px', display:'inline-block' }}>💡 {t.salesAngle}</div>
+                                </div>
+                              ))}
+                              {newsTriggers.buyingSignals?.length > 0 && (
+                                <div style={{ marginTop:12, padding:12, background:'var(--green-dim)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:8 }}>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>BUYING SIGNALS</div>
+                                  {newsTriggers.buyingSignals.map((s,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>✓ {s}</div>)}
+                                </div>
+                              )}
+                              <button onClick={() => setNewsTriggers(null)} className="btn-ghost" style={{ marginTop:10, fontSize:11 }}>Refresh</button>
+                            </div>
+                          )}
+                        </div>
+
                         {/* Account Brief */}
                         <div className="card anim-slide-up-2">
                           <div className="card-title">Account Intelligence</div>
@@ -2427,6 +2495,144 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                               })()}
                             </div>
                           )}
+                        </div>
+
+                        {/* Champion Development Playbook */}
+                        <div className="inline-section">
+                          <div className="section-header">🏆 Champion Development Playbook</div>
+                          {!championPlaybook ? (
+                            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+                              <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>Week-by-week action plan to develop your champion from interested to internal advocate.</p>
+                              <button className="gen-btn" onClick={async () => {
+                                setChampionPlaybookLoading(true);
+                                try {
+                                  const champion = result?.stakeholders?.buyingCommittee?.find(s => s.archetype === 'Champion') || result?.stakeholders?.buyingCommittee?.[0];
+                                  const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                                    body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:3000, stream:true,
+                                      system:`You are a champion development expert. Create a 4-week playbook. Return ONLY valid JSON: {"championProfile":{"role":"...","currentStatus":"...","strengthScore":${result?.stakeholders?.championDevelopmentScore||30}},"weeks":[{"week":1,"theme":"Build Trust","objective":"...","actions":[{"day":"Mon","action":"...","script":"exact words to say/write","outcome":"..."},{"day":"Wed","action":"...","script":"...","outcome":"..."},{"day":"Fri","action":"...","script":"...","outcome":"..."}],"weeklyMilestone":"..."},{"week":2,"theme":"Establish Value","objective":"...","actions":[{"day":"Mon","action":"...","script":"...","outcome":"..."},{"day":"Wed","action":"...","script":"...","outcome":"..."},{"day":"Fri","action":"...","script":"...","outcome":"..."}],"weeklyMilestone":"..."},{"week":3,"theme":"Build Coalition","objective":"...","actions":[{"day":"Mon","action":"...","script":"...","outcome":"..."},{"day":"Wed","action":"...","script":"...","outcome":"..."},{"day":"Fri","action":"...","script":"...","outcome":"..."}],"weeklyMilestone":"..."},{"week":4,"theme":"Activate Advocacy","objective":"...","actions":[{"day":"Mon","action":"...","script":"...","outcome":"..."},{"day":"Wed","action":"...","script":"...","outcome":"..."},{"day":"Fri","action":"...","script":"...","outcome":"..."}],"weeklyMilestone":"..."}],"successIndicators":["...","...","..."],"warningSignsToWatch":["...","...","..."]}`,
+                                      messages:[{role:"user",content:`Company: ${form.company}. Product: ${form.product}. Champion: ${champion?.role||'Unknown'} (${champion?.archetype||'Champion'}, access: ${champion?.accessStatus||'unknown'}). Champion score: ${result?.stakeholders?.championDevelopmentScore||30}/100. Gaps: ${result?.stakeholders?.championGaps?.join(', ')||'Unknown'}. Deal stage: ${form.dealStage}. MEDDPICC champion status: ${result?.meddpicc?.elements?.champion?.description||'Unknown'}.`}]
+                                    })
+                                  });
+                                  const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                                  while(true) { const {done,value} = await reader.read(); if(done) break;
+                                    for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                                  const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setChampionPlaybook(JSON.parse(raw.slice(s,e+1)));
+                                } catch(e) { alert("Failed. Try again."); }
+                                setChampionPlaybookLoading(false);
+                              }} disabled={championPlaybookLoading} style={{ flexShrink:0, marginLeft:16 }}>
+                                {championPlaybookLoading ? '⏳ Building...' : '🏆 Build Playbook'}
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="anim-scale-in">
+                              <div style={{ display:'flex', gap:12, marginBottom:16 }}>
+                                <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:'12px 16px', flex:1 }}>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>CHAMPION</div>
+                                  <div style={{ fontSize:14, fontWeight:700, color:'var(--text)' }}>{championPlaybook.championProfile?.role}</div>
+                                  <div style={{ fontSize:12, color:'var(--text-muted)', marginTop:2 }}>{championPlaybook.championProfile?.currentStatus}</div>
+                                </div>
+                                <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:'12px 16px', textAlign:'center' }}>
+                                  <div style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:900, color:'var(--amber)' }}>{championPlaybook.championProfile?.strengthScore}</div>
+                                  <div style={{ fontSize:8, color:'var(--text-dim)', fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>SCORE</div>
+                                </div>
+                              </div>
+                              {championPlaybook.weeks?.map((week,wi) => (
+                                <div key={wi} style={{ marginBottom:16, border:'1px solid var(--border)', borderRadius:12, overflow:'hidden' }}>
+                                  <div style={{ background:'var(--slate2)', padding:'10px 16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                                    <div>
+                                      <span style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, fontFamily:"'JetBrains Mono',monospace" }}>WEEK {week.week} — </span>
+                                      <span style={{ fontSize:13, fontWeight:700, color:'var(--text)' }}>{week.theme}</span>
+                                    </div>
+                                    <span className="tag tag-dim" style={{ fontSize:9 }}>{week.weeklyMilestone}</span>
+                                  </div>
+                                  <div style={{ padding:'12px 16px' }}>
+                                    <p style={{ fontSize:12, color:'var(--text-muted)', marginBottom:10, fontStyle:'italic' }}>{week.objective}</p>
+                                    {week.actions?.map((action,ai) => (
+                                      <div key={ai} style={{ display:'flex', gap:10, marginBottom:10, alignItems:'flex-start' }}>
+                                        <span style={{ fontSize:9, fontWeight:700, color:'var(--amber)', fontFamily:"'JetBrains Mono',monospace", minWidth:28, marginTop:2 }}>{action.day}</span>
+                                        <div style={{ flex:1 }}>
+                                          <div style={{ fontSize:12, fontWeight:600, color:'var(--text)', marginBottom:3 }}>{action.action}</div>
+                                          {action.script && (
+                                            <div style={{ fontSize:11, color:'var(--blue-light)', background:'rgba(29,78,216,0.06)', borderRadius:5, padding:'5px 8px', marginBottom:3, fontStyle:'italic' }}>"{action.script}"</div>
+                                          )}
+                                          <div style={{ fontSize:11, color:'var(--green)' }}>→ {action.outcome}</div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                              <div className="r-grid-2" style={{ marginTop:8 }}>
+                                <div style={{ background:'var(--green-dim)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:8, padding:12 }}>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>SUCCESS INDICATORS</div>
+                                  {championPlaybook.successIndicators?.map((s,i) => <div key={i} style={{ fontSize:11, color:'var(--text-muted)', marginBottom:3 }}>✓ {s}</div>)}
+                                </div>
+                                <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:8, padding:12 }}>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WARNING SIGNS</div>
+                                  {championPlaybook.warningSignsToWatch?.map((w,i) => <div key={i} style={{ fontSize:11, color:'var(--text-muted)', marginBottom:3 }}>⚠ {w}</div>)}
+                                </div>
+                              </div>
+                              <button onClick={() => setChampionPlaybook(null)} className="btn-ghost" style={{ marginTop:10, fontSize:11 }}>Regenerate</button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Persona Intelligence */}
+                        <div className="inline-section">
+                          <div className="section-header">🔎 Persona Intelligence</div>
+                          <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>AI searches public sources for what each stakeholder is saying and thinking right now.</p>
+                          {result?.stakeholders?.buyingCommittee?.map((person, pi) => (
+                            <div key={pi} style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:10 }}>
+                              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                                <div>
+                                  <div style={{ fontSize:13, fontWeight:700, color:'var(--text)' }}>{person.role}</div>
+                                  <span className="tag tag-blue" style={{ fontSize:8, marginTop:4 }}>{person.archetype}</span>
+                                </div>
+                                {!personaData[pi] && (
+                                  <button className="gen-btn" style={{ fontSize:11, padding:'6px 14px' }}
+                                    onClick={async () => {
+                                      setPersonaLoading(pi);
+                                      try {
+                                        const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                                          body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1500,
+                                            tools:[{type:"web_search_20250305",name:"web_search"}],
+                                            system:`Research this executive and return ONLY valid JSON: {"publicStance":"What this person is publicly saying about industry trends","recentActivity":["Recent activity 1","Recent activity 2"],"likelyPriorities":["Priority based on role and company context 1","Priority 2"],"conversationHooks":["Specific thing to reference in outreach 1","Hook 2"],"thoughtLeadershipTopics":["Topic they care about 1","Topic 2"],"bestApproach":"How to engage this specific person right now"}`,
+                                            messages:[{role:"user",content:`Research ${person.role} at ${form.company} in ${form.market}. Search for "${form.company} ${person.role}", "${form.company} leadership", recent interviews or articles. What are they focused on? What have they said publicly?`}]
+                                          })
+                                        });
+                                        const data = await res.json();
+                                        const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'{}';
+                                        const s=text.indexOf('{'),e=text.lastIndexOf('}');
+                                        if(s!==-1&&e!==-1) setPersonaData(prev => ({...prev, [pi]: JSON.parse(text.slice(s,e+1))}));
+                                      } catch(err) {}
+                                      setPersonaLoading(null);
+                                    }} disabled={personaLoading===pi}>
+                                    {personaLoading===pi ? '⏳' : '🔎 Research'}
+                                  </button>
+                                )}
+                              </div>
+                              {personaData[pi] && (
+                                <div className="anim-slide-up" style={{ marginTop:8 }}>
+                                  {personaData[pi].publicStance && (
+                                    <div style={{ fontSize:12, color:'var(--text-muted)', marginBottom:8, padding:'8px 10px', background:'rgba(96,165,250,0.06)', borderRadius:6, lineHeight:1.6 }}>
+                                      💭 {personaData[pi].publicStance}
+                                    </div>
+                                  )}
+                                  {personaData[pi].conversationHooks?.length > 0 && (
+                                    <div style={{ marginBottom:6 }}>
+                                      <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>CONVERSATION HOOKS</div>
+                                      {personaData[pi].conversationHooks.map((h,i) => <div key={i} style={{ fontSize:11, color:'var(--text-muted)', marginBottom:3 }}>→ {h}</div>)}
+                                    </div>
+                                  )}
+                                  {personaData[pi].bestApproach && (
+                                    <div style={{ fontSize:11, color:'var(--green)', background:'var(--green-dim)', borderRadius:5, padding:'5px 8px' }}>
+                                      ✓ {personaData[pi].bestApproach}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
 
                         {/* Email Finder */}
@@ -2938,6 +3144,68 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                           {execBrief.recommendation?.immediateNextSteps?.map((s,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:5 }}>{i+1}. {s}</div>)}
                         </div>
                         <button onClick={() => setExecBrief(null)} className="btn-ghost" style={{ marginTop:12, fontSize:11 }}>Regenerate</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Mutual Success Plan */}
+                  <div className="inline-section">
+                    <div className="section-header">🤝 Mutual Success Plan</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:16, lineHeight:1.6 }}>A co-created plan to share with your prospect. Joint milestones, mutual commitments and success metrics — aligns both sides and accelerates close.</p>
+                    {!mutualSuccessPlan ? (
+                      <button onClick={async () => {
+                        setMutualSuccessLoading(true);
+                        try {
+                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:4000, stream:true,
+                              system:`Create a Mutual Success Plan. Return ONLY valid JSON: {"title":"Mutual Success Plan — [Company] x [Vendor]","objective":"One sentence joint objective","phases":[{"phase":1,"name":"Discovery & Alignment","duration":"Weeks 1-2","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."},{"phase":2,"name":"Evaluation","duration":"Weeks 3-4","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."},{"phase":3,"name":"Decision & Contracting","duration":"Week 5-6","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."},{"phase":4,"name":"Implementation","duration":"Weeks 7-12","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."}],"successMetrics":[{"metric":"...","baseline":"...","target":"...","timeframe":"..."}],"nextStep":"The single most important next action"}`,
+                              messages:[{role:"user",content:`Vendor selling ${form.product}. Buyer: ${form.company} (${form.industry}, ${form.market}). Stage: ${form.dealStage}. Deal size: ${form.dealSize||'TBD'}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}.`}]
+                            })
+                          });
+                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                          while(true) { const {done,value} = await reader.read(); if(done) break;
+                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setMutualSuccessPlan(JSON.parse(raw.slice(s,e+1)));
+                        } catch(e) { alert("Failed. Try again."); }
+                        setMutualSuccessLoading(false);
+                      }} disabled={mutualSuccessLoading} className="btn-amber" style={{ fontSize:12, padding:'11px 24px' }}>
+                        {mutualSuccessLoading ? 'GENERATING...' : '🤝 GENERATE MUTUAL SUCCESS PLAN'}
+                      </button>
+                    ) : (
+                      <div className="anim-scale-in">
+                        <div style={{ background:'linear-gradient(135deg,rgba(16,185,129,0.1),rgba(6,95,70,0.15))', border:'1px solid rgba(16,185,129,0.2)', borderRadius:14, padding:20, marginBottom:16 }}>
+                          <div style={{ fontSize:9, color:'var(--green)', fontFamily:"'JetBrains Mono',monospace", letterSpacing:2, marginBottom:6 }}>MUTUAL SUCCESS PLAN · CONFIDENTIAL</div>
+                          <div style={{ fontFamily:"'Syne',sans-serif", fontSize:16, fontWeight:900, color:'white' }}>{mutualSuccessPlan.title}</div>
+                          <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:8, lineHeight:1.6 }}>{mutualSuccessPlan.objective}</p>
+                        </div>
+                        {mutualSuccessPlan.phases?.map((phase,pi) => (
+                          <div key={pi} style={{ border:'1px solid var(--border)', borderRadius:12, overflow:'hidden', marginBottom:10 }}>
+                            <div style={{ background:'var(--slate2)', padding:'10px 16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                              <span style={{ fontSize:13, fontWeight:700, color:'var(--text)' }}>Phase {phase.phase} — {phase.name}</span>
+                              <span className="tag tag-dim" style={{ fontSize:9 }}>{phase.duration}</span>
+                            </div>
+                            <div style={{ padding:'14px 16px' }}>
+                              <p style={{ fontSize:13, fontWeight:600, color:'var(--amber)', marginBottom:10 }}>{phase.jointMilestone}</p>
+                              <div className="r-grid-2">
+                                <div>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WE COMMIT TO</div>
+                                  {phase.vendorCommitments?.map((v,i) => <div key={i} style={{ fontSize:11, color:'var(--text-muted)', marginBottom:3 }}>→ {v}</div>)}
+                                </div>
+                                <div>
+                                  <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>BUYER COMMITS TO</div>
+                                  {phase.buyerCommitments?.map((b,i) => <div key={i} style={{ fontSize:11, color:'var(--text-muted)', marginBottom:3 }}>→ {b}</div>)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {mutualSuccessPlan.nextStep && (
+                          <div style={{ background:'var(--amber-glow)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:10, padding:16 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>NEXT STEP</div>
+                            <p style={{ fontSize:14, fontWeight:700, color:'var(--text)' }}>{mutualSuccessPlan.nextStep}</p>
+                          </div>
+                        )}
+                        <button onClick={() => setMutualSuccessPlan(null)} className="btn-ghost" style={{ marginTop:10, fontSize:11 }}>Regenerate</button>
                       </div>
                     )}
                   </div>
