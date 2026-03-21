@@ -2159,49 +2159,29 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   <button
                     onClick={runAnalysis}
                     disabled={!canProceed2}
+                    className="btn-amber"
                     style={{
                       width:'100%',
-                      background: canProceed2
-                        ? 'linear-gradient(135deg, #F59E0B 0%, #EA580C 100%)'
-                        : 'var(--slate2)',
-                      border:'none',
-                      borderRadius:14,
                       padding:'18px 32px',
-                      color: canProceed2 ? '#050C18' : 'var(--text-dim)',
-                      fontFamily:"'Syne', sans-serif",
                       fontSize:16,
-                      fontWeight:900,
                       letterSpacing:1.5,
+                      borderRadius:14,
+                      opacity: canProceed2 ? 1 : 0.4,
                       cursor: canProceed2 ? 'pointer' : 'not-allowed',
-                      transition:'all 0.2s',
+                      boxShadow: canProceed2 ? '0 8px 32px rgba(245,158,11,0.25)' : 'none',
                       display:'flex',
                       alignItems:'center',
                       justifyContent:'center',
                       gap:12,
-                      boxShadow: canProceed2 ? '0 8px 32px rgba(245,158,11,0.25)' : 'none',
-                      transform:'translateY(0)',
                     }}
-                    onMouseEnter={e => { if(canProceed2) e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(245,158,11,0.35)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=canProceed2?'0 8px 32px rgba(245,158,11,0.25)':'none'; }}
                   >
                     <span style={{ fontSize:20 }}>🚀</span>
                     <span>RUN INTELLIGENCE ANALYSIS</span>
                   </button>
-                  {!canProceed2 && (
-                    <p style={{ textAlign:'center', fontSize:11, color:'var(--text-dim)', marginTop:8, fontFamily:"'JetBrains Mono',monospace", letterSpacing:1 }}>
-                      FILL IN REQUIRED FIELDS TO CONTINUE
-                    </p>
-                  )}
-                  {canProceed2 && (
-                    <p style={{ textAlign:'center', fontSize:11, color:'var(--text-dim)', marginTop:8 }}>
-                      Generates full deal intelligence in ~20 seconds
-                    </p>
-                  )}
+                  <p style={{ textAlign:'center', fontSize:11, color:'var(--text-dim)', marginTop:8 }}>
+                    {canProceed2 ? 'Generates full deal intelligence in ~20 seconds' : 'Fill in required fields to continue'}
+                  </p>
                 </div>
-              </div>
-            </div>
-          )}
-
           {/* ── STEP 3: ANALYZING ── */}
           {step === 3 && (
             <div className="analyzing">
