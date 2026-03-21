@@ -1948,47 +1948,25 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
           {/* Step indicator */}
           {step < 4 && (
             <div>
-            {formPreFilled && form.company && (
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', borderRadius:10, marginBottom:16, gap:12 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
-                  <span style={{ fontSize:18, flexShrink:0 }}>🔄</span>
-                  <div style={{ minWidth:0 }}>
-                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>Continuing with {form.company}</div>
-                    <div style={{ fontSize:11, color:'var(--text-muted)' }}>Pre-filled from last analysis — edit anything or run as-is</div>
+              {formPreFilled && form.company && (
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', borderRadius:10, marginBottom:16, gap:12 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+                    <span style={{ fontSize:18, flexShrink:0 }}>🔄</span>
+                    <div style={{ minWidth:0 }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:'var(--text)' }}>Continuing with {form.company}</div>
+                      <div style={{ fontSize:11, color:'var(--text-muted)' }}>Pre-filled from last analysis — edit anything or run as-is</div>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => { setForm({ company:'', website:'', market:'', industry:'', product:'', productDesc:'', dealStage:'', dealSize:'', knownContacts:'', recentNews:'', competitorsMentioned:'' }); setFormPreFilled(false); }}
+                    style={{ background:'transparent', border:'1px solid var(--border)', borderRadius:7, padding:'6px 14px', color:'var(--text-muted)', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor='var(--red)'; e.currentTarget.style.color='var(--red)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-muted)'; }}
+                  >
+                    Clear &amp; Start Fresh
+                  </button>
                 </div>
-                <button
-                  onClick={() => { setForm({ company:'', website:'', market:'', industry:'', product:'', productDesc:'', dealStage:'', dealSize:'', knownContacts:'', recentNews:'', competitorsMentioned:'' }); setFormPreFilled(false); }}
-                  style={{ background:'transparent', border:'1px solid var(--border)', borderRadius:7, padding:'6px 14px', color:'var(--text-muted)', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0, transition:'all 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor='var(--red)'; e.currentTarget.style.color='var(--red)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-muted)'; }}
-                >
-                  Clear & Start Fresh
-                </button>
-              </div>
-            )}
-
-            {/* Pre-fill banner */}
-            {formPreFilled && form.company && (
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', borderRadius:10, marginBottom:16, gap:12 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
-                  <span style={{ fontSize:18, flexShrink:0 }}>🔄</span>
-                  <div style={{ minWidth:0 }}>
-                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>Continuing with {form.company}</div>
-                    <div style={{ fontSize:11, color:'var(--text-muted)' }}>Pre-filled from last analysis — edit anything or run as-is</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => { setForm({ company:'', website:'', market:'', industry:'', product:'', productDesc:'', dealStage:'', dealSize:'', knownContacts:'', recentNews:'', competitorsMentioned:'' }); setFormPreFilled(false); }}
-                  style={{ background:'transparent', border:'1px solid var(--border)', borderRadius:7, padding:'6px 14px', color:'var(--text-muted)', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0, transition:'all 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor='var(--red)'; e.currentTarget.style.color='var(--red)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-muted)'; }}
-                >
-                  Clear & Start Fresh
-                </button>
-              </div>
-            )}
-
+              )}
             <div className="steps fade-up">
               {[["01", "Company"], ["02", "Context"], ["03", "Analyse"], ["04", "Brief"]].map(([num, label], i) => {
                 const s = i + 1;
@@ -2086,7 +2064,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   Continue → Deal Context
                 </button>
               </div>
-            </div>
             </div>
           )}
 
