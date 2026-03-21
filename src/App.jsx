@@ -1936,8 +1936,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </button>
               )}
             </div>
-            <div style={{ display:"none" }}>
-              </div>
             </div>
             <div className="header-badge">POWERED BY CLAUDE AI</div>
           </div>
