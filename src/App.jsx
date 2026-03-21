@@ -1575,6 +1575,7 @@ export default function SalesIntelligenceAgent() {
   const [dealHistory, setDealHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("apac_deal_history") || "[]"); } catch { return []; }
   });
+  const [formPreFilled, setFormPreFilled] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("bahasa");
   const [emailTone, setEmailTone] = useState("formal");
@@ -1648,6 +1649,21 @@ export default function SalesIntelligenceAgent() {
   const chatBottomRef = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  React.useEffect(() => {
+    try {
+      const history = JSON.parse(localStorage.getItem("apac_deal_history") || "[]");
+      if (history.length > 0 && history[0].form) {
+        setForm(prev => {
+          if (!prev.company && !prev.product) {
+            setFormPreFilled(true);
+            return history[0].form;
+          }
+          return prev;
+        });
+      }
+    } catch(e) {}
+  }, []);
   const progress = step === 1 ? 25 : step === 2 ? 50 : step === 3 ? 75 : 100;
   const canProceed1 = form.company && form.market && form.industry;
   const canProceed2 = form.product && form.dealStage;
@@ -1928,6 +1944,18 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
         <div className="main">
           {/* Step indicator */}
           {step < 4 && (
+            {formPreFilled && form.company && (
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 18px", background:"rgba(96,165,250,0.07)", border:"1px solid rgba(96,165,250,0.18)", borderRadius:10, marginBottom:16, gap:12 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <span>🔄</span>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color:"var(--text)" }}>Continuing with {form.company}</div>
+                    <div style={{ fontSize:11, color:"var(--text-muted)" }}>Pre-filled from last analysis — edit anything or run as-is</div>
+                  </div>
+                </div>
+                <button onClick={() => { setForm({ company:"", website:"", market:"", industry:"", product:"", productDesc:"", dealStage:"", dealSize:"", knownContacts:"", recentNews:"", competitorsMentioned:"" }); setFormPreFilled(false); }} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:7, padding:"6px 14px", color:"var(--text-muted)", fontSize:11, cursor:"pointer", whiteSpace:"nowrap", flexShrink:0 }}>Clear and Start Fresh</button>
+              </div>
+            )}
             <div className="steps fade-up">
               {[["01", "Company"], ["02", "Context"], ["03", "Analyse"], ["04", "Brief"]].map(([num, label], i) => {
                 const s = i + 1;
@@ -2115,9 +2143,13 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     </div>
                   ))}
                 </div>
-                <button className="btn-amber" onClick={runAnalysis} disabled={!canProceed2}>
-                  🚀 Run Intelligence Analysis
-                </button>
+                <div style={{ marginTop:24, borderTop:"1px solid var(--border)", paddingTop:24 }}>
+                  <button onClick={runAnalysis} disabled={!canProceed2} className="btn-amber" style={{ width:"100%", padding:"18px 32px", fontSize:16, letterSpacing:1.5, borderRadius:14, opacity:canProceed2?1:0.4, cursor:canProceed2?"pointer":"not-allowed", boxShadow:canProceed2?"0 8px 32px rgba(245,158,11,0.25)":"none", display:"flex", alignItems:"center", justifyContent:"center", gap:12 }}>
+                    <span style={{ fontSize:20 }}>🚀</span>
+                    <span>RUN INTELLIGENCE ANALYSIS</span>
+                  </button>
+                  <p style={{ textAlign:"center", fontSize:11, color:"var(--text-dim)", marginTop:8 }}>{canProceed2 ? "Generates full deal intelligence in ~20 seconds" : "Fill in required fields to continue"}</p>
+                </div>
               </div>
             </div>
           )}
@@ -2263,6 +2295,28 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                             <div className="score-sub">{result.meddpicc?.forecastCategory}</div>
                           </div>
                         </div>
+
+                        <details style={{ marginBottom:14 }}>
+                          <summary style={{ fontSize:10, color:"var(--text-dim)", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1, listStyle:"none", display:"flex", alignItems:"center", gap:6, userSelect:"none", padding:"6px 0", cursor:"pointer" }}>
+                            <span>i</span> HOW SCORES ARE CALCULATED
+                          </summary>
+                          <div style={{ marginTop:10, padding:16, background:"var(--card)", border:"1px solid var(--border)", borderRadius:10 }}>
+                            <div className="r-grid-2" style={{ gap:20 }}>
+                              <div>
+                                <div style={{ fontSize:9, fontWeight:700, color:"var(--amber)", letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>DEAL SCORE (0-100)</div>
+                                <div style={{ fontSize:11, color:"var(--text-muted)", lineHeight:1.8 }}>
+                                  <div style={{ marginBottom:6 }}><strong style={{ color:"var(--text)" }}>MEDDPICC Health - 60%</strong> — 8 elements scored Green=100, Amber=50, Red=10.</div>
+                                  <div style={{ marginBottom:6 }}><strong style={{ color:"var(--text)" }}>Qualifying Questions - 25%</strong> — 5pts each for Budget, EB, Timeline, Competitors, Pain.</div>
+                                  <div><strong style={{ color:"var(--text)" }}>ICP Fit Bonus - 15%</strong> — ICP Score divided by 100 multiplied by 15.</div>
+                                </div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize:9, fontWeight:700, color:"var(--amber)", letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>ICP SCORE (0-100)</div>
+                                <div style={{ fontSize:11, color:"var(--text-muted)", lineHeight:1.8 }}>AI-assessed fit across industry, company size, geography, tech maturity, pain alignment and buying trigger strength.</div>
+                              </div>
+                            </div>
+                          </div>
+                        </details>
 
                         {/* Top Gaps */}
                         {ds?.gaps?.length > 0 && (
@@ -3497,7 +3551,9 @@ ${povDoc.closingPerspective}`;
                   {/* Negotiation Playbook */}
                   <div className="inline-section">
                     <div className="section-header" style={{ color:'var(--red)' }}>🤝 Negotiation Playbook</div>
-                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:16, lineHeight:1.6 }}>You are entering negotiation. Get your anchoring strategy, concession framework and walk-away lines — before you enter the room.</p>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:12, lineHeight:1.6 }}>Anchoring strategy, concession framework and walk-away lines — built from your actual deal data.</p>
+                    {!roiResult && <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}><span>💡</span><p style={{ fontSize:12, color:'var(--amber)', lineHeight:1.5, margin:0 }}>Complete the ROI Calculator above first for precise anchoring numbers.</p></div>}
+                    {roiResult && <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}><span className='tag tag-green' style={{ fontSize:9 }}>ROI {roiResult.roi}%</span><span className='tag tag-green' style={{ fontSize:9 }}>Payback {roiResult.payback}mo</span><span className='tag tag-dim' style={{ fontSize:9 }}>Using confirmed data</span></div>}
                     {!negotiationPlaybook ? (
                       <button
                         onClick={async () => {
