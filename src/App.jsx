@@ -1575,7 +1575,6 @@ export default function SalesIntelligenceAgent() {
   const [dealHistory, setDealHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("apac_deal_history") || "[]"); } catch { return []; }
   });
-  const [formPreFilled, setFormPreFilled] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("bahasa");
   const [emailTone, setEmailTone] = useState("formal");
@@ -1649,24 +1648,6 @@ export default function SalesIntelligenceAgent() {
   const chatBottomRef = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  // Pre-fill form from last analysis on first load
-  React.useEffect(() => {
-    try {
-      const history = JSON.parse(localStorage.getItem("apac_deal_history") || "[]");
-      if (history.length > 0 && history[0].form) {
-        setForm(prev => {
-          // Only pre-fill if form is still empty (user hasn't typed anything)
-          const isEmpty = !prev.company && !prev.product;
-          if (isEmpty) {
-            setFormPreFilled(true);
-            return history[0].form;
-          }
-          return prev;
-        });
-      }
-    } catch(e) {}
-  }, []);
   const progress = step === 1 ? 25 : step === 2 ? 50 : step === 3 ? 75 : 100;
   const canProceed1 = form.company && form.market && form.industry;
   const canProceed2 = form.product && form.dealStage;
@@ -1936,6 +1917,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </button>
               )}
             </div>
+            <div style={{ display:"none" }}>
+              </div>
             </div>
             <div className="header-badge">POWERED BY CLAUDE AI</div>
           </div>
@@ -1945,26 +1928,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
         <div className="main">
           {/* Step indicator */}
           {step < 4 && (
-            <div>
-              {formPreFilled && form.company && (
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', borderRadius:10, marginBottom:16, gap:12 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
-                    <span style={{ fontSize:18, flexShrink:0 }}>🔄</span>
-                    <div style={{ minWidth:0 }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:'var(--text)' }}>Continuing with {form.company}</div>
-                      <div style={{ fontSize:11, color:'var(--text-muted)' }}>Pre-filled from last analysis — edit anything or run as-is</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { setForm({ company:'', website:'', market:'', industry:'', product:'', productDesc:'', dealStage:'', dealSize:'', knownContacts:'', recentNews:'', competitorsMentioned:'' }); setFormPreFilled(false); }}
-                    style={{ background:'transparent', border:'1px solid var(--border)', borderRadius:7, padding:'6px 14px', color:'var(--text-muted)', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor='var(--red)'; e.currentTarget.style.color='var(--red)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-muted)'; }}
-                  >
-                    Clear and Start Fresh
-                  </button>
-                </div>
-              )}
             <div className="steps fade-up">
               {[["01", "Company"], ["02", "Context"], ["03", "Analyse"], ["04", "Brief"]].map(([num, label], i) => {
                 const s = i + 1;
@@ -2152,34 +2115,13 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     </div>
                   ))}
                 </div>
-                {/* ── RUN BUTTON ── */}
-                <div style={{ marginTop:24, borderTop:'1px solid var(--border)', paddingTop:24 }}>
-                  <button
-                    onClick={runAnalysis}
-                    disabled={!canProceed2}
-                    className="btn-amber"
-                    style={{
-                      width:'100%',
-                      padding:'18px 32px',
-                      fontSize:16,
-                      letterSpacing:1.5,
-                      borderRadius:14,
-                      opacity: canProceed2 ? 1 : 0.4,
-                      cursor: canProceed2 ? 'pointer' : 'not-allowed',
-                      boxShadow: canProceed2 ? '0 8px 32px rgba(245,158,11,0.25)' : 'none',
-                      display:'flex',
-                      alignItems:'center',
-                      justifyContent:'center',
-                      gap:12,
-                    }}
-                  >
-                    <span style={{ fontSize:20 }}>🚀</span>
-                    <span>RUN INTELLIGENCE ANALYSIS</span>
-                  </button>
-                  <p style={{ textAlign:'center', fontSize:11, color:'var(--text-dim)', marginTop:8 }}>
-                    {canProceed2 ? 'Generates full deal intelligence in ~20 seconds' : 'Fill in required fields to continue'}
-                  </p>
-                </div>
+                <button className="btn-amber" onClick={runAnalysis} disabled={!canProceed2}>
+                  🚀 Run Intelligence Analysis
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ── STEP 3: ANALYZING ── */}
           {step === 3 && (
             <div className="analyzing">
@@ -2227,7 +2169,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                     <button className="btn-ghost" onClick={() => exportToPDF(result, form, meetingPrep, execBrief, meetingInputs)} style={{ display: "flex", alignItems: "center", gap: 6, borderColor: "var(--amber)", color: "var(--amber)" }}>
                       ⬇ Export PDF
                     </button>
-                    <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setFormPreFilled(true); setChatMessages([]);
+                    <button className="btn-ghost" onClick={() => { setStep(1); setResult(null); setForm({ company:"",website:"",market:"",industry:"",product:"",productDesc:"",dealStage:"",dealSize:"",knownContacts:"",recentNews:"",competitorsMentioned:"" }); setChatMessages([]);
       setBattleCards(null); setLangData(null); setLiVariants(null); setEmailData(null); setOrgChart(null); setMeetingPrep(null); setExecBrief(null); }}>
                       + New Account
                     </button>
@@ -2321,52 +2263,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                             <div className="score-sub">{result.meddpicc?.forecastCategory}</div>
                           </div>
                         </div>
-
-                        {/* Score Methodology — collapsible */}
-                        <details style={{ marginBottom:14, cursor:'pointer' }}>
-                          <summary style={{ fontSize:10, color:'var(--text-dim)', fontFamily:"'JetBrains Mono',monospace", letterSpacing:1, listStyle:'none', display:'flex', alignItems:'center', gap:6, userSelect:'none', padding:'6px 0' }}>
-                            <span>ⓘ</span> HOW SCORES ARE CALCULATED
-                          </summary>
-                          <div style={{ marginTop:10, padding:16, background:'var(--card)', border:'1px solid var(--border)', borderRadius:10 }}>
-                            <div className="r-grid-2" style={{ gap:20 }}>
-                              <div>
-                                <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>DEAL SCORE (0–100)</div>
-                                <div style={{ fontSize:11, color:'var(--text-muted)', lineHeight:1.8 }}>
-                                  <div style={{ marginBottom:6, paddingBottom:6, borderBottom:'1px solid var(--border)' }}>
-                                    <strong style={{ color:'var(--text)' }}>MEDDPICC Health — 60%</strong><br/>
-                                    Each of 8 elements scored: Green=100pts, Amber=50pts, Red=10pts. Average across all 8, weighted at 60%.
-                                  </div>
-                                  <div style={{ marginBottom:6, paddingBottom:6, borderBottom:'1px solid var(--border)' }}>
-                                    <strong style={{ color:'var(--text)' }}>Qualifying Questions — 25%</strong><br/>
-                                    5 points each for: Budget confirmed, EB identified, Timeline defined, Competitors known, Pain quantified.
-                                  </div>
-                                  <div>
-                                    <strong style={{ color:'var(--text)' }}>ICP Fit Bonus — 15%</strong><br/>
-                                    Your ICP Score divided by 100, multiplied by 15.
-                                  </div>
-                                </div>
-                                <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(245,158,11,0.06)', borderRadius:6, fontSize:10, color:'var(--text-muted)', lineHeight:1.7 }}>
-                                  <strong style={{ color:'var(--amber)' }}>Rating bands:</strong> 75–100 Strong · 50–74 Developing · 30–49 Early · 0–29 At Risk
-                                </div>
-                              </div>
-                              <div>
-                                <div style={{ fontSize:9, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>ICP SCORE (0–100)</div>
-                                <div style={{ fontSize:11, color:'var(--text-muted)', lineHeight:1.8, marginBottom:10 }}>
-                                  AI-assessed fit between this company and your Ideal Customer Profile, scored across 6 dimensions:
-                                  <div style={{ marginTop:6 }}>→ Industry and vertical fit</div>
-                                  <div>→ Company size and growth stage</div>
-                                  <div>→ Geographic market match</div>
-                                  <div>→ Technology maturity signals</div>
-                                  <div>→ Pain point alignment</div>
-                                  <div>→ Buying trigger strength</div>
-                                </div>
-                                <div style={{ padding:'8px 10px', background:'rgba(96,165,250,0.06)', border:'1px solid rgba(96,165,250,0.12)', borderRadius:6, fontSize:10, color:'var(--text-muted)', lineHeight:1.6 }}>
-                                  <strong style={{ color:'var(--blue-light)' }}>Note:</strong> Both scores improve as you complete MEDDPICC qualifying questions. Re-run analysis after major deal updates for the most accurate score.
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </details>
 
                         {/* Top Gaps */}
                         {ds?.gaps?.length > 0 && (
@@ -2906,76 +2802,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               ) : null}
 
               {/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
-
-
-                  {/* Email Reply Analyser */}
-                  <div className="inline-section">
-                    <div className="section-header" style={{ color:'var(--blue-light)' }}>📨 Email Reply Analyser</div>
-                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Paste a prospect's reply and instantly decode what they really mean, their hidden objections and the perfect response to send.</p>
-                    <textarea
-                      placeholder="Paste the prospect email reply here"
-                      value={emailReplyInput}
-                      onChange={e => setEmailReplyInput(e.target.value)}
-                      style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:100, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }}
-                    />
-                    <button
-                      onClick={async () => {
-                        if(!emailReplyInput.trim()) return;
-                        setEmailReplyLoading(true); setEmailReplyAnalysis(null);
-                        try {
-                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
-                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, stream:true,
-                              system:`You are an expert at reading between the lines of prospect emails. Return ONLY valid JSON: {"overallSentiment":"positive|neutral|negative|stalling|ghosting","buyingSignals":["Signal 1"],"hiddenObjections":["Hidden concern 1","Hidden concern 2"],"whatTheyWant":"What they are really asking for or signalling","urgencyLevel":"high|medium|low|none","riskLevel":"low|medium|high","recommendedAction":"Exactly what to do next","perfectReply":{"subject":"Reply subject line","body":"Complete reply email under 100 words — natural, moves deal forward"},"thingsToAvoid":["Do not say this in your reply"]}`,
-                              messages:[{role:"user",content:`Prospect email: "${emailReplyInput}". Context: Selling ${form.product} to ${form.company} (${form.industry}). Deal stage: ${form.dealStage}.`}]
-                            })
-                          });
-                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
-                          while(true) { const {done,value} = await reader.read(); if(done) break;
-                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
-                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setEmailReplyAnalysis(JSON.parse(raw.slice(s,e+1)));
-                        } catch(e) { alert("Failed. Try again."); }
-                        setEmailReplyLoading(false);
-                      }}
-                      disabled={emailReplyLoading||!emailReplyInput.trim()}
-                      className="btn-amber"
-                      style={{ fontSize:12, padding:'10px 22px', marginBottom: emailReplyAnalysis ? 16 : 0 }}
-                    >
-                      {emailReplyLoading ? 'ANALYSING...' : '📨 ANALYSE REPLY'}
-                    </button>
-                    {emailReplyAnalysis && (
-                      <div className="anim-scale-in">
-                        <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
-                          <span className={`tag ${emailReplyAnalysis.overallSentiment==='positive'?'tag-green':emailReplyAnalysis.overallSentiment==='negative'||emailReplyAnalysis.overallSentiment==='ghosting'?'tag-red':'tag-amber'}`}>{emailReplyAnalysis.overallSentiment?.toUpperCase()}</span>
-                          <span className={`tag ${emailReplyAnalysis.riskLevel==='high'?'tag-red':emailReplyAnalysis.riskLevel==='medium'?'tag-amber':'tag-green'}`}>{emailReplyAnalysis.riskLevel?.toUpperCase()} RISK</span>
-                          <span className={`tag ${emailReplyAnalysis.urgencyLevel==='high'?'tag-green':'tag-dim'}`}>{emailReplyAnalysis.urgencyLevel?.toUpperCase()} URGENCY</span>
-                        </div>
-                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14, marginBottom:12 }}>
-                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WHAT THEY REALLY WANT</div>
-                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.whatTheyWant}</p>
-                        </div>
-                        {emailReplyAnalysis.hiddenObjections?.length > 0 && (
-                          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:14, marginBottom:12 }}>
-                            <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>HIDDEN OBJECTIONS</div>
-                            {emailReplyAnalysis.hiddenObjections.map((o,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>⚠ {o}</div>)}
-                          </div>
-                        )}
-                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderRadius:10, padding:14, marginBottom:12 }}>
-                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>RECOMMENDED ACTION</div>
-                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.recommendedAction}</p>
-                        </div>
-                        {emailReplyAnalysis.perfectReply && (
-                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:16, marginBottom:10 }}>
-                            <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>PERFECT REPLY</div>
-                            <div style={{ fontSize:11, fontWeight:700, color:'var(--text-dim)', marginBottom:4 }}>Subject: {emailReplyAnalysis.perfectReply.subject}</div>
-                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, marginBottom:10, whiteSpace:'pre-line' }}>{emailReplyAnalysis.perfectReply.body}</p>
-                            <button className="copy-btn" onClick={() => navigator.clipboard.writeText('Subject: ' + emailReplyAnalysis.perfectReply.subject + '\n\n' + emailReplyAnalysis.perfectReply.body)}>COPY REPLY</button>
-                          </div>
-                        )}
-                        <button onClick={() => { setEmailReplyAnalysis(null); setEmailReplyInput(""); }} className="btn-ghost" style={{ marginTop:8, fontSize:11 }}>Analyse Another</button>
-                      </div>
-                    )}
-                  </div>
-
               {activeTab === "playbook" && (
                 <div className="anim-slide-up">
                   {/* Discovery Questions */}
@@ -3200,6 +3026,73 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 
               {/* ═══ TAB: BUSINESS CASE ════════════════════════════════════ */}
 
+                  {/* Email Reply Analyser */}
+                  <div className="inline-section">
+                    <div className="section-header" style={{ color:'var(--blue-light)' }}>📨 Email Reply Analyser</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Paste a prospect's reply and instantly decode what they really mean, their hidden objections and the perfect response to send.</p>
+                    <textarea
+                      placeholder="Paste the prospect email reply here"
+                      value={emailReplyInput}
+                      onChange={e => setEmailReplyInput(e.target.value)}
+                      style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:100, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if(!emailReplyInput.trim()) return;
+                        setEmailReplyLoading(true); setEmailReplyAnalysis(null);
+                        try {
+                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, stream:true,
+                              system:`You are an expert at reading between the lines of prospect emails. Return ONLY valid JSON: {"overallSentiment":"positive|neutral|negative|stalling|ghosting","buyingSignals":["Signal 1"],"hiddenObjections":["Hidden concern 1","Hidden concern 2"],"whatTheyWant":"What they are really asking for or signalling","urgencyLevel":"high|medium|low|none","riskLevel":"low|medium|high","recommendedAction":"Exactly what to do next","perfectReply":{"subject":"Reply subject line","body":"Complete reply email under 100 words — natural, moves deal forward"},"thingsToAvoid":["Do not say this in your reply"]}`,
+                              messages:[{role:"user",content:`Prospect email: "${emailReplyInput}". Context: Selling ${form.product} to ${form.company} (${form.industry}). Deal stage: ${form.dealStage}.`}]
+                            })
+                          });
+                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                          while(true) { const {done,value} = await reader.read(); if(done) break;
+                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setEmailReplyAnalysis(JSON.parse(raw.slice(s,e+1)));
+                        } catch(e) { alert("Failed. Try again."); }
+                        setEmailReplyLoading(false);
+                      }}
+                      disabled={emailReplyLoading||!emailReplyInput.trim()}
+                      className="btn-amber"
+                      style={{ fontSize:12, padding:'10px 22px', marginBottom: emailReplyAnalysis ? 16 : 0 }}
+                    >
+                      {emailReplyLoading ? 'ANALYSING...' : '📨 ANALYSE REPLY'}
+                    </button>
+                    {emailReplyAnalysis && (
+                      <div className="anim-scale-in">
+                        <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+                          <span className={`tag ${emailReplyAnalysis.overallSentiment==='positive'?'tag-green':emailReplyAnalysis.overallSentiment==='negative'||emailReplyAnalysis.overallSentiment==='ghosting'?'tag-red':'tag-amber'}`}>{emailReplyAnalysis.overallSentiment?.toUpperCase()}</span>
+                          <span className={`tag ${emailReplyAnalysis.riskLevel==='high'?'tag-red':emailReplyAnalysis.riskLevel==='medium'?'tag-amber':'tag-green'}`}>{emailReplyAnalysis.riskLevel?.toUpperCase()} RISK</span>
+                          <span className={`tag ${emailReplyAnalysis.urgencyLevel==='high'?'tag-green':'tag-dim'}`}>{emailReplyAnalysis.urgencyLevel?.toUpperCase()} URGENCY</span>
+                        </div>
+                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WHAT THEY REALLY WANT</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.whatTheyWant}</p>
+                        </div>
+                        {emailReplyAnalysis.hiddenObjections?.length > 0 && (
+                          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:14, marginBottom:12 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>HIDDEN OBJECTIONS</div>
+                            {emailReplyAnalysis.hiddenObjections.map((o,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>⚠ {o}</div>)}
+                          </div>
+                        )}
+                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderRadius:10, padding:14, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>RECOMMENDED ACTION</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.recommendedAction}</p>
+                        </div>
+                        {emailReplyAnalysis.perfectReply && (
+                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:16, marginBottom:10 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>PERFECT REPLY</div>
+                            <div style={{ fontSize:11, fontWeight:700, color:'var(--text-dim)', marginBottom:4 }}>Subject: {emailReplyAnalysis.perfectReply.subject}</div>
+                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, marginBottom:10, whiteSpace:'pre-line' }}>{emailReplyAnalysis.perfectReply.body}</p>
+                            <button className="copy-btn" onClick={() => navigator.clipboard.writeText('Subject: ' + emailReplyAnalysis.perfectReply.subject + '\n\n' + emailReplyAnalysis.perfectReply.body)}>COPY REPLY</button>
+                          </div>
+                        )}
+                        <button onClick={() => { setEmailReplyAnalysis(null); setEmailReplyInput(""); }} className="btn-ghost" style={{ marginTop:8, fontSize:11 }}>Analyse Another</button>
+                      </div>
+                    )}
+                  </div>
               {activeTab === "bizcase" && (
                 <div className="anim-slide-up">
                   {/* POV Builder */}
@@ -3604,46 +3497,7 @@ ${povDoc.closingPerspective}`;
                   {/* Negotiation Playbook */}
                   <div className="inline-section">
                     <div className="section-header" style={{ color:'var(--red)' }}>🤝 Negotiation Playbook</div>
-                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:12, lineHeight:1.6 }}>Anchoring strategy, concession framework and walk-away lines — built from your actual deal data.</p>
-                    {!roiResult ? (
-                      <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}>
-                        <span style={{ fontSize:15, flexShrink:0 }}>💡</span>
-                        <p style={{ fontSize:12, color:'var(--amber)', lineHeight:1.5, margin:0 }}>Complete the <strong>ROI Calculator</strong> above first for precise anchoring numbers. Without it, figures will be estimated from deal context.</p>
-                      </div>
-                    ) : (
-                      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ ROI {roiResult.roi}%</span>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Payback {roiResult.payback}mo</span>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Benefit ${roiResult.totalBenefit?.toLocaleString()}</span>
-                        <span className="tag tag-dim" style={{ fontSize:9 }}>Using your confirmed data</span>
-                      </div>
-                    )}
-                    {!roiResult ? (
-                      <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}>
-                        <span style={{ fontSize:15, flexShrink:0 }}>💡</span>
-                        <p style={{ fontSize:12, color:'var(--amber)', lineHeight:1.5, margin:0 }}>Complete the <strong>ROI Calculator</strong> above first for precise anchoring numbers. Without it, figures will be estimated from deal context.</p>
-                      </div>
-                    ) : (
-                      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ ROI {roiResult.roi}%</span>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Payback {roiResult.payback}mo</span>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Benefit ${roiResult.totalBenefit?.toLocaleString()}</span>
-                        <span className="tag tag-dim" style={{ fontSize:9 }}>Using your confirmed data</span>
-                      </div>
-                    )}
-                    {!roiResult ? (
-                      <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}>
-                        <span style={{ fontSize:15, flexShrink:0 }}>💡</span>
-                        <p style={{ fontSize:12, color:'var(--amber)', lineHeight:1.5, margin:0 }}>Complete the <strong>ROI Calculator</strong> above first — the playbook uses your confirmed ROI%, payback period and total benefit for precise anchoring numbers. Without it, figures will be estimated.</p>
-                      </div>
-                    ) : (
-                      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ ROI {roiResult.roi}%</span>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Payback {roiResult.payback}mo</span>
-                        <span className="tag tag-green" style={{ fontSize:9 }}>✓ Benefit ${roiResult.totalBenefit?.toLocaleString()}</span>
-                        <span className="tag tag-dim" style={{ fontSize:9 }}>Using your confirmed data</span>
-                      </div>
-                    )}
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:16, lineHeight:1.6 }}>You are entering negotiation. Get your anchoring strategy, concession framework and walk-away lines — before you enter the room.</p>
                     {!negotiationPlaybook ? (
                       <button
                         onClick={async () => {
