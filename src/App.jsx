@@ -3067,15 +3067,15 @@ ${povDoc.executiveTheme}
 
 INDUSTRY PERSPECTIVE
 ${povDoc.industryPerspective?.headline}
-${povDoc.industryPerspective?.trends?.join(', ' ')}
+${povDoc.industryPerspective?.trends?.join(', ')}
 
 YOUR SITUATION
 ${povDoc.yourSituation?.headline}
-${povDoc.yourSituation?.specificChallenges?.join(', ' ')}
+${povDoc.yourSituation?.specificChallenges?.join(', ')}
 
 RECOMMENDED PATH
 ${povDoc.recommendedPath?.headline}
-${povDoc.recommendedPath?.principlesForSuccess?.join(', ' ')}
+${povDoc.recommendedPath?.principlesForSuccess?.join(', ')}
 
 ${povDoc.closingPerspective}`;
                               navigator.clipboard.writeText(full);
