@@ -3067,8 +3067,7 @@ ${povDoc.executiveTheme}
 
 INDUSTRY PERSPECTIVE
 ${povDoc.industryPerspective?.headline}
-${povDoc.industryPerspective?.trends?.join('
-')}
+${povDoc.industryPerspective?.trends?.join(', ' ')}
 
 YOUR SITUATION
 ${povDoc.yourSituation?.headline}
