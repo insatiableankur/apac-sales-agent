@@ -2054,6 +2054,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </button>
               </div>
             </div>
+              </React.Fragment>
           )}
 
           {/* ── STEP 2: CONTEXT ── */}
