@@ -3025,6 +3025,74 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               )}
 
               {/* ═══ TAB: BUSINESS CASE ════════════════════════════════════ */}
+
+                  {/* Email Reply Analyser */}
+                  <div className="inline-section">
+                    <div className="section-header" style={{ color:'var(--blue-light)' }}>📨 Email Reply Analyser</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Paste a prospect's reply and instantly decode what they really mean, their hidden objections and the perfect response to send.</p>
+                    <textarea
+                      placeholder="Paste the prospect email reply here"
+                      value={emailReplyInput}
+                      onChange={e => setEmailReplyInput(e.target.value)}
+                      style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:100, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if(!emailReplyInput.trim()) return;
+                        setEmailReplyLoading(true); setEmailReplyAnalysis(null);
+                        try {
+                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, stream:true,
+                              system:`You are an expert at reading between the lines of prospect emails. Return ONLY valid JSON: {"overallSentiment":"positive|neutral|negative|stalling|ghosting","buyingSignals":["Signal 1"],"hiddenObjections":["Hidden concern 1","Hidden concern 2"],"whatTheyWant":"What they are really asking for or signalling","urgencyLevel":"high|medium|low|none","riskLevel":"low|medium|high","recommendedAction":"Exactly what to do next","perfectReply":{"subject":"Reply subject line","body":"Complete reply email under 100 words — natural, moves deal forward"},"thingsToAvoid":["Do not say this in your reply"]}`,
+                              messages:[{role:"user",content:`Prospect email: "${emailReplyInput}". Context: Selling ${form.product} to ${form.company} (${form.industry}). Deal stage: ${form.dealStage}.`}]
+                            })
+                          });
+                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                          while(true) { const {done,value} = await reader.read(); if(done) break;
+                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setEmailReplyAnalysis(JSON.parse(raw.slice(s,e+1)));
+                        } catch(e) { alert("Failed. Try again."); }
+                        setEmailReplyLoading(false);
+                      }}
+                      disabled={emailReplyLoading||!emailReplyInput.trim()}
+                      className="btn-amber"
+                      style={{ fontSize:12, padding:'10px 22px', marginBottom: emailReplyAnalysis ? 16 : 0 }}
+                    >
+                      {emailReplyLoading ? 'ANALYSING...' : '📨 ANALYSE REPLY'}
+                    </button>
+                    {emailReplyAnalysis && (
+                      <div className="anim-scale-in">
+                        <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+                          <span className={`tag ${emailReplyAnalysis.overallSentiment==='positive'?'tag-green':emailReplyAnalysis.overallSentiment==='negative'||emailReplyAnalysis.overallSentiment==='ghosting'?'tag-red':'tag-amber'}`}>{emailReplyAnalysis.overallSentiment?.toUpperCase()}</span>
+                          <span className={`tag ${emailReplyAnalysis.riskLevel==='high'?'tag-red':emailReplyAnalysis.riskLevel==='medium'?'tag-amber':'tag-green'}`}>{emailReplyAnalysis.riskLevel?.toUpperCase()} RISK</span>
+                          <span className={`tag ${emailReplyAnalysis.urgencyLevel==='high'?'tag-green':'tag-dim'}`}>{emailReplyAnalysis.urgencyLevel?.toUpperCase()} URGENCY</span>
+                        </div>
+                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WHAT THEY REALLY WANT</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.whatTheyWant}</p>
+                        </div>
+                        {emailReplyAnalysis.hiddenObjections?.length > 0 && (
+                          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:14, marginBottom:12 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>HIDDEN OBJECTIONS</div>
+                            {emailReplyAnalysis.hiddenObjections.map((o,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>⚠ {o}</div>)}
+                          </div>
+                        )}
+                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderRadius:10, padding:14, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>RECOMMENDED ACTION</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.recommendedAction}</p>
+                        </div>
+                        {emailReplyAnalysis.perfectReply && (
+                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:16, marginBottom:10 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>PERFECT REPLY</div>
+                            <div style={{ fontSize:11, fontWeight:700, color:'var(--text-dim)', marginBottom:4 }}>Subject: {emailReplyAnalysis.perfectReply.subject}</div>
+                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, marginBottom:10, whiteSpace:'pre-line' }}>{emailReplyAnalysis.perfectReply.body}</p>
+                            <button className="copy-btn" onClick={() => navigator.clipboard.writeText('Subject: ' + emailReplyAnalysis.perfectReply.subject + '\n\n' + emailReplyAnalysis.perfectReply.body)}>COPY REPLY</button>
+                          </div>
+                        )}
+                        <button onClick={() => { setEmailReplyAnalysis(null); setEmailReplyInput(""); }} className="btn-ghost" style={{ marginTop:8, fontSize:11 }}>Analyse Another</button>
+                      </div>
+                    )}
+                  </div>
               {activeTab === "bizcase" && (
                 <div className="anim-slide-up">
                   {/* POV Builder */}
@@ -3425,6 +3493,113 @@ ${povDoc.closingPerspective}`;
                           </div>
                         )}
                         <button onClick={() => setMutualSuccessPlan(null)} className="btn-ghost" style={{ marginTop:10, fontSize:11 }}>Regenerate</button>
+
+                  {/* Negotiation Playbook */}
+                  <div className="inline-section">
+                    <div className="section-header" style={{ color:'var(--red)' }}>🤝 Negotiation Playbook</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:16, lineHeight:1.6 }}>You are entering negotiation. Get your anchoring strategy, concession framework and walk-away lines — before you enter the room.</p>
+                    {!negotiationPlaybook ? (
+                      <button
+                        onClick={async () => {
+                          setNegotiationLoading(true);
+                          try {
+                            const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                              body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:3000, stream:true,
+                                system:`You are a master negotiation strategist. Create a negotiation playbook. Return ONLY valid JSON: {"negotiationContext":{"powerBalance":"Who has leverage and why","theirBATNA":"Their likely alternative","ourBATNA":"Our alternative","keyLeveragePoints":["Leverage 1","Leverage 2"]},"anchoringStrategy":{"openingPosition":"Where to anchor — be specific with numbers","rationale":"Why this anchor works","deliveryLine":"Exact words to open the negotiation"},"concessionFramework":[{"sequence":"1st","concession":"What to give","value":"Its value to them","whatToAskFor":"What to demand in return"},{"sequence":"2nd","concession":"What to give","value":"Its value to them","whatToAskFor":"What to demand in return"},{"sequence":"3rd","concession":"What to give","value":"Its value to them","whatToAskFor":"What to demand in return"}],"absoluteLines":{"walkAwayPoint":"The line you will not cross — be specific","nonNegotiables":["Non-negotiable 1","Non-negotiable 2"]},"theirTactics":[{"tactic":"Tactic they will use","counter":"How to counter it"}],"closingMoves":["Closing move 1","Closing move 2"],"redFlags":["Walk away signal 1","Red flag 2"]}`,
+                                messages:[{role:"user",content:`Selling ${form.product} to ${form.company}. Deal size: ${form.dealSize||'TBD'}. Stage: ${form.dealStage}. ROI data: ${roiResult ? roiResult.roi + '% ROI, $' + (roiResult.totalBenefit||0).toLocaleString() + ' total benefit' : 'not calculated'}. Competitors: ${form.competitorsMentioned||'None'}. Champion score: ${result?.stakeholders?.championDevelopmentScore||'Unknown'}. MEDDPICC health: ${result?.meddpicc?.overallHealth||'Unknown'}.`}]
+                              })
+                            });
+                            const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                            while(true) { const {done,value} = await reader.read(); if(done) break;
+                              for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                            const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setNegotiationPlaybook(JSON.parse(raw.slice(s,e+1)));
+                          } catch(e) { alert("Failed. Try again."); }
+                          setNegotiationLoading(false);
+                        }}
+                        disabled={negotiationLoading}
+                        className="btn-amber"
+                        style={{ fontSize:12, padding:'11px 24px' }}
+                      >
+                        {negotiationLoading ? 'BUILDING PLAYBOOK...' : '🤝 BUILD NEGOTIATION PLAYBOOK'}
+                      </button>
+                    ) : (
+                      <div className="anim-scale-in">
+                        {/* Power Balance */}
+                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>NEGOTIATION CONTEXT</div>
+                          <div className="r-grid-2">
+                            <div>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--text-dim)', letterSpacing:1, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>POWER BALANCE</div>
+                              <p style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.5 }}>{negotiationPlaybook.negotiationContext?.powerBalance}</p>
+                            </div>
+                            <div>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:1, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>OUR LEVERAGE</div>
+                              {negotiationPlaybook.negotiationContext?.keyLeveragePoints?.map((l,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>✓ {l}</div>)}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Anchoring */}
+                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderLeft:'3px solid var(--blue)', borderRadius:'0 12px 12px 0', padding:16, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>ANCHORING STRATEGY</div>
+                          <div style={{ fontSize:15, fontWeight:800, color:'var(--text)', marginBottom:6 }}>{negotiationPlaybook.anchoringStrategy?.openingPosition}</div>
+                          <p style={{ fontSize:12, color:'var(--text-muted)', marginBottom:10, lineHeight:1.5 }}>{negotiationPlaybook.anchoringStrategy?.rationale}</p>
+                          {negotiationPlaybook.anchoringStrategy?.deliveryLine && (
+                            <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:6, padding:'8px 12px', marginBottom:8 }}>
+                              <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:1, marginBottom:4, fontFamily:"'JetBrains Mono',monospace" }}>SAY THIS VERBATIM</div>
+                              <p style={{ fontSize:13, color:'var(--blue-light)', fontStyle:'italic', lineHeight:1.6 }}>"{negotiationPlaybook.anchoringStrategy.deliveryLine}"</p>
+                            </div>
+                          )}
+                          <button className="copy-btn" onClick={() => navigator.clipboard.writeText(negotiationPlaybook.anchoringStrategy?.deliveryLine||'')}>COPY</button>
+                        </div>
+                        {/* Concession Framework */}
+                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:12, fontFamily:"'JetBrains Mono',monospace" }}>CONCESSION FRAMEWORK — NEVER GIVE WITHOUT GETTING</div>
+                          {negotiationPlaybook.concessionFramework?.map((cf,i) => (
+                            <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 1fr 1fr 1fr', gap:10, padding:'10px 0', borderBottom:'1px solid var(--border)', alignItems:'start' }}>
+                              <span className="tag tag-dim" style={{ fontSize:8, justifyContent:'center' }}>{cf.sequence}</span>
+                              <div>
+                                <div style={{ fontSize:8, color:'var(--text-dim)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>GIVE</div>
+                                <div style={{ fontSize:12, color:'var(--text)', lineHeight:1.4 }}>{cf.concession}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize:8, color:'var(--green)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>THEIR VALUE</div>
+                                <div style={{ fontSize:12, color:'var(--text-muted)', lineHeight:1.4 }}>{cf.value}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize:8, color:'var(--red)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>DEMAND IN RETURN</div>
+                                <div style={{ fontSize:12, color:'var(--amber)', lineHeight:1.4 }}>{cf.whatToAskFor}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Walk Away Lines */}
+                        <div style={{ background:'var(--red-dim)', border:'2px solid rgba(239,68,68,0.25)', borderRadius:12, padding:16, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>⚠ ABSOLUTE LINES — DO NOT CROSS</div>
+                          <div style={{ fontSize:15, fontWeight:800, color:'var(--red)', marginBottom:10 }}>{negotiationPlaybook.absoluteLines?.walkAwayPoint}</div>
+                          {negotiationPlaybook.absoluteLines?.nonNegotiables?.map((n,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:4 }}>✗ {n}</div>)}
+                        </div>
+                        {/* Their Tactics */}
+                        {negotiationPlaybook.theirTactics?.length > 0 && (
+                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:12 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--text-dim)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>THEIR TACTICS + YOUR COUNTERS</div>
+                            {negotiationPlaybook.theirTactics.map((t,i) => (
+                              <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, padding:'8px 0', borderBottom:'1px solid var(--border)' }}>
+                                <div>
+                                  <div style={{ fontSize:8, color:'var(--red)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>THEY WILL</div>
+                                  <div style={{ fontSize:12, color:'var(--text-muted)' }}>{t.tactic}</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontSize:8, color:'var(--green)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>YOU COUNTER</div>
+                                  <div style={{ fontSize:12, color:'var(--text-muted)' }}>{t.counter}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <button onClick={() => setNegotiationPlaybook(null)} className="btn-ghost" style={{ fontSize:11 }}>Regenerate</button>
+                      </div>
+                    )}
+                  </div>
                       </div>
                     )}
                   </div>
