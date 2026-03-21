@@ -1989,7 +1989,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               </div>
             )}
 
-            </>
             <div className="steps fade-up">
               {[["01", "Company"], ["02", "Context"], ["03", "Analyse"], ["04", "Brief"]].map(([num, label], i) => {
                 const s = i + 1;
@@ -2088,6 +2087,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </button>
               </div>
             </div>
+            </>
           )}
 
           {/* ── STEP 2: CONTEXT ── */}
