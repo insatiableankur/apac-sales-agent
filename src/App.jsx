@@ -1947,7 +1947,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
         <div className="main">
           {/* Step indicator */}
           {step < 4 && (
-            <>
+            <div>
             {formPreFilled && form.company && (
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', borderRadius:10, marginBottom:16, gap:12 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
@@ -2087,7 +2087,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </button>
               </div>
             </div>
-            </>
+            </div>
           )}
 
           {/* ── STEP 2: CONTEXT ── */}
