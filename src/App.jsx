@@ -1817,6 +1817,27 @@ export default function SalesIntelligenceAgent() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  const downloadTemplate = React.useCallback(() => {
+    const headers = ['First Name','Last Name','Job Title','Email Address','Company Name','Department','Management Level','LinkedIn URL','Mobile phone','City','Country'];
+    const rows = [
+      ['Sarah','Chen','CFO','sarah.chen@company.com','Acme Corp','Finance','C-Suite','https://linkedin.com/in/sarahchen','+65 9123 4567','Singapore','Singapore'],
+      ['James','Wong','IT Director','james.wong@company.com','Acme Corp','Technology','Director','https://linkedin.com/in/jameswong','+65 9234 5678','Singapore','Singapore'],
+      ['Priya','Sharma','Head of Procurement','priya.sharma@company.com','Acme Corp','Procurement','Director','https://linkedin.com/in/priyasharma','+65 9345 6789','Singapore','Singapore'],
+      ['','','','','','','','','','',''],
+      ['NOTE: This template works with ZoomInfo CSV column names.','','','','','','','','','',''],
+      ['Also supported: Apollo.io, Clay, LinkedIn Sales Navigator, or any CSV with these columns.','','','','','','','','','',''],
+    ];
+    const csvContent = [headers, ...rows].map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('
+');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sales-intelligence-contacts-template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
   const processImportFile = React.useCallback((file) => {
     const reader = new FileReader();
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
@@ -2255,17 +2276,64 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       if (file) processImportFile(file);
                     }}
                   >
-                    <div className="import-zone-icon">📥</div>
-                    <div className="import-zone-title">Import your contact list</div>
-                    <div className="import-zone-desc">Drop a CSV or Excel export from ZoomInfo, Apollo, Clay, LinkedIn Sales Navigator — or any contact list</div>
-                    <label className="import-zone-btn">
-                      <input type="file" accept=".csv,.xlsx,.xls" style={{ display:'none' }} onChange={e => { if(e.target.files[0]) processImportFile(e.target.files[0]); }} />
-                      Choose File
-                    </label>
-                    <div className="import-zone-logos">
-                      {['ZoomInfo','Apollo','Clay','LinkedIn SN','Generic CSV'].map(s => (
-                        <span key={s} className="import-source-tag">{s}</span>
-                      ))}
+                    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:0 }}>
+                      <div className="import-zone-icon">📥</div>
+                      <div className="import-zone-title">Import your contact list</div>
+                      <div className="import-zone-desc">
+                        Drop or upload a contact export — we auto-detect the format and build your org chart, stakeholder map and email list instantly.
+                      </div>
+
+                      <div className="import-actions-row">
+                        <label className="import-zone-btn">
+                          <input type="file" accept=".csv,.xlsx,.xls" style={{ display:'none' }} onChange={e => { if(e.target.files[0]) processImportFile(e.target.files[0]); }} />
+                          <span>📁</span> Upload CSV or Excel
+                        </label>
+                        <button className="import-template-btn" onClick={e => { e.stopPropagation(); downloadTemplate(); }}>
+                          <span>⬇</span> Download Template
+                        </button>
+                      </div>
+
+                      <div className="import-source-row">
+                        {[
+                          { label:'ZoomInfo', color:'#0077B5' },
+                          { label:'Apollo', color:'#7C3AED' },
+                          { label:'Clay', color:'#EA580C' },
+                          { label:'LinkedIn SN', color:'#0A66C2' },
+                          { label:'HubSpot', color:'#FF7A59' },
+                          { label:'Any CSV', color:'#6B7280' },
+                        ].map(s => (
+                          <span key={s.label} className="import-source-badge" style={{ borderColor: s.color + '44', color: s.color }}>
+                            {s.label}
+                          </span>
+                        ))}
+                      </div>
+
+                      <details className="import-col-guide">
+                        <summary>View expected column names</summary>
+                        <div className="import-col-grid">
+                          {[
+                            ['First Name', 'Required'],
+                            ['Last Name', 'Required'],
+                            ['Job Title', 'Required'],
+                            ['Email Address', 'Recommended'],
+                            ['Company Name', 'Required'],
+                            ['Department', 'Recommended'],
+                            ['Management Level', 'Optional'],
+                            ['LinkedIn URL', 'Optional'],
+                            ['Mobile phone', 'Optional'],
+                            ['City', 'Optional'],
+                            ['Country', 'Optional'],
+                          ].map(([col, req]) => (
+                            <div key={col} className="import-col-row">
+                              <span className="import-col-name">{col}</span>
+                              <span className={`import-col-req ${req === 'Required' ? 'req-required' : req === 'Recommended' ? 'req-recommended' : 'req-optional'}`}>{req}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <p style={{ fontSize:10, color:'var(--text-dim)', marginTop:8, lineHeight:1.5 }}>
+                          Column names are flexible — we auto-detect ZoomInfo, Apollo, Clay and LinkedIn SN formats. Download the template above for a guaranteed match.
+                        </p>
+                      </details>
                     </div>
                   </div>
                 ) : (
