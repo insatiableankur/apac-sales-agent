@@ -1825,7 +1825,7 @@ export default function SalesIntelligenceAgent() {
       ['Priya','Sharma','Head of Procurement','priya.sharma@company.com','Acme Corp','Procurement','Director','https://linkedin.com/in/priyasharma','+65 9345 6789','Singapore','Singapore'],
       ['','','','','','','','','','',''],
       ['NOTE: This template works with ZoomInfo CSV column names.','','','','','','','','','',''],
-      ['Also supported: Apollo.io, Clay, LinkedIn Sales Navigator, or any CSV with these columns.','','','','','','','','','',''],
+      ['Also supported: Apollo Clay LinkedIn SN or any CSV with these columns.','','','','','','','','','',''],
     ];
     const csvContent = [headers, ...rows].map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('
 ');
