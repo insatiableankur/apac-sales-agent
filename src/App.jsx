@@ -78,8 +78,7 @@ const inferSeniority = (seniority, title) => {
 };
 
 const parseCSV = (text) => {
-  const lines = text.split(/
-?
+  const lines = text.split(/\r?\n/).filter(Boolean);
 /).filter(Boolean);
   if (lines.length < 2) return [];
   // Detect delimiter
