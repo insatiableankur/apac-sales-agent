@@ -78,12 +78,13 @@ const inferSeniority = (seniority, title) => {
 };
 
 const parseCSV = (text) => {
-  const lines = text.split(/?
+  const lines = text.split(/
+?
 /).filter(Boolean);
   if (lines.length < 2) return [];
   // Detect delimiter
   const delimiters = [',', '	', ';', '|'];
-  const counts = delimiters.map(d => (lines[0].match(new RegExp('\' + d, 'g')) || []).length);
+  const counts = delimiters.map(d => (lines[0].match(new RegExp('\\' + d, 'g')) || []).length);
   const delimiter = delimiters[counts.indexOf(Math.max(...counts))];
   // Parse with quote handling
   const parseRow = (row) => {
