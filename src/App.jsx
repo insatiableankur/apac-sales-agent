@@ -27,6 +27,169 @@ Be deeply specific to the company, market, country, industry, product and deal s
 
 
 // ─── PDF EXPORT ───────────────────────────────────────────────────────────────
+// ─── CSV/EXCEL IMPORT ────────────────────────────────────────────────────────
+
+const detectSource = (headers) => {
+  const h = headers.map(x => x.toLowerCase());
+  if (h.some(x => x.includes('zi_') || x.includes('zoominfo'))) return 'zoominfo';
+  if (h.some(x => x.includes('apollo') || x.includes('account_name'))) return 'apollo';
+  if (h.some(x => x.includes('clay') || x.includes('enriched'))) return 'clay';
+  if (h.some(x => x.includes('linkedin') || x.includes('sales navigator'))) return 'linkedin';
+  return 'generic';
+};
+
+const COL_MAP = {
+  zoominfo: { firstName:'First Name', lastName:'Last Name', title:'Job Title', email:'Email Address', company:'Company Name', department:'Department', seniority:'Management Level', linkedin:'LinkedIn URL', phone:'Mobile phone', city:'City', country:'Country' },
+  apollo:   { firstName:'First Name', lastName:'Last Name', title:'Title', email:'Email', company:'Company', department:'Department', seniority:'Seniority', linkedin:'LinkedIn Url', phone:'Phone', city:'City', country:'Country' },
+  clay:     { firstName:'First Name', lastName:'Last Name', title:'Job Title', email:'Email', company:'Company Name', department:'Department', seniority:'Seniority Level', linkedin:'LinkedIn URL', phone:'Phone Number', city:'City', country:'Country' },
+  linkedin: { firstName:'First Name', lastName:'Last Name', title:'Title', email:'Email Address', company:'Company', department:'Function', seniority:'Seniority', linkedin:'Profile URL', phone:'', city:'Geography', country:'Country' },
+  generic:  { firstName:'first_name', lastName:'last_name', title:'title', email:'email', company:'company', department:'department', seniority:'seniority', linkedin:'linkedin', phone:'phone', city:'city', country:'country' },
+};
+
+const TITLE_ARCHETYPES = [
+  { patterns:['cfo','chief financial','vp finance','finance director','head of finance'], archetype:'Economic Buyer' },
+  { patterns:['ceo','chief executive','president','managing director','coo'], archetype:'Economic Buyer' },
+  { patterns:['cto','chief technology','vp engineering','head of technology','it director'], archetype:'Technical Evaluator' },
+  { patterns:['ciso','security','compliance','risk'], archetype:'Technical Evaluator' },
+  { patterns:['procurement','purchasing','vendor','sourcing','supply chain'], archetype:'Gatekeeper' },
+  { patterns:['transformation','innovation','change','digital','strategy'], archetype:'Champion' },
+  { patterns:['operations','ops','process','efficiency'], archetype:'Champion' },
+  { patterns:['manager','analyst','specialist','coordinator','associate'], archetype:'End User' },
+];
+
+const inferArchetype = (title) => {
+  if (!title) return 'Influencer';
+  const t = title.toLowerCase();
+  for (const { patterns, archetype } of TITLE_ARCHETYPES) {
+    if (patterns.some(p => t.includes(p))) return archetype;
+  }
+  return 'Influencer';
+};
+
+const SENIORITY_ORDER = ['c-suite','vp','director','manager','senior','associate','entry'];
+const inferSeniority = (seniority, title) => {
+  const s = (seniority || title || '').toLowerCase();
+  if (s.includes('c-suite') || s.includes('chief') || s.includes('ceo') || s.includes('cfo') || s.includes('cto')) return 0;
+  if (s.includes('vp') || s.includes('vice president')) return 1;
+  if (s.includes('director') || s.includes('head of')) return 2;
+  if (s.includes('manager') || s.includes('lead')) return 3;
+  if (s.includes('senior') || s.includes('sr.')) return 4;
+  return 5;
+};
+
+const parseCSV = (text) => {
+  const lines = text.split(/?
+/).filter(Boolean);
+  if (lines.length < 2) return [];
+  // Detect delimiter
+  const delimiters = [',', '	', ';', '|'];
+  const counts = delimiters.map(d => (lines[0].match(new RegExp('\' + d, 'g')) || []).length);
+  const delimiter = delimiters[counts.indexOf(Math.max(...counts))];
+  // Parse with quote handling
+  const parseRow = (row) => {
+    const result = [];
+    let current = '';
+    let inQuote = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === delimiter && !inQuote) { result.push(current.trim()); current = ''; }
+      else { current += ch; }
+    }
+    result.push(current.trim());
+    return result;
+  };
+  const headers = parseRow(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = parseRow(line);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
+    return obj;
+  }).filter(row => Object.values(row).some(v => v));
+};
+
+const mapContacts = (rows, source) => {
+  const map = COL_MAP[source] || COL_MAP.generic;
+  // Try to find best matching column for each field
+  const findCol = (target, rows) => {
+    if (!rows.length) return null;
+    const keys = Object.keys(rows[0]);
+    // Exact match first
+    const exact = keys.find(k => k.toLowerCase() === target.toLowerCase());
+    if (exact) return exact;
+    // Partial match
+    return keys.find(k => k.toLowerCase().includes(target.toLowerCase()) || target.toLowerCase().includes(k.toLowerCase())) || null;
+  };
+  const colCache = {};
+  Object.entries(map).forEach(([field, colName]) => {
+    colCache[field] = findCol(colName, rows) || findCol(field, rows);
+  });
+  return rows.map((row, idx) => {
+    const get = (field) => colCache[field] ? (row[colCache[field]] || '') : '';
+    const firstName = get('firstName');
+    const lastName = get('lastName');
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || get('name') || 'Unknown';
+    const title = get('title');
+    const email = get('email');
+    const company = get('company');
+    const dept = get('department');
+    const seniority = get('seniority');
+    const linkedin = get('linkedin');
+    const phone = get('phone');
+    const city = get('city');
+    const country = get('country');
+    return {
+      id: idx,
+      name: fullName,
+      firstName, lastName,
+      title: title || 'Unknown Title',
+      email: email || '',
+      company: company || '',
+      department: dept || '',
+      seniority: seniority || '',
+      linkedin: linkedin || '',
+      phone: phone || '',
+      location: [city, country].filter(Boolean).join(', '),
+      archetype: inferArchetype(title),
+      seniorityRank: inferSeniority(seniority, title),
+      confidence: email ? 'high' : 'medium',
+    };
+  }).sort((a, b) => a.seniorityRank - b.seniorityRank);
+};
+
+const buildOrgChartFromContacts = (contacts) => {
+  if (!contacts.length) return null;
+  // Group by department
+  const byDept = {};
+  contacts.forEach(c => {
+    const dept = c.department || 'General';
+    if (!byDept[dept]) byDept[dept] = [];
+    byDept[dept].push(c);
+  });
+  // Find top person (lowest seniority rank)
+  const sorted = [...contacts].sort((a, b) => a.seniorityRank - b.seniorityRank);
+  const top = sorted[0];
+  // Build tree
+  const makeNode = (contact) => ({
+    name: contact.name,
+    title: contact.title,
+    email: contact.email,
+    department: contact.department,
+    relevance: contact.archetype === 'Economic Buyer' ? 'high' : contact.archetype === 'Champion' ? 'high' : 'medium',
+    children: contacts
+      .filter(c => c.id !== contact.id && c.seniorityRank === contact.seniorityRank + 1 && (!c.department || c.department === contact.department || contact.seniorityRank < 2))
+      .slice(0, 4)
+      .map(c => ({ name:c.name, title:c.title, email:c.email, department:c.department, relevance:'medium', children:[] }))
+  });
+  const emailDomain = top.email ? top.email.split('@')[1] : null;
+  return {
+    ceo: makeNode(top),
+    emailPattern: emailDomain ? `firstname.lastname@${emailDomain}` : null,
+    reportingStructure: `${contacts.length} contacts imported from ${Object.keys(byDept).length} departments`,
+    source: 'imported',
+  };
+};
+
 const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs) => {
   // Dynamically load jsPDF
   if (!window.jspdf) {
@@ -1576,6 +1739,11 @@ export default function SalesIntelligenceAgent() {
     try { return JSON.parse(localStorage.getItem("apac_deal_history") || "[]"); } catch { return []; }
   });
   const [formPreFilled, setFormPreFilled] = useState(false);
+  const [importedContacts, setImportedContacts] = useState([]);
+  const [importSource, setImportSource] = useState(null); // 'zoominfo'|'apollo'|'clay'|'generic'
+  const [importPreview, setImportPreview] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importDragging, setImportDragging] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("bahasa");
   const [emailTone, setEmailTone] = useState("formal");
@@ -1649,6 +1817,71 @@ export default function SalesIntelligenceAgent() {
   const chatBottomRef = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const processImportFile = React.useCallback((file) => {
+    const reader = new FileReader();
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    reader.onload = async (e) => {
+      try {
+        let rows = [];
+        if (isExcel) {
+          // Use SheetJS via CDN-style dynamic import
+          const XLSX = window.XLSX;
+          if (!XLSX) {
+            // Load SheetJS dynamically
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+              script.onload = resolve;
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+          }
+          const wb = window.XLSX.read(e.target.result, { type: 'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const json = window.XLSX.utils.sheet_to_json(ws, { header:1 });
+          if (json.length < 2) return;
+          const headers = json[0];
+          rows = json.slice(1).map(row => {
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? String(row[i]) : ''; });
+            return obj;
+          }).filter(row => Object.values(row).some(v => v));
+        } else {
+          // CSV
+          const text = new TextDecoder().decode(new Uint8Array(e.target.result));
+          rows = parseCSV(text);
+        }
+        if (!rows.length) { alert('No data found in file. Please check the file format.'); return; }
+        const headers = Object.keys(rows[0]);
+        const source = detectSource(headers);
+        const contacts = mapContacts(rows, source);
+        if (!contacts.length) { alert('Could not parse contacts. Please check column headers.'); return; }
+        setImportedContacts(contacts);
+        setImportSource(source);
+        setImportPreview(true);
+        // Auto-fill form from first contact data
+        const topContact = contacts[0];
+        const company = topContact.company || '';
+        const country = contacts[0].location?.split(',').pop()?.trim() || '';
+        const contactNames = contacts.slice(0, 5).map(c => `${c.name} (${c.title})`).join(', ');
+        setForm(prev => ({
+          ...prev,
+          company: company || prev.company,
+          knownContacts: contactNames,
+        }));
+        setFormPreFilled(true);
+      } catch(err) {
+        console.error(err);
+        alert('Failed to parse file. Please ensure it is a valid CSV or Excel file.');
+      }
+    };
+    if (isExcel) {
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
+  }, []);
 
   React.useEffect(() => {
     try {
@@ -2009,6 +2242,64 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               <div style={{ marginBottom: 32 }} className="fade-up-1">
                 <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 30, fontWeight: 800, color: "white", marginBottom: 8 }}>Who are you targeting?</h1>
                 <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.6 }}>Start with the company. The more you give, the sharper the intelligence.</p>
+
+                {/* ── IMPORT ZONE ── */}
+                {!importPreview ? (
+                  <div
+                    className={`import-zone ${importDragging ? 'import-zone-drag' : ''}`}
+                    onDragOver={e => { e.preventDefault(); setImportDragging(true); }}
+                    onDragLeave={() => setImportDragging(false)}
+                    onDrop={e => {
+                      e.preventDefault();
+                      setImportDragging(false);
+                      const file = e.dataTransfer.files[0];
+                      if (file) processImportFile(file);
+                    }}
+                  >
+                    <div className="import-zone-icon">📥</div>
+                    <div className="import-zone-title">Import your contact list</div>
+                    <div className="import-zone-desc">Drop a CSV or Excel export from ZoomInfo, Apollo, Clay, LinkedIn Sales Navigator — or any contact list</div>
+                    <label className="import-zone-btn">
+                      <input type="file" accept=".csv,.xlsx,.xls" style={{ display:'none' }} onChange={e => { if(e.target.files[0]) processImportFile(e.target.files[0]); }} />
+                      Choose File
+                    </label>
+                    <div className="import-zone-logos">
+                      {['ZoomInfo','Apollo','Clay','LinkedIn SN','Generic CSV'].map(s => (
+                        <span key={s} className="import-source-tag">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="import-preview anim-scale-in">
+                    <div className="import-preview-header">
+                      <div>
+                        <div className="import-preview-source">{importSource?.toUpperCase()} DETECTED</div>
+                        <div className="import-preview-title">Found {importedContacts.length} contacts at <strong>{importedContacts[0]?.company || form.company}</strong></div>
+                      </div>
+                      <button className="import-preview-clear" onClick={() => { setImportPreview(null); setImportedContacts([]); setImportSource(null); }}>✕ Clear</button>
+                    </div>
+                    <div className="import-contact-grid">
+                      {importedContacts.slice(0, 6).map((c, i) => (
+                        <div key={i} className="import-contact-chip">
+                          <div className="import-contact-avatar">{c.name?.[0] || '?'}</div>
+                          <div className="import-contact-info">
+                            <div className="import-contact-name">{c.name}</div>
+                            <div className="import-contact-title">{c.title}</div>
+                          </div>
+                          <span className={`tag ${c.archetype === 'Economic Buyer' ? 'tag-amber' : c.archetype === 'Champion' ? 'tag-green' : c.archetype === 'Technical Evaluator' ? 'tag-blue' : 'tag-dim'}`} style={{ fontSize:8, flexShrink:0 }}>{c.archetype.split(' ')[0]}</span>
+                        </div>
+                      ))}
+                      {importedContacts.length > 6 && (
+                        <div className="import-contact-chip" style={{ justifyContent:'center', color:'var(--text-dim)', fontSize:12 }}>+{importedContacts.length - 6} more</div>
+                      )}
+                    </div>
+                    <div className="import-preview-footer">
+                      <span className="tag tag-green" style={{ fontSize:9 }}>✓ Form pre-filled</span>
+                      <span className="tag tag-green" style={{ fontSize:9 }}>✓ Org chart ready</span>
+                      <span className="tag tag-green" style={{ fontSize:9 }}>✓ {importedContacts.filter(c=>c.email).length} emails found</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="card fade-up-2">
@@ -2540,6 +2831,17 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                         {/* Org Chart */}
                         <div className="inline-section">
                           <div className="section-header">🏢 Org Chart</div>
+                          {importedContacts.length > 0 && !orgChart && (
+                            <div style={{ marginBottom:12, padding:'10px 14px', background:'var(--green-dim)', border:'1px solid rgba(16,185,129,0.2)', borderRadius:8, display:'flex', gap:10, alignItems:'center', justifyContent:'space-between' }}>
+                              <div>
+                                <div style={{ fontSize:12, fontWeight:700, color:'var(--green)' }}>✓ Org chart from your {importedContacts.length} imported contacts</div>
+                                <div style={{ fontSize:11, color:'var(--text-muted)' }}>Built from real data — not AI guesswork</div>
+                              </div>
+                              <button className="gen-btn" style={{ fontSize:11, padding:'6px 14px' }} onClick={() => {
+                                setOrgChart(buildOrgChartFromContacts(importedContacts));
+                              }}>Build from Import</button>
+                            </div>
+                          )}
                           {!orgChart ? (
                             <button className="gen-btn" onClick={() => generateOrgChart(form.company, form.market, form.industry, result, setOrgChart, setOrgLoading)} disabled={orgLoading}>
                               {orgLoading ? '⏳ Researching...' : '🏢 Generate Org Chart'}
@@ -2706,6 +3008,25 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                         {/* Email Finder */}
                         <div className="inline-section">
                           <div className="section-header">📧 Email Intelligence</div>
+                          {importedContacts.length > 0 && !emailData && (
+                            <div style={{ marginBottom:12, padding:'10px 14px', background:'var(--green-dim)', border:'1px solid rgba(16,185,129,0.2)', borderRadius:8, display:'flex', gap:10, alignItems:'center', justifyContent:'space-between' }}>
+                              <div>
+                                <div style={{ fontSize:12, fontWeight:700, color:'var(--green)' }}>✓ {importedContacts.filter(c=>c.email).length} emails from your import</div>
+                                <div style={{ fontSize:11, color:'var(--text-muted)' }}>Real verified emails — no guesswork needed</div>
+                              </div>
+                              <button className="gen-btn" style={{ fontSize:11, padding:'6px 14px' }} onClick={() => {
+                                const emailList = importedContacts.filter(c=>c.email).map(c => ({
+                                  role: c.title,
+                                  name: c.name,
+                                  email: c.email,
+                                  emailPattern: null,
+                                  confidence: 'high',
+                                  source: 'imported',
+                                }));
+                                setEmailData(emailList.length ? emailList : null);
+                              }}>Use Imported Emails</button>
+                            </div>
+                          )}
                           {!emailData ? (
                             <button className="gen-btn" onClick={() => findEmails(form.company, result?.stakeholders?.buyingCommittee||[], setEmailData, setEmailLoading)} disabled={emailLoading}>
                               {emailLoading ? '⏳ Searching...' : '📧 Find Emails'}
