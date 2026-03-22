@@ -1827,8 +1827,7 @@ export default function SalesIntelligenceAgent() {
       ['NOTE: This template works with ZoomInfo CSV column names.','','','','','','','','','',''],
       ['Also supported: Apollo Clay LinkedIn SN or any CSV with these columns.','','','','','','','','','',''],
     ];
-    const csvContent = [headers, ...rows].map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('
-');
+    const csvContent = [headers, ...rows].map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
