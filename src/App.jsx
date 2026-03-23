@@ -1723,6 +1723,130 @@ const CSS = `
 .import-source-badge:hover {
   background: rgba(255,255,255,0.09);
 }
+
+/* ── IMPORT ZONE ─────────────────────────────────── */
+.import-zone {
+  border: 1.5px dashed rgba(245,158,11,0.25);
+  border-radius: 16px;
+  background: rgba(245,158,11,0.03);
+  padding: 32px 28px 24px;
+  margin: 24px 0 0;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: default;
+}
+.import-zone-drag {
+  border-color: rgba(245,158,11,0.6);
+  background: rgba(245,158,11,0.06);
+}
+.import-zone-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  display: block;
+}
+.import-zone-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.import-zone-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto 20px;
+}
+.import-actions-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.import-zone-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.import-zone-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+}
+.import-template-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--amber);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.import-template-btn:hover {
+  background: rgba(245,158,11,0.18);
+  border-color: rgba(245,158,11,0.5);
+}
+.import-col-guide {
+  margin-top: 16px;
+  text-align: left;
+  width: 100%;
+}
+.import-col-guide summary {
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-align: center;
+  padding: 4px 0;
+  list-style: none;
+}
+.import-col-guide summary::-webkit-details-marker { display: none; }
+.import-col-guide summary::before { content: "▶ "; font-size: 10px; }
+.import-col-guide[open] summary::before { content: "▼ "; }
+.import-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.import-col-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.import-col-name {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+}
+.req-required { font-size: 10px; font-weight: 700; color: var(--amber); }
+.req-recommended { font-size: 10px; font-weight: 600; color: var(--blue-light); }
+.req-optional { font-size: 10px; color: var(--text-dim); }
+
+/* light mode overrides */
+.light-mode .import-zone { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.02); }
+.light-mode .import-zone-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+.light-mode .import-col-grid { background: rgba(0,0,0,0.02); }
 `
 
 // ─── SMALL HELPERS ────────────────────────────────────────────────────────────
