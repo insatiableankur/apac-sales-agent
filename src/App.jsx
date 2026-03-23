@@ -2402,17 +2402,30 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </div>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>{h.date}</div>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      if(window.confirm('Remove ' + h.company + ' from history?')) {
-                        const updated = dealHistory.filter(x => x.id !== h.id);
-                        setDealHistory(updated);
-                        try { localStorage.setItem("apac_deal_history", JSON.stringify(updated)); } catch(err) {}
-                      }
-                    }}
-                    style={{ background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:5, padding:"3px 8px", color:"#EF4444", fontSize:10, cursor:"pointer", fontWeight:700 }}
-                  >✕ Remove</button>
+                  <div style={{ display:"flex", gap:6 }}>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        setForm(h.form);
+                        setShowHistory(false);
+                        setStep(1);
+                        setFormPreFilled(true);
+                        setPreFilledCompany(h.company);
+                      }}
+                      style={{ background:"rgba(96,165,250,0.08)", border:"1px solid rgba(96,165,250,0.2)", borderRadius:5, padding:"3px 8px", color:"var(--blue-light)", fontSize:10, cursor:"pointer", fontWeight:700 }}
+                    >✎ Edit</button>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        if(window.confirm('Remove ' + h.company + ' from history?')) {
+                          const updated = dealHistory.filter(x => x.id !== h.id);
+                          setDealHistory(updated);
+                          try { localStorage.setItem("apac_deal_history", JSON.stringify(updated)); } catch(err) {}
+                        }
+                      }}
+                      style={{ background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:5, padding:"3px 8px", color:"#EF4444", fontSize:10, cursor:"pointer", fontWeight:700 }}
+                    >✕ Remove</button>
+                  </div>
                 </div>
               </div>
             );
