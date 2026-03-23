@@ -1059,7 +1059,7 @@ const CSS = `
     -webkit-backdrop-filter: blur(20px) saturate(180%);
   }
   .header-inner {
-    max-width: 1100px; margin: 0 auto;
+    max-width: 1440px; margin: 0 auto; padding: 0 8px;
     display: flex; align-items: center; justify-content: space-between;
     height: 60px;
   }
@@ -1091,7 +1091,7 @@ const CSS = `
   }
 
   /* ─── MAIN LAYOUT ─────────────────────────────────────────────── */
-  .main { max-width: 900px; margin: 0 auto; padding: 48px 24px 100px; }
+  .main { max-width: 1440px; margin: 0 auto; padding: 48px 32px 100px; }
 
   /* ─── STEPS ───────────────────────────────────────────────────── */
   .steps { display: flex; align-items: center; gap: 0; margin-bottom: 48px; }
@@ -1558,7 +1558,7 @@ const CSS = `
 
   /* ─── RESPONSIVE BREAKPOINTS ─────────────────────────────────────── */
   @media (max-width: 768px) {
-    .main { padding: 24px 16px 80px; }
+    .main { padding: 24px 16px 80px; max-width: 100%; }
     .header { padding: 0 16px; }
     .header-inner { height: 56px; }
     .logo-text { font-size: 13px; }
