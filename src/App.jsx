@@ -1699,6 +1699,30 @@ const CSS = `
   .light-mode .email-header { background: #F8FAFC; }
   .light-mode .com-before { background: rgba(239,68,68,0.05); }
   .light-mode .com-after { background: rgba(16,185,129,0.05); }
+.import-source-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px 0 4px;
+}
+.import-source-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+  background: rgba(255,255,255,0.04);
+  cursor: default;
+  transition: background 0.15s;
+}
+.import-source-badge:hover {
+  background: rgba(255,255,255,0.09);
+}
 `
 
 // ─── SMALL HELPERS ────────────────────────────────────────────────────────────
@@ -2308,6 +2332,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                         </button>
                       </div>
 
+                      <div style={{ fontSize:11, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:"0.08em", marginTop:14, marginBottom:2, textAlign:"center" }}>Works with</div>
                       <div className="import-source-row">
                         {[
                           { label:'ZoomInfo', color:'#0077B5' },
