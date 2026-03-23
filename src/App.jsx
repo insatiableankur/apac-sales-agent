@@ -2176,17 +2176,15 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 <div className="logo-sub">ANKUR SEHGAL · 7X PRESIDENT'S CLUB</div>
             </div>
             <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-              <button onClick={() => setDarkMode(!darkMode)} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"6px 12px", color:"var(--text-muted)", fontSize:14, cursor:"pointer" }}>
-                {darkMode ? "☀️" : "🌙"}
-              </button>
               {dealHistory.length > 0 && (
                 <button onClick={() => setShowHistory(!showHistory)} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.3)", borderRadius:8, padding:"6px 14px", color:"var(--amber)", fontSize:12, fontWeight:700, cursor:"pointer", letterSpacing:1 }}>
                   📋 HISTORY ({dealHistory.length})
                 </button>
               )}
+              <button onClick={() => setDarkMode(!darkMode)} title={darkMode ? "Light Mode" : "Dark Mode"} style={{ background:"transparent", border:"1px solid var(--border)", borderRadius:8, padding:"6px 12px", color:"var(--text-muted)", fontSize:14, cursor:"pointer" }}>
+                {darkMode ? "☀️" : "🌙"}
+              </button>
             </div>
-            <div style={{ display:"none" }}>
-              </div>
             </div>
             <div className="header-badge">POWERED BY CLAUDE AI</div>
           </div>
@@ -2249,7 +2247,20 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                   <span style={{ fontSize:11, background:"rgba(26,86,219,0.1)", color:"var(--blue-light)", borderRadius:4, padding:"2px 8px" }}>{h.dealPotential}</span>
                   <span style={{ fontSize:11, color:"var(--text-muted)", borderRadius:4, padding:"2px 8px", border:"1px solid var(--border)" }}>{h.dealStage?.split(" — ")[0]}</span>
                 </div>
-                <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:8 }}>{h.date}</div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
+                  <div style={{ fontSize:11, color:"var(--text-muted)" }}>{h.date}</div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      if(window.confirm('Remove ' + h.company + ' from history?')) {
+                        const updated = dealHistory.filter(x => x.id !== h.id);
+                        setDealHistory(updated);
+                        try { localStorage.setItem("apac_deal_history", JSON.stringify(updated)); } catch(err) {}
+                      }
+                    }}
+                    style={{ background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:5, padding:"3px 8px", color:"#EF4444", fontSize:10, cursor:"pointer", fontWeight:700 }}
+                  >✕ Remove</button>
+                </div>
               </div>
             );
           })}
@@ -3242,7 +3253,76 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </div>
               ) : null}
 
-              {/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
+              
+
+                  {/* Email Reply Analyser */}
+                  <div className="inline-section">
+                    <div className="section-header" style={{ color:'var(--blue-light)' }}>📨 Email Reply Analyser</div>
+                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Paste a prospect's reply and instantly decode what they really mean, their hidden objections and the perfect response to send.</p>
+                    <textarea
+                      placeholder="Paste the prospect email reply here"
+                      value={emailReplyInput}
+                      onChange={e => setEmailReplyInput(e.target.value)}
+                      style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:100, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if(!emailReplyInput.trim()) return;
+                        setEmailReplyLoading(true); setEmailReplyAnalysis(null);
+                        try {
+                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
+                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, stream:true,
+                              system:`You are an expert at reading between the lines of prospect emails. Return ONLY valid JSON: {"overallSentiment":"positive|neutral|negative|stalling|ghosting","buyingSignals":["Signal 1"],"hiddenObjections":["Hidden concern 1","Hidden concern 2"],"whatTheyWant":"What they are really asking for or signalling","urgencyLevel":"high|medium|low|none","riskLevel":"low|medium|high","recommendedAction":"Exactly what to do next","perfectReply":{"subject":"Reply subject line","body":"Complete reply email under 100 words — natural, moves deal forward"},"thingsToAvoid":["Do not say this in your reply"]}`,
+                              messages:[{role:"user",content:`Prospect email: "${emailReplyInput}". Context: Selling ${form.product} to ${form.company} (${form.industry}). Deal stage: ${form.dealStage}.`}]
+                            })
+                          });
+                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
+                          while(true) { const {done,value} = await reader.read(); if(done) break;
+                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
+                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setEmailReplyAnalysis(JSON.parse(raw.slice(s,e+1)));
+                        } catch(e) { alert("Failed. Try again."); }
+                        setEmailReplyLoading(false);
+                      }}
+                      disabled={emailReplyLoading||!emailReplyInput.trim()}
+                      className="btn-amber"
+                      style={{ fontSize:12, padding:'10px 22px', marginBottom: emailReplyAnalysis ? 16 : 0 }}
+                    >
+                      {emailReplyLoading ? 'ANALYSING...' : '📨 ANALYSE REPLY'}
+                    </button>
+                    {emailReplyAnalysis && (
+                      <div className="anim-scale-in">
+                        <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+                          <span className={`tag ${emailReplyAnalysis.overallSentiment==='positive'?'tag-green':emailReplyAnalysis.overallSentiment==='negative'||emailReplyAnalysis.overallSentiment==='ghosting'?'tag-red':'tag-amber'}`}>{emailReplyAnalysis.overallSentiment?.toUpperCase()}</span>
+                          <span className={`tag ${emailReplyAnalysis.riskLevel==='high'?'tag-red':emailReplyAnalysis.riskLevel==='medium'?'tag-amber':'tag-green'}`}>{emailReplyAnalysis.riskLevel?.toUpperCase()} RISK</span>
+                          <span className={`tag ${emailReplyAnalysis.urgencyLevel==='high'?'tag-green':'tag-dim'}`}>{emailReplyAnalysis.urgencyLevel?.toUpperCase()} URGENCY</span>
+                        </div>
+                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WHAT THEY REALLY WANT</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.whatTheyWant}</p>
+                        </div>
+                        {emailReplyAnalysis.hiddenObjections?.length > 0 && (
+                          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:14, marginBottom:12 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>HIDDEN OBJECTIONS</div>
+                            {emailReplyAnalysis.hiddenObjections.map((o,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>⚠ {o}</div>)}
+                          </div>
+                        )}
+                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderRadius:10, padding:14, marginBottom:12 }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>RECOMMENDED ACTION</div>
+                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.recommendedAction}</p>
+                        </div>
+                        {emailReplyAnalysis.perfectReply && (
+                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:16, marginBottom:10 }}>
+                            <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>PERFECT REPLY</div>
+                            <div style={{ fontSize:11, fontWeight:700, color:'var(--text-dim)', marginBottom:4 }}>Subject: {emailReplyAnalysis.perfectReply.subject}</div>
+                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, marginBottom:10, whiteSpace:'pre-line' }}>{emailReplyAnalysis.perfectReply.body}</p>
+                            <button className="copy-btn" onClick={() => navigator.clipboard.writeText('Subject: ' + emailReplyAnalysis.perfectReply.subject + '\n\n' + emailReplyAnalysis.perfectReply.body)}>COPY REPLY</button>
+                          </div>
+                        )}
+                        <button onClick={() => { setEmailReplyAnalysis(null); setEmailReplyInput(""); }} className="btn-ghost" style={{ marginTop:8, fontSize:11 }}>Analyse Another</button>
+                      </div>
+                    )}
+                  </div>
+{/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
               {activeTab === "playbook" && (
                 <div className="anim-slide-up">
                   {/* Discovery Questions */}
@@ -3467,73 +3547,6 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 
               {/* ═══ TAB: BUSINESS CASE ════════════════════════════════════ */}
 
-                  {/* Email Reply Analyser */}
-                  <div className="inline-section">
-                    <div className="section-header" style={{ color:'var(--blue-light)' }}>📨 Email Reply Analyser</div>
-                    <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Paste a prospect's reply and instantly decode what they really mean, their hidden objections and the perfect response to send.</p>
-                    <textarea
-                      placeholder="Paste the prospect email reply here"
-                      value={emailReplyInput}
-                      onChange={e => setEmailReplyInput(e.target.value)}
-                      style={{ width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', color:'var(--text)', fontSize:13, outline:'none', minHeight:100, resize:'vertical', lineHeight:1.6, marginBottom:10, boxSizing:'border-box' }}
-                    />
-                    <button
-                      onClick={async () => {
-                        if(!emailReplyInput.trim()) return;
-                        setEmailReplyLoading(true); setEmailReplyAnalysis(null);
-                        try {
-                          const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
-                            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, stream:true,
-                              system:`You are an expert at reading between the lines of prospect emails. Return ONLY valid JSON: {"overallSentiment":"positive|neutral|negative|stalling|ghosting","buyingSignals":["Signal 1"],"hiddenObjections":["Hidden concern 1","Hidden concern 2"],"whatTheyWant":"What they are really asking for or signalling","urgencyLevel":"high|medium|low|none","riskLevel":"low|medium|high","recommendedAction":"Exactly what to do next","perfectReply":{"subject":"Reply subject line","body":"Complete reply email under 100 words — natural, moves deal forward"},"thingsToAvoid":["Do not say this in your reply"]}`,
-                              messages:[{role:"user",content:`Prospect email: "${emailReplyInput}". Context: Selling ${form.product} to ${form.company} (${form.industry}). Deal stage: ${form.dealStage}.`}]
-                            })
-                          });
-                          const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
-                          while(true) { const {done,value} = await reader.read(); if(done) break;
-                            for(const line of decoder.decode(value,{stream:true}).split("\n")) { if(line.startsWith("data: ")) { try { const evt=JSON.parse(line.slice(6)); if(evt.type==="content_block_delta"&&evt.delta?.type==="text_delta") raw+=evt.delta.text; } catch(e){} } } }
-                          const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setEmailReplyAnalysis(JSON.parse(raw.slice(s,e+1)));
-                        } catch(e) { alert("Failed. Try again."); }
-                        setEmailReplyLoading(false);
-                      }}
-                      disabled={emailReplyLoading||!emailReplyInput.trim()}
-                      className="btn-amber"
-                      style={{ fontSize:12, padding:'10px 22px', marginBottom: emailReplyAnalysis ? 16 : 0 }}
-                    >
-                      {emailReplyLoading ? 'ANALYSING...' : '📨 ANALYSE REPLY'}
-                    </button>
-                    {emailReplyAnalysis && (
-                      <div className="anim-scale-in">
-                        <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
-                          <span className={`tag ${emailReplyAnalysis.overallSentiment==='positive'?'tag-green':emailReplyAnalysis.overallSentiment==='negative'||emailReplyAnalysis.overallSentiment==='ghosting'?'tag-red':'tag-amber'}`}>{emailReplyAnalysis.overallSentiment?.toUpperCase()}</span>
-                          <span className={`tag ${emailReplyAnalysis.riskLevel==='high'?'tag-red':emailReplyAnalysis.riskLevel==='medium'?'tag-amber':'tag-green'}`}>{emailReplyAnalysis.riskLevel?.toUpperCase()} RISK</span>
-                          <span className={`tag ${emailReplyAnalysis.urgencyLevel==='high'?'tag-green':'tag-dim'}`}>{emailReplyAnalysis.urgencyLevel?.toUpperCase()} URGENCY</span>
-                        </div>
-                        <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:14, marginBottom:12 }}>
-                          <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>WHAT THEY REALLY WANT</div>
-                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.whatTheyWant}</p>
-                        </div>
-                        {emailReplyAnalysis.hiddenObjections?.length > 0 && (
-                          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:14, marginBottom:12 }}>
-                            <div style={{ fontSize:8, fontWeight:700, color:'var(--red)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>HIDDEN OBJECTIONS</div>
-                            {emailReplyAnalysis.hiddenObjections.map((o,i) => <div key={i} style={{ fontSize:12, color:'var(--text-muted)', marginBottom:3 }}>⚠ {o}</div>)}
-                          </div>
-                        )}
-                        <div style={{ background:'rgba(29,78,216,0.08)', border:'1px solid rgba(96,165,250,0.2)', borderRadius:10, padding:14, marginBottom:12 }}>
-                          <div style={{ fontSize:8, fontWeight:700, color:'var(--blue-light)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>RECOMMENDED ACTION</div>
-                          <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6 }}>{emailReplyAnalysis.recommendedAction}</p>
-                        </div>
-                        {emailReplyAnalysis.perfectReply && (
-                          <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:16, marginBottom:10 }}>
-                            <div style={{ fontSize:8, fontWeight:700, color:'var(--green)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>PERFECT REPLY</div>
-                            <div style={{ fontSize:11, fontWeight:700, color:'var(--text-dim)', marginBottom:4 }}>Subject: {emailReplyAnalysis.perfectReply.subject}</div>
-                            <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, marginBottom:10, whiteSpace:'pre-line' }}>{emailReplyAnalysis.perfectReply.body}</p>
-                            <button className="copy-btn" onClick={() => navigator.clipboard.writeText('Subject: ' + emailReplyAnalysis.perfectReply.subject + '\n\n' + emailReplyAnalysis.perfectReply.body)}>COPY REPLY</button>
-                          </div>
-                        )}
-                        <button onClick={() => { setEmailReplyAnalysis(null); setEmailReplyInput(""); }} className="btn-ghost" style={{ marginTop:8, fontSize:11 }}>Analyse Another</button>
-                      </div>
-                    )}
-                  </div>
               {activeTab === "bizcase" && (
                 <div className="anim-slide-up">
                   {/* POV Builder */}
