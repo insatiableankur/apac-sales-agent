@@ -3260,7 +3260,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 
               
 
-                  {/* Email Reply Analyser */}
+              {activeTab === "outreach" && (
                   <div className="inline-section">
                     <div className="section-header" style={{ color:'var(--blue-light)' }}>📨 Email Reply Analyser</div>
                     <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Paste a prospect's reply and instantly decode what they really mean, their hidden objections and the perfect response to send.</p>
@@ -3327,6 +3327,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                       </div>
                     )}
                   </div>
+              )}
 {/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
               {activeTab === "playbook" && (
                 <div className="anim-slide-up">
