@@ -1,3 +1,4 @@
+import Landing from "./Landing";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -1754,6 +1755,7 @@ export default function SalesIntelligenceAgent() {
   const [emailLoading, setEmailLoading] = useState(false);
   const [orgChart, setOrgChart] = useState(null);
   const [orgLoading, setOrgLoading] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [roiResult, setRoiResult] = useState(null);
   const [roiResearch, setRoiResearch] = useState(null);
@@ -2162,6 +2164,9 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
   };
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
+  if (showLanding) {
+    return <Landing onStart={() => setShowLanding(false)} darkMode={darkMode} />;
+  }
   return (
     <>
       <style>{CSS}</style>

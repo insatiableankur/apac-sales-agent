@@ -1,0 +1,1085 @@
+import { useState, useEffect, useRef } from "react";
+
+/* ─────────────────────────────────────────
+   LANDING PAGE — Sales Intelligence Agent
+   Matches App.jsx design system exactly:
+   Syne / JetBrains Mono / Inter
+   --navy #050C18 / --amber #F59E0B
+   --blue-light #60A5FA / --green #10B981
+───────────────────────────────────────── */
+
+// Animated counter hook
+function useCounter(target, duration = 1800, start = false) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime = null;
+    const step = (ts) => {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setVal(Math.floor(ease * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration, start]);
+  return val;
+}
+
+// Intersection observer hook
+function useInView(threshold = 0.2) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+      { threshold }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView];
+}
+
+// ── Stat ticker
+function StatTicker({ value, suffix = "", label, start }) {
+  const count = useCounter(value, 1600, start);
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div style={{
+        fontFamily: "'Syne', sans-serif",
+        fontWeight: 900,
+        fontSize: "clamp(2rem, 4vw, 3rem)",
+        color: "var(--amber)",
+        lineHeight: 1,
+        letterSpacing: "-0.02em",
+      }}>
+        {count}{suffix}
+      </div>
+      <div style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "0.7rem",
+        color: "rgba(255,255,255,0.45)",
+        textTransform: "uppercase",
+        letterSpacing: "0.12em",
+        marginTop: "0.4rem",
+      }}>{label}</div>
+    </div>
+  );
+}
+
+// ── Animated deal score card (hero)
+function HeroDealScore() {
+  const [score, setScore] = useState(0);
+  const [active, setActive] = useState(false);
+  const [filled, setFilled] = useState([]);
+
+  const meddpicc = ["Metrics", "Economic Buyer", "Decision Criteria", "Decision Process", "Identify Pain", "Champion", "Competition"];
+  const scores = [85, 70, 90, 65, 95, 80, 55];
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setActive(true);
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < meddpicc.length) {
+          setFilled(prev => [...prev, i]);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 220);
+    }, 600);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!active) return;
+    let target = 78;
+    let current = 0;
+    const step = () => {
+      current += 1.4;
+      if (current >= target) { setScore(target); return; }
+      setScore(Math.floor(current));
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [active]);
+
+  const scoreColor = score >= 70 ? "#10B981" : score >= 40 ? "#F59E0B" : "#EF4444";
+
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(245,158,11,0.2)",
+      borderRadius: "16px",
+      padding: "1.5rem",
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: "0.75rem",
+      position: "relative",
+      overflow: "hidden",
+      backdropFilter: "blur(12px)",
+      minWidth: "280px",
+      maxWidth: "340px",
+      width: "100%",
+    }}>
+      {/* Scan line animation */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0,
+        height: "2px",
+        background: "linear-gradient(90deg, transparent, rgba(245,158,11,0.6), transparent)",
+        animation: "scanline 2.5s ease-in-out infinite",
+      }} />
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <span style={{ color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: "0.65rem" }}>
+          DEAL SCORE
+        </span>
+        <span style={{ color: "rgba(245,158,11,0.6)", fontSize: "0.65rem" }}>● LIVE</span>
+      </div>
+
+      {/* Big score */}
+      <div style={{
+        fontSize: "clamp(3rem, 8vw, 4.5rem)",
+        fontFamily: "'Syne', sans-serif",
+        fontWeight: 900,
+        color: scoreColor,
+        lineHeight: 1,
+        marginBottom: "0.25rem",
+        transition: "color 0.3s",
+        letterSpacing: "-0.04em",
+      }}>{score}</div>
+      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", marginBottom: "1.25rem" }}>
+        / 100 — {score >= 70 ? "STRONG PIPELINE" : score >= 40 ? "NEEDS WORK" : "AT RISK"}
+      </div>
+
+      {/* MEDDPICC rows */}
+      {meddpicc.map((item, i) => (
+        <div key={item} style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          marginBottom: "0.4rem",
+          opacity: filled.includes(i) ? 1 : 0.2,
+          transition: "opacity 0.3s",
+        }}>
+          <div style={{
+            width: "6px", height: "6px", borderRadius: "50%",
+            background: filled.includes(i) ? scoreColor : "rgba(255,255,255,0.2)",
+            flexShrink: 0,
+          }} />
+          <span style={{ color: "rgba(255,255,255,0.5)", width: "120px", fontSize: "0.68rem" }}>{item}</span>
+          <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.08)", borderRadius: "2px", overflow: "hidden" }}>
+            {filled.includes(i) && (
+              <div style={{
+                height: "100%",
+                width: `${scores[i]}%`,
+                background: `linear-gradient(90deg, ${scoreColor}80, ${scoreColor})`,
+                borderRadius: "2px",
+                animation: "barFill 0.6s ease-out",
+              }} />
+            )}
+          </div>
+          {filled.includes(i) && (
+            <span style={{ color: scoreColor, fontSize: "0.65rem", width: "28px", textAlign: "right" }}>{scores[i]}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Feature card
+function FeatureCard({ icon, title, desc, delay = 0 }) {
+  const [ref, inView] = useInView(0.1);
+  return (
+    <div ref={ref} style={{
+      background: "rgba(255,255,255,0.025)",
+      border: "1px solid rgba(255,255,255,0.07)",
+      borderRadius: "12px",
+      padding: "1.5rem",
+      transition: `opacity 0.5s ${delay}ms, transform 0.5s ${delay}ms`,
+      opacity: inView ? 1 : 0,
+      transform: inView ? "translateY(0)" : "translateY(24px)",
+      cursor: "default",
+    }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)";
+        e.currentTarget.style.background = "rgba(245,158,11,0.04)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+        e.currentTarget.style.background = "rgba(255,255,255,0.025)";
+      }}
+    >
+      <div style={{ fontSize: "1.5rem", marginBottom: "0.75rem" }}>{icon}</div>
+      <div style={{
+        fontFamily: "'Syne', sans-serif",
+        fontWeight: 700,
+        fontSize: "0.95rem",
+        color: "#fff",
+        marginBottom: "0.5rem",
+        letterSpacing: "-0.01em",
+      }}>{title}</div>
+      <div style={{
+        fontFamily: "'Inter', sans-serif",
+        fontSize: "0.82rem",
+        color: "rgba(255,255,255,0.45)",
+        lineHeight: 1.6,
+      }}>{desc}</div>
+    </div>
+  );
+}
+
+// ── Step card
+function StepCard({ num, title, desc, delay = 0 }) {
+  const [ref, inView] = useInView(0.1);
+  return (
+    <div ref={ref} style={{
+      display: "flex",
+      gap: "1.25rem",
+      alignItems: "flex-start",
+      transition: `opacity 0.6s ${delay}ms, transform 0.6s ${delay}ms`,
+      opacity: inView ? 1 : 0,
+      transform: inView ? "translateX(0)" : "translateX(-20px)",
+    }}>
+      <div style={{
+        width: "40px",
+        height: "40px",
+        borderRadius: "10px",
+        background: "rgba(245,158,11,0.1)",
+        border: "1px solid rgba(245,158,11,0.3)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Syne', sans-serif",
+        fontWeight: 900,
+        fontSize: "1rem",
+        color: "var(--amber)",
+        flexShrink: 0,
+      }}>{num}</div>
+      <div>
+        <div style={{
+          fontFamily: "'Syne', sans-serif",
+          fontWeight: 700,
+          fontSize: "1rem",
+          color: "#fff",
+          marginBottom: "0.35rem",
+          letterSpacing: "-0.01em",
+        }}>{title}</div>
+        <div style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: "0.85rem",
+          color: "rgba(255,255,255,0.45)",
+          lineHeight: 1.65,
+        }}>{desc}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Testimonial
+function Testimonial({ quote, name, title, company }) {
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.025)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: "12px",
+      padding: "1.5rem",
+    }}>
+      <div style={{
+        fontFamily: "'Inter', sans-serif",
+        fontSize: "0.88rem",
+        color: "rgba(255,255,255,0.65)",
+        lineHeight: 1.7,
+        marginBottom: "1.1rem",
+        fontStyle: "italic",
+      }}>"{quote}"</div>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{
+          width: "36px", height: "36px",
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, rgba(245,158,11,0.3), rgba(96,165,250,0.3))",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "'Syne', sans-serif",
+          fontWeight: 900, fontSize: "0.9rem", color: "#fff",
+        }}>{name[0]}</div>
+        <div>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "0.82rem", color: "#fff" }}>{name}</div>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "0.68rem", color: "rgba(255,255,255,0.35)", marginTop: "2px" }}>{title} · {company}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────
+// MAIN LANDING COMPONENT
+// ────────────────────────────────────────
+export default function Landing({ onStart, darkMode = true }) {
+  const [statsRef, statsInView] = useInView(0.3);
+  const [heroVisible, setHeroVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHeroVisible(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  const features = [
+    { icon: "🎯", title: "Deal Intel + MEDDPICC", desc: "Instant account brief, MEDDPICC gap analysis, and a 0–100 deal score built on Forrester-grade methodology.", delay: 0 },
+    { icon: "👥", title: "Stakeholder Intelligence", desc: "Auto-map buying committee, build your Champion playbook, and find email contacts — all from one input.", delay: 80 },
+    { icon: "📣", title: "Outreach in 11 Languages", desc: "Multi-touch email sequences, LinkedIn variants, and AI-powered reply analysis. Localised for every region.", delay: 160 },
+    { icon: "🔍", title: "Playbook + Battle Cards", desc: "Discovery questions, custom CoM, objection simulator, and live competitive intelligence matrix.", delay: 0 },
+    { icon: "💼", title: "Business Case Builder", desc: "POV, ROI (Forrester research), exec briefs, mutual success plans, and a full negotiation playbook.", delay: 80 },
+    { icon: "🤖", title: "AI Deal Coach", desc: "Real-time chat coaching and transcript analysis. Ask anything about your deal and get elite-level guidance.", delay: 160 },
+  ];
+
+  const steps = [
+    { num: "01", title: "Enter your account details", desc: "Paste a company name and context, or import directly from ZoomInfo, Apollo, Clay, LinkedIn Sales Navigator, or HubSpot CSV — in seconds." },
+    { num: "02", title: "Run AI Intelligence", desc: "Four parallel AI streams analyse your deal across MEDDPICC, stakeholders, competitive landscape, and business drivers simultaneously." },
+    { num: "03", title: "Prepare, engage, and close", desc: "Get a 0–100 deal score, tailored outreach, battle cards, a business case, and live coaching — everything in one place." },
+  ];
+
+  const testimonials = [
+    { quote: "I used to spend 3 hours prepping for an exec meeting. Now it's 15 minutes and I walk in sharper than I ever have.", name: "Sarah K.", title: "Enterprise AE", company: "Series B SaaS" },
+    { quote: "The MEDDPICC scoring alone changed how I forecast. My manager stopped questioning my pipeline — it speaks for itself.", name: "Marcus T.", title: "Sr. Account Executive", company: "Fintech Scale-up" },
+    { quote: "The competitive battle cards are terrifying — in the best way. I know exactly what to say before they even bring up a competitor.", name: "Priya R.", title: "Regional Sales Director", company: "Enterprise Software" },
+  ];
+
+  // ── Shared styles
+  const s = {
+    amber: "var(--amber, #F59E0B)",
+    navy: "var(--navy, #050C18)",
+    syne: "'Syne', sans-serif",
+    mono: "'JetBrains Mono', monospace",
+    inter: "'Inter', sans-serif",
+  };
+
+  const ctaBtn = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.6rem",
+    background: "linear-gradient(135deg, #F59E0B, #D97706)",
+    color: "#000",
+    border: "none",
+    borderRadius: "10px",
+    padding: "0.9rem 2rem",
+    fontFamily: s.syne,
+    fontWeight: 800,
+    fontSize: "0.95rem",
+    letterSpacing: "-0.01em",
+    cursor: "pointer",
+    transition: "transform 0.15s, box-shadow 0.15s",
+    boxShadow: "0 4px 24px rgba(245,158,11,0.35)",
+  };
+
+  return (
+    <div style={{
+      background: s.navy,
+      color: "#fff",
+      minHeight: "100vh",
+      fontFamily: s.inter,
+      overflowX: "hidden",
+    }}>
+      {/* ── Injected CSS ── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+        :root { --amber: #F59E0B; --navy: #050C18; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @keyframes scanline {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes barFill {
+          from { width: 0; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes pulse-ring {
+          0% { transform: scale(1); opacity: 0.4; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(32px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes gridMove {
+          from { background-position: 0 0; }
+          to { background-position: 40px 40px; }
+        }
+
+        .cta-btn:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 32px rgba(245,158,11,0.45) !important;
+        }
+        .cta-btn:active { transform: translateY(0) !important; }
+
+        .cta-ghost:hover {
+          background: rgba(255,255,255,0.08) !important;
+          border-color: rgba(255,255,255,0.25) !important;
+        }
+
+        .nav-link:hover { color: rgba(245,158,11,0.9) !important; }
+
+        @media (max-width: 768px) {
+          .hero-grid { flex-direction: column !important; align-items: center !important; }
+          .hero-text { text-align: center !important; max-width: 100% !important; }
+          .features-grid { grid-template-columns: 1fr !important; }
+          .steps-pricing-grid { grid-template-columns: 1fr !important; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1.5rem !important; }
+          .testimonials-grid { grid-template-columns: 1fr !important; }
+          .footer-grid { flex-direction: column !important; gap: 1rem !important; text-align: center !important; }
+        }
+        @media (max-width: 480px) {
+          .hero-score-card { display: none !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
+
+      {/* ──────────── NAV ──────────── */}
+      <nav style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "1rem 2rem",
+        background: "rgba(5,12,24,0.85)",
+        backdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        maxWidth: "100%",
+      }}>
+        <div style={{
+          fontFamily: s.syne,
+          fontWeight: 900,
+          fontSize: "1.05rem",
+          letterSpacing: "-0.02em",
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}>
+          <span style={{
+            background: "linear-gradient(135deg, #F59E0B, #D97706)",
+            borderRadius: "6px",
+            padding: "2px 7px",
+            color: "#000",
+            fontSize: "0.75rem",
+            fontWeight: 900,
+            letterSpacing: "0.05em",
+          }}>SIA</span>
+          Sales Intelligence Agent
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+          <a href="#features" className="nav-link" style={{
+            fontFamily: s.mono,
+            fontSize: "0.72rem",
+            color: "rgba(255,255,255,0.45)",
+            textDecoration: "none",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            transition: "color 0.2s",
+          }}>Features</a>
+          <a href="#how-it-works" className="nav-link" style={{
+            fontFamily: s.mono,
+            fontSize: "0.72rem",
+            color: "rgba(255,255,255,0.45)",
+            textDecoration: "none",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            transition: "color 0.2s",
+          }}>How it works</a>
+          <a href="#pricing" className="nav-link" style={{
+            fontFamily: s.mono,
+            fontSize: "0.72rem",
+            color: "rgba(255,255,255,0.45)",
+            textDecoration: "none",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            transition: "color 0.2s",
+          }}>Pricing</a>
+          <button
+            className="cta-btn"
+            onClick={onStart}
+            style={{
+              ...ctaBtn,
+              padding: "0.55rem 1.2rem",
+              fontSize: "0.8rem",
+            }}
+          >
+            Start Free →
+          </button>
+        </div>
+      </nav>
+
+      {/* ──────────── HERO ──────────── */}
+      <section style={{
+        position: "relative",
+        padding: "5rem 2rem 4rem",
+        maxWidth: "1200px",
+        margin: "0 auto",
+        overflow: "hidden",
+      }}>
+        {/* Grid background */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(245,158,11,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(245,158,11,0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px",
+          animation: "gridMove 8s linear infinite",
+          opacity: 0.6,
+          pointerEvents: "none",
+        }} />
+
+        {/* Glow orbs */}
+        <div style={{
+          position: "absolute",
+          top: "-60px",
+          left: "20%",
+          width: "400px",
+          height: "400px",
+          background: "radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute",
+          top: "20%",
+          right: "-5%",
+          width: "300px",
+          height: "300px",
+          background: "radial-gradient(circle, rgba(96,165,250,0.05) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+
+        <div className="hero-grid" style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "4rem",
+          position: "relative",
+          zIndex: 1,
+        }}>
+          {/* Left text */}
+          <div className="hero-text" style={{
+            flex: 1,
+            maxWidth: "600px",
+            opacity: heroVisible ? 1 : 0,
+            transform: heroVisible ? "translateY(0)" : "translateY(32px)",
+            transition: "opacity 0.7s, transform 0.7s",
+          }}>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              background: "rgba(245,158,11,0.1)",
+              border: "1px solid rgba(245,158,11,0.25)",
+              borderRadius: "100px",
+              padding: "0.3rem 0.9rem",
+              marginBottom: "1.5rem",
+              fontFamily: s.mono,
+              fontSize: "0.68rem",
+              color: "rgba(245,158,11,0.9)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            }}>
+              <span style={{
+                width: "6px", height: "6px",
+                borderRadius: "50%",
+                background: "#10B981",
+                display: "inline-block",
+                animation: "pulse-ring 1.5s ease-out infinite",
+              }} />
+              Built for MEDDPICC practitioners
+            </div>
+
+            <h1 style={{
+              fontFamily: s.syne,
+              fontWeight: 900,
+              fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.03em",
+              marginBottom: "1.25rem",
+              color: "#fff",
+            }}>
+              Every elite rep's
+              <br />
+              <span style={{
+                background: "linear-gradient(135deg, #F59E0B 0%, #FCD34D 50%, #F59E0B 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>unfair advantage.</span>
+            </h1>
+
+            <p style={{
+              fontFamily: s.inter,
+              fontSize: "clamp(0.95rem, 2vw, 1.1rem)",
+              color: "rgba(255,255,255,0.55)",
+              lineHeight: 1.7,
+              marginBottom: "2rem",
+              maxWidth: "480px",
+            }}>
+              The AI sales intelligence platform built around MEDDPICC. No CRM needed. Everything you need to prepare, engage, and close enterprise deals — in minutes, not hours.
+            </p>
+
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "2rem" }}>
+              <button
+                className="cta-btn"
+                onClick={onStart}
+                style={ctaBtn}
+              >
+                Start Analysis Free →
+              </button>
+              <button
+                className="cta-ghost"
+                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  background: "transparent",
+                  color: "rgba(255,255,255,0.6)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "10px",
+                  padding: "0.9rem 1.5rem",
+                  fontFamily: s.syne,
+                  fontWeight: 700,
+                  fontSize: "0.88rem",
+                  cursor: "pointer",
+                  transition: "background 0.2s, border-color 0.2s",
+                }}
+              >
+                See how it works
+              </button>
+            </div>
+
+            <div style={{
+              display: "flex",
+              gap: "1.5rem",
+              flexWrap: "wrap",
+              alignItems: "center",
+              opacity: 0.55,
+            }}>
+              {["No credit card required", "Works instantly", "No CRM needed"].map((t) => (
+                <div key={t} style={{
+                  display: "flex", alignItems: "center", gap: "0.35rem",
+                  fontFamily: s.mono, fontSize: "0.68rem",
+                  color: "rgba(255,255,255,0.7)",
+                  letterSpacing: "0.04em",
+                }}>
+                  <span style={{ color: "#10B981", fontSize: "0.75rem" }}>✓</span> {t}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — Deal Score card */}
+          <div className="hero-score-card" style={{
+            flexShrink: 0,
+            opacity: heroVisible ? 1 : 0,
+            transform: heroVisible ? "translateY(0)" : "translateY(32px)",
+            transition: "opacity 0.7s 0.25s, transform 0.7s 0.25s",
+            animation: heroVisible ? "float 4s ease-in-out infinite 1.5s" : "none",
+          }}>
+            <HeroDealScore />
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────── STATS ──────────── */}
+      <section ref={statsRef} style={{
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        padding: "2.5rem 2rem",
+        background: "rgba(255,255,255,0.015)",
+      }}>
+        <div className="stats-grid" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "2rem",
+          maxWidth: "800px",
+          margin: "0 auto",
+        }}>
+          <StatTicker value={6} suffix="+" label="Modules" start={statsInView} />
+          <StatTicker value={11} label="Languages" start={statsInView} />
+          <StatTicker value={100} suffix="+" label="Deal signals" start={statsInView} />
+          <StatTicker value={89} suffix="%" label="Gross margin" start={statsInView} />
+        </div>
+      </section>
+
+      {/* ──────────── HOW IT WORKS ──────────── */}
+      <section id="how-it-works" style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
+        <div style={{ marginBottom: "3.5rem" }}>
+          <div style={{
+            fontFamily: s.mono,
+            fontSize: "0.68rem",
+            color: "rgba(245,158,11,0.7)",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            marginBottom: "0.75rem",
+          }}>// HOW IT WORKS</div>
+          <h2 style={{
+            fontFamily: s.syne,
+            fontWeight: 900,
+            fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+            letterSpacing: "-0.025em",
+            color: "#fff",
+            maxWidth: "480px",
+          }}>
+            From cold account to{" "}
+            <span style={{ color: s.amber }}>closed deal</span>.
+          </h2>
+        </div>
+
+        <div className="steps-pricing-grid" style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "4rem",
+          alignItems: "center",
+        }}>
+          {/* Steps */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            {steps.map((step, i) => (
+              <StepCard key={step.num} {...step} delay={i * 120} />
+            ))}
+          </div>
+
+          {/* Visual — flow diagram */}
+          <div style={{
+            background: "rgba(255,255,255,0.025)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "16px",
+            padding: "2rem",
+            fontFamily: s.mono,
+            fontSize: "0.72rem",
+          }}>
+            {[
+              { label: "INPUT", items: ["Company name + context", "ZoomInfo / Apollo CSV", "LinkedIn Sales Navigator", "HubSpot export"], color: "rgba(96,165,250,0.7)" },
+              { label: "AI PROCESSING", items: ["4 parallel AI streams", "MEDDPICC gap analysis", "Competitive intelligence", "Stakeholder mapping"], color: "rgba(245,158,11,0.7)" },
+              { label: "OUTPUT", items: ["Deal Score 0–100", "Email sequences (11 langs)", "Battle cards + playbook", "AI Deal Coach"], color: "rgba(16,185,129,0.7)" },
+            ].map((block, i) => (
+              <div key={block.label}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.6rem",
+                  marginTop: i > 0 ? "0.3rem" : 0,
+                }}>
+                  <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: block.color }} />
+                  <span style={{ color: block.color, letterSpacing: "0.1em", fontSize: "0.65rem" }}>{block.label}</span>
+                </div>
+                <div style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: `1px solid ${block.color}22`,
+                  borderRadius: "8px",
+                  padding: "0.75rem",
+                  marginBottom: "0.5rem",
+                }}>
+                  {block.items.map(item => (
+                    <div key={item} style={{
+                      color: "rgba(255,255,255,0.5)",
+                      padding: "0.2rem 0",
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    }}>→ {item}</div>
+                  ))}
+                </div>
+                {i < 2 && (
+                  <div style={{
+                    textAlign: "center",
+                    color: "rgba(255,255,255,0.15)",
+                    fontSize: "1.2rem",
+                    margin: "0.25rem 0",
+                  }}>↓</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────── FEATURES ──────────── */}
+      <section id="features" style={{
+        padding: "5rem 2rem",
+        background: "rgba(255,255,255,0.012)",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+      }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "3rem" }}>
+            <div style={{
+              fontFamily: s.mono,
+              fontSize: "0.68rem",
+              color: "rgba(245,158,11,0.7)",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              marginBottom: "0.75rem",
+            }}>// FEATURES</div>
+            <h2 style={{
+              fontFamily: s.syne,
+              fontWeight: 900,
+              fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+              letterSpacing: "-0.025em",
+              color: "#fff",
+            }}>
+              Six modules.{" "}
+              <span style={{ color: s.amber }}>One platform.</span>
+            </h2>
+          </div>
+
+          <div className="features-grid" style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "1rem",
+          }}>
+            {features.map((f) => (
+              <FeatureCard key={f.title} {...f} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────── TESTIMONIALS ──────────── */}
+      <section style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
+        <div style={{ marginBottom: "3rem" }}>
+          <div style={{
+            fontFamily: s.mono,
+            fontSize: "0.68rem",
+            color: "rgba(245,158,11,0.7)",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            marginBottom: "0.75rem",
+          }}>// WHAT REPS SAY</div>
+          <h2 style={{
+            fontFamily: s.syne,
+            fontWeight: 900,
+            fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+            letterSpacing: "-0.025em",
+            color: "#fff",
+          }}>
+            Built by a{" "}
+            <span style={{ color: s.amber }}>7x President's Club</span> rep.
+          </h2>
+        </div>
+        <div className="testimonials-grid" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "1rem",
+        }}>
+          {testimonials.map((t) => <Testimonial key={t.name} {...t} />)}
+        </div>
+      </section>
+
+      {/* ──────────── PRICING ──────────── */}
+      <section id="pricing" style={{
+        padding: "5rem 2rem",
+        background: "rgba(255,255,255,0.012)",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+      }}>
+        <div style={{ maxWidth: "480px", margin: "0 auto", textAlign: "center" }}>
+          <div style={{
+            fontFamily: s.mono,
+            fontSize: "0.68rem",
+            color: "rgba(245,158,11,0.7)",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            marginBottom: "0.75rem",
+          }}>// PRICING</div>
+          <h2 style={{
+            fontFamily: s.syne,
+            fontWeight: 900,
+            fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+            letterSpacing: "-0.025em",
+            color: "#fff",
+            marginBottom: "1rem",
+          }}>One price.<br />Everything included.</h2>
+          <p style={{
+            fontFamily: s.inter,
+            fontSize: "0.9rem",
+            color: "rgba(255,255,255,0.45)",
+            lineHeight: 1.7,
+            marginBottom: "2.5rem",
+          }}>
+            No per-seat tiers. No CRM required. No sales call.
+            Everything Gong/Clari charge $1,200+/user/year for —
+            built for the individual rep.
+          </p>
+
+          <div style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(245,158,11,0.25)",
+            borderRadius: "20px",
+            padding: "2.5rem",
+            marginBottom: "1.5rem",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0,
+              height: "3px",
+              background: "linear-gradient(90deg, #F59E0B, #FCD34D, #F59E0B)",
+            }} />
+
+            <div style={{
+              fontFamily: s.syne,
+              fontWeight: 900,
+              fontSize: "3.5rem",
+              color: "#fff",
+              letterSpacing: "-0.04em",
+              lineHeight: 1,
+            }}>
+              $99
+              <span style={{
+                fontFamily: s.inter,
+                fontWeight: 400,
+                fontSize: "1rem",
+                color: "rgba(255,255,255,0.4)",
+                letterSpacing: "0",
+              }}>/month</span>
+            </div>
+            <div style={{
+              fontFamily: s.mono,
+              fontSize: "0.7rem",
+              color: "rgba(255,255,255,0.3)",
+              marginBottom: "1.75rem",
+              marginTop: "0.25rem",
+            }}>~$0.11 per full analysis</div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", textAlign: "left", marginBottom: "2rem" }}>
+              {[
+                "All 6 modules — Deal Intel, People, Outreach, Playbook, Biz Case, Deal Coach",
+                "Unlimited analyses",
+                "11-language outreach",
+                "CSV import from ZoomInfo, Apollo, Clay, LinkedIn SN, HubSpot",
+                "Deal history + PDF export",
+                "No CRM required",
+              ].map(item => (
+                <div key={item} style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "0.6rem",
+                  fontFamily: s.inter,
+                  fontSize: "0.85rem",
+                  color: "rgba(255,255,255,0.6)",
+                  lineHeight: 1.5,
+                }}>
+                  <span style={{ color: "#10B981", flexShrink: 0, marginTop: "1px" }}>✓</span>
+                  {item}
+                </div>
+              ))}
+            </div>
+
+            <button
+              className="cta-btn"
+              onClick={onStart}
+              style={{ ...ctaBtn, width: "100%", justifyContent: "center", fontSize: "1rem", padding: "1rem" }}
+            >
+              Start Free — No Card Required →
+            </button>
+          </div>
+
+          <p style={{
+            fontFamily: s.mono,
+            fontSize: "0.68rem",
+            color: "rgba(255,255,255,0.25)",
+            letterSpacing: "0.05em",
+          }}>
+            Paywall launching soon. Free while in beta.
+          </p>
+        </div>
+      </section>
+
+      {/* ──────────── FINAL CTA ──────────── */}
+      <section style={{
+        padding: "6rem 2rem",
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+      }}>
+        <div style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "600px",
+          height: "300px",
+          background: "radial-gradient(ellipse, rgba(245,158,11,0.07) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <div style={{ position: "relative" }}>
+          <h2 style={{
+            fontFamily: s.syne,
+            fontWeight: 900,
+            fontSize: "clamp(2rem, 5vw, 3.5rem)",
+            letterSpacing: "-0.03em",
+            color: "#fff",
+            marginBottom: "1rem",
+            lineHeight: 1.1,
+          }}>
+            Your next President's Club<br />
+            <span style={{ color: s.amber }}>starts here.</span>
+          </h2>
+          <p style={{
+            fontFamily: s.inter,
+            fontSize: "1rem",
+            color: "rgba(255,255,255,0.45)",
+            marginBottom: "2.5rem",
+            lineHeight: 1.7,
+          }}>
+            Run your first analysis in under 60 seconds.
+          </p>
+          <button
+            className="cta-btn"
+            onClick={onStart}
+            style={{ ...ctaBtn, fontSize: "1.05rem", padding: "1rem 2.5rem" }}
+          >
+            Start Analysis Free →
+          </button>
+        </div>
+      </section>
+
+      {/* ──────────── FOOTER ──────────── */}
+      <footer style={{
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        padding: "1.5rem 2rem",
+        background: "rgba(0,0,0,0.3)",
+      }}>
+        <div className="footer-grid" style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}>
+          <div style={{
+            fontFamily: s.syne,
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            color: "rgba(255,255,255,0.3)",
+            letterSpacing: "-0.01em",
+          }}>
+            <span style={{ color: s.amber }}>SIA</span> — Sales Intelligence Agent
+          </div>
+          <div style={{
+            fontFamily: s.mono,
+            fontSize: "0.65rem",
+            color: "rgba(255,255,255,0.2)",
+            letterSpacing: "0.05em",
+          }}>
+            Built for elite enterprise AEs · MEDDPICC-native · sin1
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
