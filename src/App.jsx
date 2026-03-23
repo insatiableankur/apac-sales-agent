@@ -2645,33 +2645,33 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button className="btn-ghost" onClick={() => setStep(1)}>← Back</button>
-                {/* MEDDPICC Pre-Qualifying Questions */}
-                <div style={{ background:"rgba(26,86,219,0.06)", border:"1px solid rgba(26,86,219,0.2)", borderRadius:12, padding:20, marginBottom:20 }}>
-                  <div style={{ fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:800, color:"var(--blue-light)", marginBottom:4, letterSpacing:1 }}>MEDDPICC CALIBRATION</div>
-                  <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:16 }}>Answer to get more accurate MEDDPICC scoring. Skip any you don't know yet.</div>
-                  {[
-                    ["budgetConfirmed", "Budget confirmed or allocated?", "e.g. Yes - $500K approved / No / Under discussion"],
-                    ["ebIdentified", "Economic Buyer identified?", "e.g. Yes - CFO John Smith / No / Suspected"],
-                    ["timelineDefined", "Compelling event or deadline?", "e.g. Go-live by Q3 / Board approval by June / No deadline"],
-                    ["competitorsKnown", "Competitors actively involved?", "e.g. SAP shortlisted / Oracle evaluated / None known"],
-                    ["painQuantified", "Pain quantified in $ terms?", "e.g. $2M/year in manual costs / Not yet quantified"],
-                  ].map(([key, label, ph]) => (
-                    <div key={key} style={{ marginBottom:10 }}>
-                      <div style={{ fontSize:10, fontWeight:700, color:"var(--text-muted)", letterSpacing:1, marginBottom:4 }}>{label.toUpperCase()}</div>
-                      <input type="text" placeholder={ph} value={meddQual[key]} onChange={e => setMeddQual(p => ({...p, [key]: e.target.value}))}
-                        style={{ width:"100%", background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:"8px 12px", color:"var(--text)", fontSize:12, boxSizing:"border-box" }} />
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop:24, borderTop:"1px solid var(--border)", paddingTop:24 }}>
-                  <button onClick={runAnalysis} disabled={!canProceed2} className="btn-amber" style={{ width:"100%", padding:"18px 32px", fontSize:16, letterSpacing:1.5, borderRadius:14, opacity:canProceed2?1:0.4, cursor:canProceed2?"pointer":"not-allowed", boxShadow:canProceed2?"0 8px 32px rgba(245,158,11,0.25)":"none", display:"flex", alignItems:"center", justifyContent:"center", gap:12 }}>
-                    <span style={{ fontSize:20 }}>🚀</span>
-                    <span>RUN INTELLIGENCE ANALYSIS</span>
-                  </button>
-                  <p style={{ textAlign:"center", fontSize:11, color:"var(--text-dim)", marginTop:8 }}>{canProceed2 ? "Generates full deal intelligence in ~20 seconds" : "Fill in required fields to continue"}</p>
-                </div>
+              <button className="btn-ghost" style={{ marginBottom:20 }} onClick={() => setStep(1)}>← Back</button>
+
+              {/* MEDDPICC Pre-Qualifying Questions */}
+              <div className="card fade-up-4" style={{ background:"rgba(26,86,219,0.06)", border:"1px solid rgba(26,86,219,0.2)", marginBottom:24 }}>
+                <div style={{ fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:800, color:"var(--blue-light)", marginBottom:4, letterSpacing:1 }}>MEDDPICC CALIBRATION</div>
+                <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:16 }}>Answer to get more accurate MEDDPICC scoring. Skip any you don't know yet.</div>
+                {[
+                  ["budgetConfirmed", "Budget confirmed or allocated?", "e.g. Yes - $500K approved / No / Under discussion"],
+                  ["ebIdentified", "Economic Buyer identified?", "e.g. Yes - CFO John Smith / No / Suspected"],
+                  ["timelineDefined", "Compelling event or deadline?", "e.g. Go-live by Q3 / Board approval by June / No deadline"],
+                  ["competitorsKnown", "Competitors actively involved?", "e.g. SAP shortlisted / Oracle evaluated / None known"],
+                  ["painQuantified", "Pain quantified in $ terms?", "e.g. $2M/year in manual costs / Not yet quantified"],
+                ].map(([key, label, ph]) => (
+                  <div key={key} style={{ marginBottom:10 }}>
+                    <div style={{ fontSize:10, fontWeight:700, color:"var(--text-muted)", letterSpacing:1, marginBottom:4 }}>{label.toUpperCase()}</div>
+                    <input type="text" placeholder={ph} value={meddQual[key]} onChange={e => setMeddQual(p => ({...p, [key]: e.target.value}))}
+                      style={{ width:"100%", background:"var(--bg)", border:"1px solid var(--border)", borderRadius:8, padding:"8px 12px", color:"var(--text)", fontSize:12, boxSizing:"border-box" }} />
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ borderTop:"1px solid var(--border)", paddingTop:24 }}>
+                <button onClick={runAnalysis} disabled={!canProceed2} className="btn-amber" style={{ width:"100%", padding:"18px 32px", fontSize:16, letterSpacing:1.5, borderRadius:14, opacity:canProceed2?1:0.4, cursor:canProceed2?"pointer":"not-allowed", boxShadow:canProceed2?"0 8px 32px rgba(245,158,11,0.25)":"none", display:"flex", alignItems:"center", justifyContent:"center", gap:12 }}>
+                  <span style={{ fontSize:20 }}>🚀</span>
+                  <span>RUN INTELLIGENCE ANALYSIS</span>
+                </button>
+                <p style={{ textAlign:"center", fontSize:11, color:"var(--text-dim)", marginTop:8 }}>{canProceed2 ? "Generates full deal intelligence in ~20 seconds" : "Fill in required fields to continue"}</p>
               </div>
             </div>
           )}
