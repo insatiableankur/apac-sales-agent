@@ -425,7 +425,7 @@ export default function Landing({ onStart, darkMode = true }) {
 
         .nav-link:hover { color: rgba(245,158,11,0.9) !important; }
         .nav-links-desktop { display: flex; align-items: center; gap: 1.5rem; }
-        .nav-mobile-cta { display: none !important; }
+        .nav-mobile-cta { display: none; }
         @media (max-width: 640px) {
           .nav-links-desktop { display: none !important; }
           .nav-mobile-cta { display: flex !important; }
@@ -435,9 +435,6 @@ export default function Landing({ onStart, darkMode = true }) {
         @media (max-width: 768px) {
           .hero-grid { flex-direction: column !important; align-items: center !important; }
           .hero-text { text-align: center !important; max-width: 100% !important; }
-          .hero-cta-row { flex-direction: column !important; width: 100% !important; }
-          .hero-cta-row > * { width: 100% !important; justify-content: center !important; }
-          .hero-cta-secondary { width: 100% !important; text-align: center !important; }
           .features-grid { grid-template-columns: 1fr !important; }
           .steps-pricing-grid { grid-template-columns: 1fr !important; }
           .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1.5rem !important; }
@@ -446,7 +443,6 @@ export default function Landing({ onStart, darkMode = true }) {
         }
         @media (max-width: 480px) {
           .hero-score-card { display: none !important; }
-          .hero-section { padding: "3rem 1.25rem 2rem" !important; }
           .stats-grid { grid-template-columns: 1fr 1fr !important; }
         }
       `}</style>
@@ -632,7 +628,7 @@ export default function Landing({ onStart, darkMode = true }) {
             <h1 style={{
               fontFamily: s.syne,
               fontWeight: 900,
-              fontSize: "clamp(1.8rem, 5vw, 3.6rem)",
+              fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.03em",
               marginBottom: "1.25rem",
@@ -659,7 +655,7 @@ export default function Landing({ onStart, darkMode = true }) {
               The AI sales intelligence platform built around MEDDPICC. No CRM needed. Everything you need to prepare, engage, and close enterprise deals — in minutes, not hours.
             </p>
 
-            <div className="hero-cta-row" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "2rem" }}>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "2rem" }}>
               <button
                 className="cta-btn"
                 onClick={onStart}
@@ -1049,7 +1045,7 @@ export default function Landing({ onStart, darkMode = true }) {
           <h2 style={{
             fontFamily: s.syne,
             fontWeight: 900,
-            fontSize: "clamp(1.6rem, 5vw, 3.5rem)",
+            fontSize: "clamp(2rem, 5vw, 3.5rem)",
             letterSpacing: "-0.03em",
             color: "#fff",
             marginBottom: "1rem",
