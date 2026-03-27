@@ -381,8 +381,6 @@ export default function Landing({ onStart, darkMode = true }) {
       minHeight: "100vh",
       fontFamily: s.inter,
       overflowX: "hidden",
-      width: "100%",
-      minWidth: "100vw",
     }}>
       {/* ── Injected CSS ── */}
       <style>{`
@@ -549,7 +547,7 @@ export default function Landing({ onStart, darkMode = true }) {
       <section style={{
         position: "relative",
         padding: "5rem 2rem 4rem",
-        maxWidth: "1400px",
+        maxWidth: "1200px",
         margin: "0 auto",
         overflow: "hidden",
       }}>
@@ -747,7 +745,7 @@ export default function Landing({ onStart, darkMode = true }) {
       </section>
 
       {/* ──────────── HOW IT WORKS ──────────── */}
-      <section id="how-it-works" style={{ padding: "5rem 2rem", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+      <section id="how-it-works" style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{ marginBottom: "3.5rem" }}>
           <div style={{
             fontFamily: s.mono,
@@ -844,7 +842,7 @@ export default function Landing({ onStart, darkMode = true }) {
         borderTop: "1px solid rgba(255,255,255,0.06)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div style={{ marginBottom: "3rem" }}>
             <div style={{
               fontFamily: s.mono,
@@ -879,7 +877,7 @@ export default function Landing({ onStart, darkMode = true }) {
       </section>
 
       {/* ──────────── TESTIMONIALS ──────────── */}
-      <section style={{ padding: "5rem 2rem", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+      <section style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{ marginBottom: "3rem" }}>
           <div style={{
             fontFamily: s.mono,
@@ -1089,7 +1087,7 @@ export default function Landing({ onStart, darkMode = true }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          maxWidth: "1400px",
+          maxWidth: "1100px",
           margin: "0 auto",
         }}>
           <div style={{
