@@ -1592,28 +1592,6 @@ const CSS = `
   .light-mode .chat-input-area { background: #F1F5F9; }
   .light-mode .chat-input { background: white; border-color: rgba(0,0,0,0.1); color: #0F172A; }
 
-  /* ─── TAB CONTENT MIN HEIGHT ─────────────────────────────────────── */
-  .tab-content-area { min-height: 60vh; }
-
-  /* ─── DESKTOP OPTIMISATION ────────────────────────────────────────── */
-  @media (min-width: 1024px) {
-    .main { padding: 48px 48px 100px; }
-    .stat-grid { grid-template-columns: repeat(4, 1fr); }
-    .medd-grid { grid-template-columns: 1fr 1fr; }
-    .r-grid-2 { grid-template-columns: 1fr 1fr; }
-    .r-grid-3 { grid-template-columns: repeat(3, 1fr); }
-    .r-grid-4 { grid-template-columns: repeat(4, 1fr); }
-  }
-
-  /* ─── IPAD OPTIMISATION (768px - 1024px) ─────────────────────────── */
-  @media (min-width: 768px) and (max-width: 1024px) {
-    .main { padding: 32px 28px 80px; }
-    .stat-grid { grid-template-columns: 1fr 1fr; }
-    .r-grid-4 { grid-template-columns: 1fr 1fr; }
-    .tabs { gap: 2px; }
-    .tab { padding: 8px 11px; font-size: 9px; }
-  }
-
   /* ─── RESPONSIVE BREAKPOINTS ─────────────────────────────────────── */
   @media (max-width: 768px) {
     .main { padding: 24px 16px 80px; max-width: 100%; }
@@ -3008,7 +2986,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               {/* ── TAB: BRIEF ── */}
               {/* ═══ TAB: DEAL INTELLIGENCE ═══════════════════════════════ */}
               {activeTab === "intel" && (
-                <div className="anim-slide-up tab-content-area">
+                <div className="anim-slide-up">
                   {result.accountBrief ? (() => {
                     const ab = result.accountBrief;
                     const ds = calcDealScore(result, meddQual);
@@ -3243,7 +3221,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 
               {/* ═══ TAB: PEOPLE & POWER ═══════════════════════════════════ */}
               {activeTab === "people" && (
-                <div className="anim-slide-up tab-content-area">
+                <div className="anim-slide-up">
                   {result.stakeholders ? (() => {
                     const st = result.stakeholders;
                     return (
@@ -3711,7 +3689,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               )}
 {/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
               {activeTab === "playbook" && (
-                <div className="anim-slide-up tab-content-area">
+                <div className="anim-slide-up">
                   {/* Discovery Questions */}
                   {result.discoveryQuestions && (() => {
                     const dq = result.discoveryQuestions;
@@ -3935,7 +3913,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               {/* ═══ TAB: BUSINESS CASE ════════════════════════════════════ */}
 
               {activeTab === "bizcase" && (
-                <div className="anim-slide-up tab-content-area">
+                <div className="anim-slide-up">
                   {/* POV Builder */}
                   <div className="card" style={{ marginBottom:20 }}>
                     <div className="card-title" style={{ color:'var(--blue-light)' }}>📐 Point of View Document</div>
