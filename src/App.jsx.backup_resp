@@ -1609,7 +1609,6 @@ const CSS = `
     .com-before-after { grid-template-columns: 1fr; }
     .steps { display: none; }
     .company-title { font-size: 22px; }
-    .pdf-export-bar { display: none !important; }
   }
   @media (max-width: 480px) {
     .tab { padding: 7px 8px; font-size: 7.5px; }
@@ -2540,7 +2539,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
       {step === 1 && (
             <div>
               <div style={{ marginBottom: 32 }} className="fade-up-1">
-                <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 800, color: "white", marginBottom: 8 }}>Who are you targeting?</h1>
+                <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 30, fontWeight: 800, color: "white", marginBottom: 8 }}>Who are you targeting?</h1>
                 <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.6 }}>Start with the company. The more you give, the sharper the intelligence.</p>
 
                 {/* ── IMPORT ZONE ── */}
@@ -2753,7 +2752,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
           {step === 2 && (
             <div>
               <div style={{ marginBottom: 32 }} className="fade-up-1">
-                <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(20px, 5vw, 30px)", fontWeight: 800, color: "white", marginBottom: 8 }}>What are you selling — and where does it stand?</h1>
+                <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 30, fontWeight: 800, color: "white", marginBottom: 8 }}>What are you selling — and where does it stand?</h1>
                 <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.6 }}>Your product and deal stage shapes every recommendation. Be specific.</p>
               </div>
 
@@ -2942,8 +2941,8 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
               </div>
 
               {/* Stat strip */}
-              {/* PDF Export Bar — hidden on mobile, shown on desktop only */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "var(--amber-glow)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px 18px" }} className="pdf-export-bar">
+              {/* PDF Export Bar */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "var(--amber-glow)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px 18px" }}>
                 <div style={{ fontSize: 13, color: "var(--amber)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>📄 INTELLIGENCE BRIEF READY</div>
                 <button
                   onClick={() => exportToPDF(result, form, meetingPrep, execBrief, meetingInputs)}
