@@ -424,13 +424,6 @@ export default function Landing({ onStart, darkMode = true }) {
         }
 
         .nav-link:hover { color: rgba(245,158,11,0.9) !important; }
-        .nav-links-desktop { display: flex; align-items: center; gap: 1.5rem; }
-        .nav-mobile-cta { display: none; }
-        @media (max-width: 640px) {
-          .nav-links-desktop { display: none !important; }
-          .nav-mobile-cta { display: flex !important; }
-          .nav-logo-text { display: none !important; }
-        }
 
         @media (max-width: 768px) {
           .hero-grid { flex-direction: column !important; align-items: center !important; }
@@ -455,12 +448,11 @@ export default function Landing({ onStart, darkMode = true }) {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "0.75rem 1.25rem",
+        padding: "1rem 2rem",
         background: "rgba(5,12,24,0.85)",
         backdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
         maxWidth: "100%",
-        overflow: "hidden",
       }}>
         <div style={{
           fontFamily: s.syne,
@@ -471,7 +463,6 @@ export default function Landing({ onStart, darkMode = true }) {
           display: "flex",
           alignItems: "center",
           gap: "0.5rem",
-          flexShrink: 0,
         }}>
           <span style={{
             background: "linear-gradient(135deg, #F59E0B, #D97706)",
@@ -481,12 +472,11 @@ export default function Landing({ onStart, darkMode = true }) {
             fontSize: "0.75rem",
             fontWeight: 900,
             letterSpacing: "0.05em",
-            flexShrink: 0,
           }}>SIA</span>
-          <span className="nav-logo-text">Sales Intelligence Agent</span>
+          Sales Intelligence Agent
         </div>
 
-        <div className="nav-links-desktop">
+        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
           <a href="#features" className="nav-link" style={{
             fontFamily: s.mono,
             fontSize: "0.72rem",
@@ -526,17 +516,6 @@ export default function Landing({ onStart, darkMode = true }) {
             Start Free →
           </button>
         </div>
-        <button
-          className="nav-mobile-cta cta-btn"
-          onClick={onStart}
-          style={{
-            ...ctaBtn,
-            padding: "0.5rem 1rem",
-            fontSize: "0.75rem",
-          }}
-        >
-          Start Free →
-        </button>
       </nav>
 
       {/* ──────────── HERO ──────────── */}
@@ -610,10 +589,6 @@ export default function Landing({ onStart, darkMode = true }) {
               color: "rgba(245,158,11,0.9)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
             }}>
               <span style={{
                 width: "6px", height: "6px",
