@@ -1068,7 +1068,6 @@ const CSS = `
   /* ─── ANIMATED BACKGROUND ─────────────────────────────────────── */
   .app {
     min-height: 100vh;
-    width: 100%;
     background: var(--navy);
     position: relative;
   }
@@ -1127,7 +1126,7 @@ const CSS = `
   }
 
   /* ─── MAIN LAYOUT ─────────────────────────────────────────────── */
-  .main { max-width: 960px; margin: 0 auto; padding: 48px 32px 100px; }
+  .main { max-width: 1440px; margin: 0 auto; padding: 48px 32px 100px; }
 
   /* ─── STEPS ───────────────────────────────────────────────────── */
   .steps { display: flex; align-items: center; gap: 0; margin-bottom: 48px; }
@@ -1598,7 +1597,7 @@ const CSS = `
 
   /* ─── DESKTOP OPTIMISATION ────────────────────────────────────────── */
   @media (min-width: 1024px) {
-    .main { padding: 48px 40px 100px; max-width: 1000px; }
+    .main { padding: 48px 48px 100px; }
     .stat-grid { grid-template-columns: repeat(4, 1fr); }
     .medd-grid { grid-template-columns: 1fr 1fr; }
     .r-grid-2 { grid-template-columns: 1fr 1fr; }
@@ -1617,7 +1616,7 @@ const CSS = `
 
   /* ─── RESPONSIVE BREAKPOINTS ─────────────────────────────────────── */
   @media (max-width: 768px) {
-    .main { padding: 24px 16px 80px; max-width: 100%; width: 100%; }
+    .main { padding: 24px 16px 80px; max-width: 100%; }
     .header { padding: 0 16px; }
     .header-inner { height: 56px; }
     .logo-text { font-size: 13px; }
