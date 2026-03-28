@@ -3178,7 +3178,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 
                         <details style={{ marginBottom:14 }}>
                           <summary style={{ fontSize:10, color:"var(--text-dim)", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1, listStyle:"none", display:"flex", alignItems:"center", gap:6, userSelect:"none", padding:"6px 0", cursor:"pointer" }}>
-                            <span>ⓘ</span> HOW SCORES ARE CALCULATED
+                            <span>i</span> HOW SCORES ARE CALCULATED
                           </summary>
                           <div style={{ marginTop:10, padding:16, background:"var(--card)", border:"1px solid var(--border)", borderRadius:10 }}>
                             <div className="r-grid-2" style={{ gap:20 }}>
@@ -4486,10 +4486,10 @@ ${povDoc.closingPerspective}`;
                   <div className="inline-section">
                     <div className="section-header" style={{ color:'var(--amber)' }}>🎯 Close Plan Builder</div>
                     <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:14, lineHeight:1.6 }}>Enter your target close date and AI builds a backwards-mapped plan — milestones, stakeholders, and actions needed to close on time.</p>
-                    <div style={{ marginBottom:14 }}>
-                      <div style={{ marginBottom:10 }}>
+                    <div style={{ display:'flex', gap:10, marginBottom:14, alignItems:'flex-end' }}>
+                      <div style={{ flex:1 }}>
                         <div style={{ fontSize:9, fontWeight:700, color:'var(--text-dim)', letterSpacing:2, marginBottom:6, fontFamily:"'JetBrains Mono',monospace" }}>TARGET CLOSE DATE</div>
-                        <input type="date" value={closeDate} onChange={e => setCloseDate(e.target.value)} className="input-field" style={{ width:'100%', maxWidth:280 }} />
+                        <input type="date" value={closeDate} onChange={e => setCloseDate(e.target.value)} className="input-field" style={{ width:'100%' }} />
                       </div>
                       <button onClick={async () => {
                         if (!closeDate) return;
@@ -4507,7 +4507,7 @@ ${povDoc.closingPerspective}`;
                           const s=raw.indexOf("{"),e=raw.lastIndexOf("}"); setClosePlan(JSON.parse(raw.slice(s,e+1)));
                         } catch(e) { alert("Failed. Try again."); }
                         setClosePlanLoading(false);
-                      }} disabled={closePlanLoading||!closeDate} className="btn-amber" style={{ fontSize:12, padding:'10px 24px' }}>
+                      }} disabled={closePlanLoading||!closeDate} className="btn-amber" style={{ fontSize:12, padding:'10px 20px', whiteSpace:'nowrap' }}>
                         {closePlanLoading ? 'BUILDING...' : '🎯 BUILD CLOSE PLAN'}
                       </button>
                     </div>
