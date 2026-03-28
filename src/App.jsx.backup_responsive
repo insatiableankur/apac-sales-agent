@@ -1621,7 +1621,6 @@ const CSS = `
   .stakeholder-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
   .stakeholder-role { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: white; }
   .stakeholder-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 768px) { .stakeholder-body { grid-template-columns: 1fr; gap: 10px; } }
   .sf-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
   .sf-value { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
   .talk-track {
@@ -2000,7 +1999,6 @@ const CSS = `
   .person-card:hover { border-color:var(--border2); background:var(--card2); }
   /* ─── COMPETE ─────────────────────────────────────────────────────── */
   .compete-vs { display:flex; gap:4px; align-items:stretch; margin-bottom:16px; border-radius:12px; overflow:hidden; }
-  @media (max-width: 480px) { .compete-vs { flex-direction: column; } }
   .compete-win { flex:1; background:var(--green-dim); border:1px solid rgba(16,185,129,0.2); padding:16px; }
   .compete-lose { flex:1; background:var(--red-dim); border:1px solid rgba(239,68,68,0.2); padding:16px; }
   .compete-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; font-weight:700; }
@@ -2849,7 +2847,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
           {/* ── STEP 1: COMPANY ── */}
           {/* ── DEAL HISTORY PANEL ── */}
       {showHistory && (
-        <div style={{ position:"fixed", top:0, right:0, width:"min(420px, 100vw)", height:"100vh", background:"var(--card)", borderLeft:"1px solid var(--border)", zIndex:1000, overflowY:"auto", padding:"24px 16px" }}>
+        <div style={{ position:"fixed", top:0, right:0, width:420, height:"100vh", background:"var(--card)", borderLeft:"1px solid var(--border)", zIndex:1000, overflowY:"auto", padding:24 }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
             <div style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:900, color:"var(--amber)" }}>Deal History</div>
             <div style={{ display:"flex", gap:8 }}>
