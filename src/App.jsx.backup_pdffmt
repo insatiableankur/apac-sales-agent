@@ -529,32 +529,28 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
     sectionHeader('Value Drivers');
     com.valueDrivers?.forEach(v => {
       checkY(14);
-      const vdrvLines = doc.splitTextToSize(v.driver || '', CW - 65);
-      const vspecLines = doc.splitTextToSize(v.specifics || '', CW - 8);
-      const vdH = Math.max(14, vdrvLines.length * 5 + vspecLines.length * 4.5 + 6);
-      checkY(vdH + 2);
-      setFill('#FFFBEB'); doc.roundedRect(M, y, CW, vdH, 1.5, 1.5, 'F');
+      setFill('#FFFBEB'); doc.roundedRect(M, y, CW, 12, 1.5, 1.5, 'F');
       setTxt('#92400E'); doc.setFontSize(9); doc.setFont('helvetica','bold');
-      vdrvLines.forEach((l, li) => doc.text(l, M + 4, y + 5 + li * 5));
+      doc.text(v.driver, M + 4, y + 5);
       setTxt('#10B981'); doc.setFontSize(9); doc.setFont('helvetica','bold');
       doc.text(v.estimatedImpact || '', W - M - 4, y + 5, { align: 'right' });
       setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
-      vspecLines.forEach((l, li) => doc.text(l, M + 4, y + 5 + vdrvLines.length * 5 + li * 4.5));
-      y += vdH + 3;
+      const vl = doc.splitTextToSize(v.specifics || '', CW - 8);
+      doc.text(vl[0] || '', M + 4, y + 9.5);
+      y += 15;
     });
 
     sectionHeader('Objection Handlers');
     com.objectionHandlers?.forEach(o => {
-      const objQLines = doc.splitTextToSize('"' + (o.objection || '') + '"', CW - 8);
-      const objRLines = doc.splitTextToSize(o.response || '', CW - 8);
-      const objH = objQLines.length * 4.5 + objRLines.length * 4.5 + 10;
-      checkY(objH + 2);
-      setFill('#FEF2F2'); doc.roundedRect(M, y, CW, objH, 1.5, 1.5, 'F');
+      checkY(18);
+      setFill('#FEF2F2'); doc.roundedRect(M, y, CW, 16, 1.5, 1.5, 'F');
       setTxt('#991B1B'); doc.setFontSize(9); doc.setFont('helvetica','bold');
-      objQLines.forEach((l, li) => doc.text(l, M + 4, y + 5 + li * 4.5));
+      const ql = doc.splitTextToSize(`"${o.objection}"`, CW - 8);
+      doc.text(ql[0] || '', M + 4, y + 5);
       setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
-      objRLines.forEach((l, li) => doc.text(l, M + 4, y + 5 + objQLines.length * 4.5 + 2 + li * 4.5));
-      y += objH + 3;
+      const rl = doc.splitTextToSize(o.response || '', CW - 8);
+      rl.slice(0,2).forEach((l,li) => doc.text(l, M + 4, y + 10 + li*4));
+      y += 19;
     });
 
     sectionHeader('Closing Hypothesis', '#10B981');
@@ -623,7 +619,7 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
     });
 
     sectionHeader('Landmines to Avoid');
-    meetingPrep.landminesToAvoid?.forEach(l => bulletItem(l, '#EF4444')); y += 2;
+    meetingPrep.landminesToAvoid?.forEach(l => bulletItem(`✗ ${l}`, '#EF4444')); y += 2;
 
     sectionHeader('Follow-Up Template');
     bodyText(meetingPrep.followUpTemplate, 0, '#374151');
@@ -738,9 +734,6 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
       y += 3;
     });
     if (closePlan.criticalPathItems?.length) {
-      const cpNeeded = 16 + closePlan.criticalPathItems.length * 8 +
-        (closePlan.earlyWarningSignals?.length ? 16 + closePlan.earlyWarningSignals.length * 8 : 0);
-      checkY(Math.min(cpNeeded, 80));
       sectionHeader('Critical Path', '#EF4444');
       closePlan.criticalPathItems.forEach(c => bulletItem(c, '#991B1B'));
     }
@@ -792,16 +785,12 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
     sectionHeader('Concession Framework');
     negotiationPlaybook.concessionFramework?.forEach((cf, i) => {
       checkY(16);
-      const cfGLines = doc.splitTextToSize(cf.sequence + ' - Give: ' + (cf.concession || ''), CW - 8);
-      const cfDLines = doc.splitTextToSize('Demand: ' + (cf.whatToAskFor || ''), CW - 8);
-      const cfH = (cfGLines.length + cfDLines.length) * 4.5 + 8;
-      checkY(cfH + 2);
-      setFill('#F8FAFF'); doc.roundedRect(M, y, CW, cfH, 1.5, 1.5, 'F');
+      setFill('#F8FAFF'); doc.roundedRect(M, y, CW, 14, 1.5, 1.5, 'F');
       setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','bold');
-      cfGLines.forEach((l, li) => doc.text(l, M + 3, y + 5 + li * 4.5));
+      doc.text(cf.sequence + ' — Give: ' + (cf.concession || ''), M + 3, y + 5);
       setTxt('#10B981'); doc.setFont('helvetica','normal');
-      cfDLines.forEach((l, li) => doc.text(l, M + 3, y + 5 + cfGLines.length * 4.5 + li * 4.5));
-      y += cfH + 3;
+      doc.text('Demand: ' + (cf.whatToAskFor || ''), M + 3, y + 10);
+      y += 17;
     });
     sectionHeader('Walk Away Point', '#EF4444');
     bodyText(negotiationPlaybook.absoluteLines?.walkAwayPoint, 0, '#991B1B');
@@ -851,14 +840,17 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
       doc.text('Buyer Commits To:', M + hw + 4, y); y += 5;
       const maxCommits = Math.max(phase.vendorCommitments?.length || 0, phase.buyerCommitments?.length || 0);
       for (let ci = 0; ci < maxCommits; ci++) {
-        const vcl = phase.vendorCommitments?.[ci] ? doc.splitTextToSize('-> ' + phase.vendorCommitments[ci], hw - 4) : [];
-        const bcl = phase.buyerCommitments?.[ci] ? doc.splitTextToSize('-> ' + phase.buyerCommitments[ci], hw - 4) : [];
-        const rowH = Math.max(vcl.length, bcl.length) * 4.5 + 3;
-        checkY(rowH + 1);
+        checkY(6);
         setTxt('#374151'); doc.setFontSize(8); doc.setFont('helvetica','normal');
-        vcl.forEach((l, li) => doc.text(l, M, y + li * 4.5));
-        bcl.forEach((l, li) => doc.text(l, M + hw + 4, y + li * 4.5));
-        y += rowH;
+        if (phase.vendorCommitments?.[ci]) {
+          const vl = doc.splitTextToSize('→ ' + phase.vendorCommitments[ci], hw - 2);
+          vl.slice(0,2).forEach((l, li) => doc.text(l, M, y + li * 4));
+        }
+        if (phase.buyerCommitments?.[ci]) {
+          const bl = doc.splitTextToSize('→ ' + phase.buyerCommitments[ci], hw - 2);
+          bl.slice(0,2).forEach((l, li) => doc.text(l, M + hw + 4, y + li * 4));
+        }
+        y += 9;
       }
       y += 3;
     });
