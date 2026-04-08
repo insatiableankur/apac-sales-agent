@@ -4546,6 +4546,91 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
 {/* ═══ TAB: PLAYBOOK ═════════════════════════════════════════ */}
               {activeTab === "playbook" && (
                 <div className="anim-slide-up tab-content-area">
+                  <div style={{marginBottom:'2rem'}}>
+                    <div className="section-header" style={{marginBottom:'0.5rem'}}>
+                      <div><span style={{marginRight:6}}>&#x1F4DA;</span>Templates Library</div>
+                      <span style={{fontSize:'12px',color:'var(--text-muted)'}}>
+                        {form.company ? 'AI pre-fill ready — ' + form.company : 'Run intelligence to enable AI pre-fill'}
+                      </span>
+                    </div>
+                    <p style={{fontSize:'13px',color:'var(--text-muted)',marginBottom:'1.25rem',lineHeight:'1.6'}}>
+                      18 MEDDPICC and Command of the Message templates. AI pre-filled from your deal. Download as PDF or DOCX.
+                    </p>
+                    <div className="tmpl-stage-pills">
+                      {['all','qualify','align','validate','biz','close','expand'].map(function(s) { return (
+                        <button key={s}
+                          className={'tmpl-pill' + (tmplStage === s ? ' active' : '')}
+                          onClick={function() { setTmplStage(s); setTmplActive(null); setTmplContent(''); }}>
+                          {s === 'all' ? 'All 18' : s === 'qualify' ? 'Qualify & discover' : s === 'align' ? 'Solution alignment' : s === 'validate' ? 'Validate & prove' : s === 'biz' ? 'Business case' : s === 'close' ? 'Negotiate & close' : 'Post-sale'}
+                        </button>
+                      ); })}
+                    </div>
+                    <div className="tmpl-grid">
+                      {TEMPLATE_LIST.filter(function(t) { return tmplStage === 'all' || t.stage === tmplStage; }).map(function(t) { return (
+                        <div key={t.id}
+                          className={'tmpl-card' + (tmplActive && tmplActive.id === t.id ? ' tmpl-sel' : '')}
+                          onClick={function() { setTmplActive(tmplActive && tmplActive.id === t.id ? null : t); setTmplContent(''); }}>
+                          <div className="tmpl-icon">{t.icon}</div>
+                          <div className="tmpl-name">{t.name}</div>
+                          <div className="tmpl-desc">{t.desc}</div>
+                          <div className="tmpl-meta">
+                            <span className="tmpl-badge">{t.badge}</span>
+                            {t.docx && <span className="tmpl-docx-tag">DOCX</span>}
+                            <span className="tmpl-fw">{t.framework}</span>
+                          </div>
+                        </div>
+                      ); })}
+                    </div>
+                    {tmplActive && (
+                      <div className="tmpl-preview-panel">
+                        <div className="tmpl-preview-top">
+                          <div className="tmpl-pname">{tmplActive.name}</div>
+                          <div className="tmpl-pmeta">{tmplActive.framework} &middot; {tmplActive.stageLabel}</div>
+                          <div className="tmpl-act-row">
+                            <button className="tmpl-btn tmpl-btn-ai" disabled={tmplLoading}
+                              onClick={function() { generateTemplate(tmplActive); }}>
+                              {tmplLoading ? 'Generating...' : (form.company ? 'AI Pre-fill — ' + form.company : 'AI Pre-fill')}
+                            </button>
+                            <button className="tmpl-btn"
+                              onClick={function() { exportTemplatePDF(tmplActive, tmplContent); }}>
+                              Blank PDF
+                            </button>
+                            {tmplActive.docx && (
+                              <button className="tmpl-btn"
+                                onClick={function() { exportTemplateDOCX(tmplActive, tmplContent); }}>
+                                Download DOCX
+                              </button>
+                            )}
+                            {tmplContent && (
+                              <button className="tmpl-btn"
+                                onClick={function() { navigator.clipboard.writeText(tmplContent); }}>
+                                Copy
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        {tmplLoading && (
+                          <div className="tmpl-gen-loading">
+                            <div className="spinner" style={{width:'16px',height:'16px'}} />
+                            Generating from deal context...
+                          </div>
+                        )}
+                        {!tmplLoading && !tmplContent && (
+                          <div className="tmpl-empty-hint">
+                            {form.company
+                              ? 'Click AI Pre-fill to generate this template with ' + form.company + ' deal data. Or download the blank PDF.'
+                              : 'Run intelligence first for AI pre-fill. Download the blank PDF to use immediately.'}
+                          </div>
+                        )}
+                        {tmplContent && (
+                          <div className="tmpl-output"
+                            dangerouslySetInnerHTML={{__html: formatTmplOutput(tmplContent)}} />
+                        )}
+                      </div>
+                    )}
+                    <div className="tmpl-divider">Playbook tools</div>
+                  </div>
+
                   {/* Discovery Questions */}
                   {result.discoveryQuestions && (() => {
                     const dq = result.discoveryQuestions;
