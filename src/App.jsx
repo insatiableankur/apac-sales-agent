@@ -2686,6 +2686,15 @@ export default function SalesIntelligenceAgent() {
   const runAnalysis = useCallback(async () => {
     setStep(3);
     setAnalyzeStep(0);
+        // Reset secondary sections from previous deal — prevents stale data in PDF
+        setClosePlan(null);
+        setMutualSuccessPlan(null);
+        setChampionPlaybook(null);
+        setPovDoc(null);
+        setNegotiationPlaybook(null);
+        setExecBrief(null);
+        setCloseDate('');
+
     const ticker = setInterval(() => setAnalyzeStep(s => Math.min(s + 1, ANALYZE_STEPS.length - 1)), 900);
     try {
       // Live web search for company intel
