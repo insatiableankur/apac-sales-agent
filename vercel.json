@@ -1,6 +1,9 @@
 {
   "functions": {
     "api/anthropic.js": {
+      "maxDuration": 300
+    },
+    "api/apollo.js": {
       "maxDuration": 60
     }
   },
