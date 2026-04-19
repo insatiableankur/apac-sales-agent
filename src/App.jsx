@@ -2088,6 +2088,12 @@ const CSS = `
   /* ─── COMPETE ─────────────────────────────────────────────────────── */
   .compete-vs { display:flex; gap:4px; align-items:stretch; margin-bottom:16px; border-radius:12px; overflow:hidden; }
   @media (max-width: 480px) { .compete-vs { flex-direction: column; } }
+  .neg-concession-row { display: grid; grid-template-columns: 60px 1fr 1fr 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: start; }
+  .neg-tactics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  @media (max-width: 768px) {
+    .neg-concession-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 0; }
+    .neg-tactics-row { grid-template-columns: 1fr; gap: 8px; padding: 10px 0; }
+  }
   .compete-win { flex:1; background:var(--green-dim); border:1px solid rgba(16,185,129,0.2); padding:16px; }
   .compete-lose { flex:1; background:var(--red-dim); border:1px solid rgba(239,68,68,0.2); padding:16px; }
   .compete-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; font-weight:700; }
@@ -5473,7 +5479,7 @@ ${povDoc.closingPerspective}`;
                         <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:12 }}>
                           <div style={{ fontSize:8, fontWeight:700, color:'var(--amber)', letterSpacing:2, marginBottom:12, fontFamily:"'JetBrains Mono',monospace" }}>CONCESSION FRAMEWORK — NEVER GIVE WITHOUT GETTING</div>
                           {negotiationPlaybook.concessionFramework?.map((cf,i) => (
-                            <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 1fr 1fr 1fr', gap:10, padding:'10px 0', borderBottom:'1px solid var(--border)', alignItems:'start' }}>
+                            <div key={i} className="neg-concession-row">
                               <span className="tag tag-dim" style={{ fontSize:8, justifyContent:'center' }}>{cf.sequence}</span>
                               <div>
                                 <div style={{ fontSize:8, color:'var(--text-dim)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>GIVE</div>
@@ -5501,7 +5507,7 @@ ${povDoc.closingPerspective}`;
                           <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:12 }}>
                             <div style={{ fontSize:8, fontWeight:700, color:'var(--text-dim)', letterSpacing:2, marginBottom:10, fontFamily:"'JetBrains Mono',monospace" }}>THEIR TACTICS + YOUR COUNTERS</div>
                             {negotiationPlaybook.theirTactics.map((t,i) => (
-                              <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, padding:'8px 0', borderBottom:'1px solid var(--border)' }}>
+                              <div key={i} className="neg-tactics-row">
                                 <div>
                                   <div style={{ fontSize:8, color:'var(--red)', letterSpacing:1, marginBottom:3, fontFamily:"'JetBrains Mono',monospace" }}>THEY WILL</div>
                                   <div style={{ fontSize:12, color:'var(--text-muted)' }}>{t.tactic}</div>

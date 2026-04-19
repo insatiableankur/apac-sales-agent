@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Patch scripts are single-use, not tracked
+patch*.py
