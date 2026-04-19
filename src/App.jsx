@@ -5240,8 +5240,20 @@ ${povDoc.closingPerspective}`;
                           try {
                             const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
                               body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:5000, stream:true,
-                                system:`Write executive briefing for CFO/CEO. Use actual ROI figures. Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","currentStateAnalysis":{"headline":"...","painPoints":["...","...","..."],"costOfStatusQuo":"...","urgencyDrivers":["...","..."]},"businessCase":{"totalInvestment":"...","year1Benefits":"...","roiPercentage":"...","paybackPeriod":"...","npv3Year":"..."},"riskAnalysis":{"risksOfInaction":["...","...","..."]},"peerValidation":{"industryBenchmark":"...","analystPerspective":"..."},"recommendation":{"decision":"...","immediateNextSteps":["...","...","..."],"executiveSponsorAsk":"..."}}`,
-                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. ROI: ${roiResult?`${roiResult.roi}% ROI, ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit`:'not calculated'}.`}]
+                                system:`Write an executive briefing for CFO/CEO.
+
+CRITICAL FINANCIAL RULES — BREACH = TOTAL REWRITE:
+1. Use ONLY numbers provided in the user message. NEVER invent financial figures.
+2. totalInvestment = the Deal Size from user context, verbatim. If missing, output EXACTLY: "[REP TO FILL — ENTER DEAL SIZE]"
+3. year1Benefits = the totalBenefit figure from user context, verbatim. If missing: "[REP TO FILL — CALCULATE ROI FIRST]"
+4. roiPercentage / paybackPeriod: copy from user context. If missing: "[REP TO FILL — CALCULATE ROI FIRST]"
+5. npv3Year: calculate as (year1Benefits × 3) − totalInvestment. If either input missing: "[REP TO FILL — REQUIRES DEAL SIZE + ROI]"
+6. FORBIDDEN PHRASES (never output these — they read as AI theater to senior buyers): "requires further analysis", "pending calculation", "to be determined", "depends on implementation", "comprehensive cost-benefit analysis", "detailed implementation planning", "further investigation required", "subject to further review". When data is missing, use the explicit [REP TO FILL — ...] placeholders above.
+7. currentStateAnalysis.costOfStatusQuo: if no ROI data provided, use qualitative framing ("Operational drag that scales with growth velocity") rather than invented dollar estimates.
+8. peerValidation.industryBenchmark and analystPerspective: cite REAL named sources (Gartner, Forrester, IDC, McKinsey research) with approximate findings. Do not fabricate statistics.
+
+Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","currentStateAnalysis":{"headline":"...","painPoints":["...","...","..."],"costOfStatusQuo":"...","urgencyDrivers":["...","..."]},"businessCase":{"totalInvestment":"...","year1Benefits":"...","roiPercentage":"...","paybackPeriod":"...","npv3Year":"..."},"riskAnalysis":{"risksOfInaction":["...","...","..."]},"peerValidation":{"industryBenchmark":"...","analystPerspective":"..."},"recommendation":{"decision":"...","immediateNextSteps":["...","...","..."],"executiveSponsorAsk":"..."}}`,
+                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. Deal Size (use EXACTLY this value for totalInvestment field): ${form.dealSize || '[NOT SET — use placeholder [REP TO FILL — ENTER DEAL SIZE] for totalInvestment]'}. ROI: ${roiResult ? `${roiResult.roi}% ROI, ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit` : '[NOT CALCULATED — use [REP TO FILL — CALCULATE ROI FIRST] for roiPercentage, paybackPeriod, year1Benefits, and npv3Year fields. Do NOT invent figures. Do NOT use hedging language like "requires further analysis"]'}.`}]
                               })
                             });
                             const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
