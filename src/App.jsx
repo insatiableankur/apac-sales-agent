@@ -1134,7 +1134,7 @@ const calcROI = (inputs, result) => {
   const hourlyRate = salary / 2080;
   const annualHours = emp * hrs * 52;
   // Base scenario
-  const laborSavings = annualHours * hourlyRate * 0.7;
+  const laborSavings = annualHours * hourlyRate * 0.35;  // v28: lowered from 0.7 to reflect industry-standard 20-40% productivity capture on process automation (McKinsey/Bain research)
   const totalBenefit = laborSavings + errorCost + revenueUpside;
   const roi = dealSize > 0 ? ((totalBenefit - dealSize) / dealSize * 100).toFixed(0) : 0;
   const payback = totalBenefit > 0 ? (dealSize / (totalBenefit / 12)).toFixed(1) : 0;
