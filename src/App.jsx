@@ -208,6 +208,11 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
 
   const addPage = () => { doc.addPage(); y = 16; };
   const checkY = (needed = 12) => { if (y + needed > 278) addPage(); };
+  const checkYLines = (lines, lineHeight = 4.5, padding = 2) => {
+    const arr = Array.isArray(lines) ? lines : [lines];
+    const needed = arr.length * lineHeight + padding;
+    if (y + needed > 278) addPage();
+  };
 
   // Colour helpers
   const hex2rgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
@@ -726,6 +731,7 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
         doc.text('[' + (a.owner || '') + ']', M, y);
         setTxt('#374151'); doc.setFont('helvetica','normal');
         const aLines = doc.splitTextToSize(a.action || '', CW - 20);
+        checkYLines(aLines, 4.5);
         aLines.forEach((l, li) => { if(li>0) checkY(5); doc.text(l, M + 18, y + li * 4.5); });
         y += aLines.length * 4.5 + 1;
       });
@@ -770,6 +776,7 @@ const exportToPDF = async (result, form, meetingPrep, execBrief, meetingInputs, 
         doc.text(a.day || '', M, y);
         setTxt('#374151'); doc.setFont('helvetica','normal');
         const aLines = doc.splitTextToSize(a.action || '', CW - 14);
+        checkYLines(aLines, 4.5);
         aLines.forEach((l, li) => doc.text(l, M + 12, y + li * 4.5));
         y += aLines.length * 4.5 + 2;
       });
