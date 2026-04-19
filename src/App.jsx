@@ -16,6 +16,17 @@ const MARKETS = [
 ];
 const INDUSTRIES = ["Financial Services / Banking","Insurance / Insurtech","Fintech / Payments","HCM / HR Technology","ERP / Finance Systems","Retail / CPG / Ecommerce","Logistics / Supply Chain","Healthcare / Pharma","Telco / Media / Tech","Real Estate / PropTech","Energy / Resources","Manufacturing","Professional Services","Government / Public Sector"];
 const DEAL_STAGES = ["Prospecting — No Contact Yet","Discovery — First Meetings Done","Evaluation — Active POC / Demo","Proposal — Business Case Submitted","Negotiation — Commercial Terms","Closed Won","Closed Lost — Needs Autopsy"];
+
+const stripCiteTags = (val) => {
+  if (typeof val === 'string') return val.replace(new RegExp('<[^>]+>', 'g'), '');
+  if (Array.isArray(val)) return val.map(stripCiteTags);
+  if (val && typeof val === 'object') {
+    const out = {};
+    for (const k in val) out[k] = stripCiteTags(val[k]);
+    return out;
+  }
+  return val;
+};
 const DEAL_SIZES = ["< $50K ACV","$50K – $100K ACV","$100K – $250K ACV","$250K – $500K ACV","$500K – $1M ACV","$1M+ ACV"];
 const PRODUCTS = ["Financial Reporting & ESG Platform","HCM / Workforce Management","CRM / Revenue Intelligence","Customer Engagement / Messaging","Data & Analytics Platform","ERP / Finance Automation","Cybersecurity / GRC","Supply Chain Management","Marketing Automation","Learning & Development","Other SaaS Platform"];
 
@@ -4881,7 +4892,7 @@ MEDDPICC gaps: ${Object.entries(result.meddpicc?.elements || {}).filter(([, v]) 
                           const data = await res.json();
                           const text = data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'{}';
                           const s=text.indexOf('{'),e=text.lastIndexOf('}');
-                          if(s!==-1&&e!==-1) setPovDoc(JSON.parse(text.slice(s,e+1)));
+                          if(s!==-1&&e!==-1) setPovDoc(stripCiteTags(JSON.parse(text.slice(s,e+1))));
                         } catch(err) { alert("Failed to generate POV. Try again."); }
                         setPovLoading(false);
                       }} disabled={povLoading} className="btn-amber" style={{ fontSize:12, padding:'11px 28px' }}>
