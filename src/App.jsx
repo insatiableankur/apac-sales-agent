@@ -1693,6 +1693,10 @@ const CSS = `
   .stakeholder-role { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: white; }
   .stakeholder-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 768px) { .stakeholder-body { grid-template-columns: 1fr; gap: 10px; } }
+  @media (max-width: 768px) {
+    .tmpl-stage-pills { flex-wrap: nowrap !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; padding-bottom: 6px; scrollbar-width: thin; }
+    .tmpl-stage-pills .tmpl-pill { flex-shrink: 0; white-space: nowrap; }
+  }
   .sf-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
   .sf-value { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
   .talk-track {
