@@ -27,6 +27,46 @@ const stripCiteTags = (val) => {
   }
   return val;
 };
+// Collapses ACV range strings from DEAL_SIZES dropdown into scalar values for AI prompts.
+// Preserves original form.dealSize for UI/history; only AI call sites use the normalized scalar.
+// Examples: "$250K - $500K ACV" -> "$375K", "< $50K ACV" -> "$25K", "$1M+ ACV" -> "$1M+".
+const normalizeDealSize = (dealSize) => {
+  if (!dealSize || typeof dealSize !== 'string') return dealSize;
+  const s = dealSize.trim();
+  const parseAmount = (str) => {
+    const m = str.match(new RegExp('\\$?(\\d+(?:\\.\\d+)?)(K|M)?', 'i'));
+    if (!m) return null;
+    const n = parseFloat(m[1]);
+    return m[2] && m[2].toUpperCase() === 'M' ? n * 1000 : n;
+  };
+  const format = (thousands) => {
+    if (thousands >= 1000) {
+      const mm = thousands / 1000;
+      return '$' + (mm % 1 === 0 ? mm.toString() : mm.toFixed(1)) + 'M';
+    }
+    return '$' + Math.round(thousands) + 'K';
+  };
+  if (s.indexOf('<') === 0) {
+    const top = parseAmount(s.replace('<', ''));
+    if (top !== null) return format(top / 2);
+  }
+  if (s.indexOf('+') !== -1 && s.indexOf('-') === -1 && s.indexOf('\u2013') === -1) {
+    const floorMatch = s.match(new RegExp('\\$?(\\d+(?:\\.\\d+)?)(K|M)?\\+', 'i'));
+    if (floorMatch) {
+      const floor = parseAmount(floorMatch[0].replace('+', ''));
+      if (floor !== null) return format(floor) + '+';
+    }
+  }
+  const rangeRe = new RegExp('\\$?(\\d+(?:\\.\\d+)?)(K|M)?\\s*[-\u2013\u2014]\\s*\\$?(\\d+(?:\\.\\d+)?)(K|M)?', 'i');
+  const rangeMatch = s.match(rangeRe);
+  if (rangeMatch) {
+    const low = parseAmount('$' + rangeMatch[1] + (rangeMatch[2] || ''));
+    const high = parseAmount('$' + rangeMatch[3] + (rangeMatch[4] || ''));
+    if (low !== null && high !== null) return format((low + high) / 2);
+  }
+  return dealSize;
+};
+
 const DEAL_SIZES = ["< $50K ACV","$50K – $100K ACV","$100K – $250K ACV","$250K – $500K ACV","$500K – $1M ACV","$1M+ ACV"];
 const PRODUCTS = ["Financial Reporting & ESG Platform","HCM / Workforce Management","CRM / Revenue Intelligence","Customer Engagement / Messaging","Data & Analytics Platform","ERP / Finance Automation","Cybersecurity / GRC","Supply Chain Management","Marketing Automation","Learning & Development","Other SaaS Platform"];
 
@@ -2744,7 +2784,7 @@ INDUSTRY: ${form.industry}
 PRODUCT BEING SOLD: ${form.product}
 PRODUCT DESCRIPTION: ${form.productDesc || "Not provided"}
 DEAL STAGE: ${form.dealStage}
-DEAL SIZE TARGET: ${form.dealSize || "Not specified"}
+DEAL SIZE TARGET: ${normalizeDealSize(form.dealSize) || "Not specified"}
 KNOWN CONTACTS: ${form.knownContacts || "None provided"}
 RECENT NEWS / CONTEXT: ${form.recentNews || "None provided"}
 COMPETITORS MENTIONED: ${form.competitorsMentioned || "None known"}
@@ -5041,7 +5081,7 @@ ${povDoc.closingPerspective}`;
                               const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
                                 body: JSON.stringify({ model:"claude-haiku-4-5-20251001", max_tokens:400,
                                   system:`Estimate ROI calculator inputs for a B2B SaaS sale. Return ONLY valid JSON: {"employees":"number of finance/ops staff affected","avgSalary":"average annual salary USD as number","hoursPerWeek":"hours per week spent on manual work as number","currentErrors":"annual cost of errors and compliance risk USD as number","dealSize":"estimated ACV USD as number based on company size"}`,
-                                  messages:[{role:"user",content:`Company: ${form.company}. Industry: ${form.industry}. Market: ${form.market}. Deal size target: ${form.dealSize || 'unknown'}. Product: ${form.product}. Estimate realistic ROI inputs.`}]
+                                  messages:[{role:"user",content:`Company: ${form.company}. Industry: ${form.industry}. Market: ${form.market}. Deal size target: ${normalizeDealSize(form.dealSize) || 'unknown'}. Product: ${form.product}. Estimate realistic ROI inputs.`}]
                                 })
                               });
                               const data = await res.json();
@@ -5253,7 +5293,7 @@ CRITICAL FINANCIAL RULES — BREACH = TOTAL REWRITE:
 8. peerValidation.industryBenchmark and analystPerspective: cite REAL named sources (Gartner, Forrester, IDC, McKinsey research) with approximate findings. Do not fabricate statistics.
 
 Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","currentStateAnalysis":{"headline":"...","painPoints":["...","...","..."],"costOfStatusQuo":"...","urgencyDrivers":["...","..."]},"businessCase":{"totalInvestment":"...","year1Benefits":"...","roiPercentage":"...","paybackPeriod":"...","npv3Year":"..."},"riskAnalysis":{"risksOfInaction":["...","...","..."]},"peerValidation":{"industryBenchmark":"...","analystPerspective":"..."},"recommendation":{"decision":"...","immediateNextSteps":["...","...","..."],"executiveSponsorAsk":"..."}}`,
-                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. Deal Size (use EXACTLY this value for totalInvestment field): ${form.dealSize || '[NOT SET — use placeholder [REP TO FILL — ENTER DEAL SIZE] for totalInvestment]'}. ROI: ${roiResult ? `${roiResult.roi}% ROI, ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit` : '[NOT CALCULATED — use [REP TO FILL — CALCULATE ROI FIRST] for roiPercentage, paybackPeriod, year1Benefits, and npv3Year fields. Do NOT invent figures. Do NOT use hedging language like "requires further analysis"]'}.`}]
+                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. Deal Size (use EXACTLY this value for totalInvestment field): ${normalizeDealSize(form.dealSize) || '[NOT SET — use placeholder [REP TO FILL — ENTER DEAL SIZE] for totalInvestment]'}. ROI: ${roiResult ? `${roiResult.roi}% ROI, ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit` : '[NOT CALCULATED — use [REP TO FILL — CALCULATE ROI FIRST] for roiPercentage, paybackPeriod, year1Benefits, and npv3Year fields. Do NOT invent figures. Do NOT use hedging language like "requires further analysis"]'}.`}]
                               })
                             });
                             const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
@@ -5314,7 +5354,7 @@ Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","current
                           const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
                             body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:3000, stream:true,
                               system:`You are a world-class enterprise sales strategist. Build a backwards-mapped close plan. Return ONLY valid JSON: {"targetCloseDate":"...","weeksToClose":8,"overallStrategy":"One sentence on the close approach","phases":[{"week":"Week 1-2","theme":"Discovery & Validation","milestone":"What must be achieved","actions":[{"action":"Specific action","owner":"Rep|Champion|EB|Procurement","priority":"critical|high|medium"}],"riskIfMissed":"What happens if this phase slips"},{"week":"Week 3-4","theme":"Technical Validation","milestone":"...","actions":[{"action":"...","owner":"...","priority":"..."}],"riskIfMissed":"..."},{"week":"Week 5-6","theme":"Business Case & EB Access","milestone":"...","actions":[{"action":"...","owner":"...","priority":"..."}],"riskIfMissed":"..."},{"week":"Week 7-8","theme":"Procurement & Close","milestone":"...","actions":[{"action":"...","owner":"...","priority":"..."}],"riskIfMissed":"..."}],"criticalPathItems":["The single most important thing that could derail this deal","Second biggest risk"],"earlyWarningSignals":["Signal that deal is slipping 1","Signal 2"]}`,
-                              messages:[{role:"user",content:`Target close date: ${closeDate}. Company: ${form.company}. Industry: ${form.industry}. Deal stage: ${form.dealStage}. Deal size: ${form.dealSize || 'TBD'}. MEDDPICC health: ${result?.meddpicc?.overallHealth || 'unknown'}. Champion score: ${result?.stakeholders?.championDevelopmentScore || 'unknown'}. Key gaps: ${result?.meddpicc?.dealRisks?.join(', ') || 'unknown'}.`}]
+                              messages:[{role:"user",content:`Target close date: ${closeDate}. Company: ${form.company}. Industry: ${form.industry}. Deal stage: ${form.dealStage}. Deal size: ${normalizeDealSize(form.dealSize) || 'TBD'}. MEDDPICC health: ${result?.meddpicc?.overallHealth || 'unknown'}. Champion score: ${result?.stakeholders?.championDevelopmentScore || 'unknown'}. Key gaps: ${result?.meddpicc?.dealRisks?.join(', ') || 'unknown'}.`}]
                             })
                           });
                           const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
@@ -5384,7 +5424,7 @@ Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","current
                           const res = await fetch("/api/anthropic", { method:"POST", headers:{"Content-Type":"application/json"},
                             body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:4000, stream:true,
                               system:`Create a Mutual Success Plan. Return ONLY valid JSON: {"title":"Mutual Success Plan — [Company] x [Vendor]","objective":"One sentence joint objective","phases":[{"phase":1,"name":"Discovery & Alignment","duration":"Weeks 1-2","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."},{"phase":2,"name":"Evaluation","duration":"Weeks 3-4","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."},{"phase":3,"name":"Decision & Contracting","duration":"Week 5-6","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."},{"phase":4,"name":"Implementation","duration":"Weeks 7-12","vendorCommitments":["...","..."],"buyerCommitments":["...","..."],"jointMilestone":"...","successCriteria":"..."}],"successMetrics":[{"metric":"...","baseline":"...","target":"...","timeframe":"..."}],"nextStep":"The single most important next action"}`,
-                              messages:[{role:"user",content:`Vendor selling ${form.product}. Buyer: ${form.company} (${form.industry}, ${form.market}). Stage: ${form.dealStage}. Deal size: ${form.dealSize||'TBD'}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}.`}]
+                              messages:[{role:"user",content:`Vendor selling ${form.product}. Buyer: ${form.company} (${form.industry}, ${form.market}). Stage: ${form.dealStage}. Deal size: ${normalizeDealSize(form.dealSize)||'TBD'}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}.`}]
                             })
                           });
                           const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
@@ -5454,7 +5494,7 @@ CRITICAL PRICING RULE — BREACH = TOTAL REWRITE:
 4. walkAwayPoint: Express as % of deal size ("below 70% of the provided anchor") or qualitative ("any deal that removes our data-ownership guarantees"). Never invent a specific dollar walk-away.
 
 Return ONLY valid JSON: {"negotiationContext":{"powerBalance":"Who has leverage and why","theirBATNA":"Their likely alternative","ourBATNA":"Our alternative","keyLeveragePoints":["Leverage 1","Leverage 2"]},"anchoringStrategy":{"openingPosition":"Anchor as % premium over provided deal size, or [DEAL SIZE — SET BY REP] placeholder if missing","rationale":"Why this anchor works for THIS deal","deliveryLine":"Exact words to open the negotiation — do not invent pricing inside this line"},"concessionFramework":[{"sequence":"1st","concession":"What to give","value":"Qualitative or %-based value — NEVER invented dollars","whatToAskFor":"What to demand in return"},{"sequence":"2nd","concession":"What to give","value":"Qualitative or %-based value","whatToAskFor":"What to demand in return"},{"sequence":"3rd","concession":"What to give","value":"Qualitative or %-based value","whatToAskFor":"What to demand in return"}],"absoluteLines":{"walkAwayPoint":"%-based or qualitative — never an invented dollar figure","nonNegotiables":["Non-negotiable 1","Non-negotiable 2"]},"theirTactics":[{"tactic":"Tactic they will use","counter":"How to counter it"}],"closingMoves":["Closing move 1","Closing move 2"],"redFlags":["Walk away signal 1","Red flag 2"]}`,
-                                messages:[{role:"user",content:`Selling ${form.product} to ${form.company}. DEAL SIZE (this is the ONLY dollar figure you may anchor on — use EXACTLY this value for every pricing field, do not invent other numbers): ${form.dealSize||'[NOT SET — use placeholder "[DEAL SIZE — SET BY REP BEFORE USING THIS PLAYBOOK]" in openingPosition, walkAwayPoint, and every other pricing field]'}. Stage: ${form.dealStage}. ROI data: ${roiResult ? roiResult.roi + '% ROI, $' + (roiResult.totalBenefit||0).toLocaleString() + ' total benefit' : 'not calculated'}. Competitors: ${form.competitorsMentioned||'None'}. Champion score: ${result?.stakeholders?.championDevelopmentScore||'Unknown'}. MEDDPICC health: ${result?.meddpicc?.overallHealth||'Unknown'}.`}]
+                                messages:[{role:"user",content:`Selling ${form.product} to ${form.company}. DEAL SIZE (this is the ONLY dollar figure you may anchor on — use EXACTLY this value for every pricing field, do not invent other numbers): ${normalizeDealSize(form.dealSize)||'[NOT SET — use placeholder "[DEAL SIZE — SET BY REP BEFORE USING THIS PLAYBOOK]" in openingPosition, walkAwayPoint, and every other pricing field]'}. Stage: ${form.dealStage}. ROI data: ${roiResult ? roiResult.roi + '% ROI, $' + (roiResult.totalBenefit||0).toLocaleString() + ' total benefit' : 'not calculated'}. Competitors: ${form.competitorsMentioned||'None'}. Champion score: ${result?.stakeholders?.championDevelopmentScore||'Unknown'}. MEDDPICC health: ${result?.meddpicc?.overallHealth||'Unknown'}.`}]
                               })
                             });
                             const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
