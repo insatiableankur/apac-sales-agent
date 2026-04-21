@@ -2913,6 +2913,14 @@ CRITICAL OUTREACH RULES (non-negotiable):
 - FORBIDDEN phrases in email bodies: "companies like yours", "our customers typically", "customers have reduced", "similar companies have seen", "peer organizations", "we have helped companies like".
 - sendingTips must contain tactical/behavioural advice only (timing, channel sequencing, personalization depth). NEVER list named customers or case studies as sending tips.
 - Generic industry framing without numbers is acceptable ("finance teams often prioritize close-time reduction"). A placeholder is credible; an invented peer claim with an invented number is disqualifying.
+
+CRITICAL PEER CLAIM RULES (non-negotiable — catches lexical variants):
+- BANNED PATTERN: any sentence of the form "[subject] typically/often/usually [sees/faces/experiences] [number or range]" where the subject is a peer reference like "companies your scale", "finance teams", "enterprises at your size", "SaaS leaders", "organizations like", "firms in your segment". Example of what is BANNED: "Finance teams typically face 40% longer close cycles". Example of what is BANNED: "Companies your scale often see material efficiency gains".
+- BANNED PATTERN: any sentence beginning "Companies [your/at your] [scale/size/stage] often/typically/usually..." — these are invented peer benchmarks regardless of wording.
+- BANNED PATTERN: implied peer benchmarks without explicit customer names, e.g. "most enterprises at your scale face significant delays", "businesses your size experience 3x longer cycles". The rule covers any construction that asserts a quantified pattern about unnamed peers.
+- ALLOWED: generic industry observations with no number and no quantified comparative ("finance teams often prioritize close-time reduction", "enterprise SaaS companies face regulatory complexity"). No numbers, no comparatives, no "faster/slower/longer than X".
+- ALLOWED: THIS deal's specifics, reasoning from pains explicitly in the user message.
+- If a quantified peer benchmark would strengthen the email, replace with [REP TO FILL - INSERT CUSTOMER PROOF POINT] instead of fabricating.
 `;
 
       setAnalyzeStep(4);
@@ -2932,7 +2940,15 @@ CRITICAL CoM RULES (non-negotiable):
 - NEVER cite named customers (e.g. ServiceNow, Databricks, Adobe, Snowflake) in any CoM field. Use [REP TO FILL - INSERT CUSTOMER PROOF POINT].
 - Generic industry framing without invented numbers is acceptable. A placeholder is credible; an invented peer claim with an invented number is disqualifying.
 `;
-      const sys4 = `You are the Global Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"nextBestActions":[{"priority":1,"action":"Most critical action","why":"Why this is #1","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]} Be specific to the deal.`;
+      const sys4 = `You are the Global Enterprise SaaS Sales Intelligence Engine. Return ONLY valid JSON with exactly this 1 key: {"nextBestActions":[{"priority":1,"action":"Most critical action","why":"Why this is #1","timeframe":"This week"},{"priority":2,"action":"Action 2","why":"Why","timeframe":"Next 2 weeks"},{"priority":3,"action":"Action 3","why":"Why","timeframe":"This month"}]} Be specific to the deal.
+
+CRITICAL NEXT ACTIONS RULES (non-negotiable):
+- NEVER use a specific vendor name for the SELLER in any action or why field. Do NOT say "Workiva's specialized platform", "SAP's capabilities", "Salesforce's tools" etc. as the selling vendor. Refer to "our platform" or the generic solution category.
+- NEVER invent competitor names. Only reference competitors that appear in the user message's competitorsMentioned field. If no competitors were provided, do NOT invent ones like "Enablon", "Anaplan", "Oracle EPM" — describe competitive dynamics generically ("displace incumbent reporting tooling") or use [REP TO FILL - CONFIRM COMPETITOR].
+- NEVER cite named customer proof points (e.g. ServiceNow, Databricks) in action or why fields. Use [REP TO FILL - INSERT CUSTOMER PROOF POINT] instead if needed.
+- NEVER invent peer statistics ("40% faster close", "3x efficiency gains") in why fields. Frame the why using THIS deal's specifics — the pain points, trigger events, champion score, MEDDPICC gaps explicitly present in the user message.
+- Actions and whys must be grounded in the deal context the rep provided. A placeholder or generic framing is credible; an invented competitor or fabricated peer stat is disqualifying.
+`;
       // Retry wrapper for reliability
       const reliableCall = async (p, s, retries=3) => {
         for (let i=0; i<retries; i++) {
