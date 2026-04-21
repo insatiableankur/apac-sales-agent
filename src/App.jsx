@@ -1186,13 +1186,25 @@ const calcROI = (inputs, result) => {
   const aggressiveBenefit = totalBenefit * 1.5;
   const aggressiveRoi = dealSize > 0 ? ((aggressiveBenefit - dealSize) / dealSize * 100).toFixed(0) : 0;
   const aggressivePayback = aggressiveBenefit > 0 ? (dealSize / (aggressiveBenefit / 12)).toFixed(1) : 0;
+  // v30 Patch G — honest display for negative-Y1 cases
+  // roi is Y1 payback ratio, not a true IRR. When negative, display as break-even in Month N.
+  const roiNum = parseInt(roi);
+  const paybackNum = parseFloat(payback);
+  const roiDisplay = (() => {
+    if (roiNum >= 0) return roiNum + '%';
+    if (paybackNum > 0 && paybackNum <= 18) return 'Break-even Month ' + Math.ceil(paybackNum);
+    return 'Payback > 18 months (review inputs)';
+  })();
+  const roiIsBreakEven = roiNum < 0;
   return {
     laborSavings: Math.round(laborSavings),
     errorCost: Math.round(errorCost),
     revenueUpside: Math.round(revenueUpside),
     totalBenefit: Math.round(totalBenefit),
-    roi: parseInt(roi),
-    payback: parseFloat(payback),
+    roi: roiNum,
+    payback: paybackNum,
+    roiDisplay,
+    roiIsBreakEven,
     costOfInaction: Math.round(totalBenefit / 12),
     scenarios: {
       conservative: { benefit: Math.round(conservativeBenefit), roi: parseInt(conservativeRoi), payback: parseFloat(conservativePayback), label: 'Conservative', assumption: '50% of projected benefits realised' },
@@ -5193,7 +5205,7 @@ ${povDoc.closingPerspective}`;
                   {roiResult && (
                     <div className="anim-scale-in" style={{ marginBottom:20 }}>
                       <div className="r-grid-3" style={{ marginBottom:16 }}>
-                        {[['ROI',`${roiResult.roi}%`,'#10B981'],['Payback',`${roiResult.payback} mo`,'#F59E0B'],['Monthly CoI',`$${roiResult.costOfInaction?.toLocaleString()}`,'#EF4444']].map(([label,val,color]) => (
+                        {[['ROI',roiResult.roiDisplay||`${roiResult.roi}%`,roiResult.roiIsBreakEven?'#F59E0B':'#10B981'],['Payback',`${roiResult.payback} mo`,'#F59E0B'],['Monthly CoI',`$${roiResult.costOfInaction?.toLocaleString()}`,'#EF4444']].map(([label,val,color]) => (
                           <div key={label} className="roi-metric" style={{ borderColor:`${color}33` }}>
                             <div className="roi-value" style={{ color }}>{val}</div>
                             <div className="roi-label">{label}</div>
@@ -5205,7 +5217,7 @@ ${povDoc.closingPerspective}`;
                         <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.75, fontStyle:'italic', marginBottom:10 }}>
                           "The cost of inaction is ${roiResult.costOfInaction?.toLocaleString()} per month — ${roiResult.totalBenefit?.toLocaleString()} annually. Our solution delivers {roiResult.roi}% ROI with a {roiResult.payback}-month payback. Every month you delay costs more than the solution itself."
                         </p>
-                        <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`The cost of inaction is $${roiResult.costOfInaction?.toLocaleString()} per month. Our solution delivers ${roiResult.roi}% ROI with a ${roiResult.payback}-month payback period.`)}>COPY</button>
+                        <button className="copy-btn" onClick={() => navigator.clipboard.writeText(roiResult.roiIsBreakEven ? `The cost of inaction is $${roiResult.costOfInaction?.toLocaleString()} per month. Our solution pays back in month ${Math.ceil(roiResult.payback)}, with $${roiResult.totalBenefit?.toLocaleString()} in annual benefits from year two onward.` : `The cost of inaction is $${roiResult.costOfInaction?.toLocaleString()} per month. Our solution delivers ${roiResult.roi}% ROI with a ${roiResult.payback}-month payback period.`)}>COPY</button>
                       </div>
                       {roiResult?.scenarios && (
                         <div style={{ marginBottom:16 }}>
@@ -5357,7 +5369,7 @@ CRITICAL FINANCIAL RULES — BREACH = TOTAL REWRITE:
 8. peerValidation.industryBenchmark and analystPerspective: cite REAL named sources (Gartner, Forrester, IDC, McKinsey research) with approximate findings. Do not fabricate statistics.
 
 Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","currentStateAnalysis":{"headline":"...","painPoints":["...","...","..."],"costOfStatusQuo":"...","urgencyDrivers":["...","..."]},"businessCase":{"totalInvestment":"...","year1Benefits":"...","roiPercentage":"...","paybackPeriod":"...","npv3Year":"..."},"riskAnalysis":{"risksOfInaction":["...","...","..."]},"peerValidation":{"industryBenchmark":"...","analystPerspective":"..."},"recommendation":{"decision":"...","immediateNextSteps":["...","...","..."],"executiveSponsorAsk":"..."}}`,
-                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. Deal Size (use EXACTLY this value for totalInvestment field): ${normalizeDealSize(form.dealSize) || '[NOT SET — use placeholder [REP TO FILL — ENTER DEAL SIZE] for totalInvestment]'}. ROI: ${roiResult ? `${roiResult.roi}% ROI, ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit` : '[NOT CALCULATED — use [REP TO FILL — CALCULATE ROI FIRST] for roiPercentage, paybackPeriod, year1Benefits, and npv3Year fields. Do NOT invent figures. Do NOT use hedging language like "requires further analysis"]'}.`}]
+                                messages:[{role:"user",content:`Company: ${form.company} | ${form.market} | ${form.industry}. Solution: ${form.product}. Pain: ${result?.accountBrief?.painPoints?.map(p=>p.pain).join(', ')||''}. Deal Size (use EXACTLY this value for totalInvestment field): ${normalizeDealSize(form.dealSize) || '[NOT SET — use placeholder [REP TO FILL — ENTER DEAL SIZE] for totalInvestment]'}. ROI: ${roiResult ? `${roiResult.roiDisplay||roiResult.roi+'%'} (Y1 ratio), ${roiResult.payback}mo payback, $${roiResult.totalBenefit?.toLocaleString()} annual benefit${roiResult.roiIsBreakEven ? ' — Y1 investment year, positive from Y2' : ''}` : '[NOT CALCULATED — use [REP TO FILL — CALCULATE ROI FIRST] for roiPercentage, paybackPeriod, year1Benefits, and npv3Year fields. Do NOT invent figures. Do NOT use hedging language like "requires further analysis"]'}.`}]
                               })
                             });
                             const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
@@ -5541,7 +5553,7 @@ Return ONLY valid JSON: {"documentTitle":"...","executiveSummary":"...","current
                     <div className="section-header" style={{ color:'var(--red)' }}>🤝 Negotiation Playbook</div>
                     <p style={{ fontSize:13, color:'var(--text-muted)', marginBottom:12, lineHeight:1.6 }}>Anchoring strategy, concession framework and walk-away lines — built from your actual deal data.</p>
                     {!roiResult && <div style={{ display:'flex', gap:8, alignItems:'flex-start', marginBottom:14, padding:'10px 14px', background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8 }}><span>💡</span><p style={{ fontSize:12, color:'var(--amber)', lineHeight:1.5, margin:0 }}>Complete the ROI Calculator above first for precise anchoring numbers.</p></div>}
-                    {roiResult && <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}><span className='tag tag-green' style={{ fontSize:9 }}>ROI {roiResult.roi}%</span><span className='tag tag-green' style={{ fontSize:9 }}>Payback {roiResult.payback}mo</span><span className='tag tag-dim' style={{ fontSize:9 }}>Using confirmed data</span></div>}
+                    {roiResult && <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}><span className='tag tag-green' style={{ fontSize:9 }}>ROI {roiResult.roiDisplay||`${roiResult.roi}%`}</span><span className='tag tag-green' style={{ fontSize:9 }}>Payback {roiResult.payback}mo</span><span className='tag tag-dim' style={{ fontSize:9 }}>Using confirmed data</span></div>}
                     {!negotiationPlaybook ? (
                       <button
                         onClick={async () => {
@@ -5567,7 +5579,7 @@ CRITICAL NEGOTIATION RULES (non-negotiable):
 - rationale fields must justify the anchor by citing THIS deal's leverage points (MEDDPICC health, champion score, competitors, ROI data provided) — NOT invented peer-based anchors.
 - Generic negotiation principles are fine without numbers ("premium positioning is defensible when ROI is quantified"). A placeholder is credible; an invented peer benchmark with an invented number is disqualifying.
 `,
-                                messages:[{role:"user",content:`Selling ${form.product} to ${form.company}. DEAL SIZE (this is the ONLY dollar figure you may anchor on — use EXACTLY this value for every pricing field, do not invent other numbers): ${normalizeDealSize(form.dealSize)||'[NOT SET — use placeholder "[DEAL SIZE — SET BY REP BEFORE USING THIS PLAYBOOK]" in openingPosition, walkAwayPoint, and every other pricing field]'}. Stage: ${form.dealStage}. ROI data: ${roiResult ? roiResult.roi + '% ROI, $' + (roiResult.totalBenefit||0).toLocaleString() + ' total benefit' : 'not calculated'}. Competitors: ${form.competitorsMentioned||'None'}. Champion score: ${result?.stakeholders?.championDevelopmentScore||'Unknown'}. MEDDPICC health: ${result?.meddpicc?.overallHealth||'Unknown'}.`}]
+                                messages:[{role:"user",content:`Selling ${form.product} to ${form.company}. DEAL SIZE (this is the ONLY dollar figure you may anchor on — use EXACTLY this value for every pricing field, do not invent other numbers): ${normalizeDealSize(form.dealSize)||'[NOT SET — use placeholder "[DEAL SIZE — SET BY REP BEFORE USING THIS PLAYBOOK]" in openingPosition, walkAwayPoint, and every other pricing field]'}. Stage: ${form.dealStage}. ROI data: ${roiResult ? (roiResult.roiDisplay||roiResult.roi+'% ROI') + ', $' + (roiResult.totalBenefit||0).toLocaleString() + ' total benefit' + (roiResult.roiIsBreakEven ? ' (Y1 break-even, positive Y2+)' : '') : 'not calculated'}. Competitors: ${form.competitorsMentioned||'None'}. Champion score: ${result?.stakeholders?.championDevelopmentScore||'Unknown'}. MEDDPICC health: ${result?.meddpicc?.overallHealth||'Unknown'}.`}]
                               })
                             });
                             const reader = res.body.getReader(); const decoder = new TextDecoder(); let raw = "";
